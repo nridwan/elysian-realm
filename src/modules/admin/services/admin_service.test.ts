@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
+import { PrismaClient } from '@prisma/client'
 import { AdminService } from './admin_service'
 
 // Mock Prisma client
@@ -18,11 +19,14 @@ const mockPrisma = {
     delete: vi.fn(),
     create: vi.fn(),
   },
-  permission: {
-    findMany: vi.fn(),
-    create: vi.fn(),
-  },
-}
+  $on: vi.fn(),
+  $connect: vi.fn(),
+  $disconnect: vi.fn(),
+  $executeRaw: vi.fn(),
+  $queryRaw: vi.fn(),
+  $transaction: vi.fn(),
+  $use: vi.fn(),
+} as unknown as PrismaClient
 
 describe('AdminService - Logic Tests', () => {
   it('should have AdminService class', () => {
@@ -41,8 +45,7 @@ describe('AdminService - Logic Tests', () => {
     expect(typeof service.createRole).toBe('function')
     expect(typeof service.updateRole).toBe('function')
     expect(typeof service.deleteRole).toBe('function')
-    expect(typeof service.getPermissions).toBe('function')
-    expect(typeof service.createPermission).toBe('function')
+    expect(typeof service.getAllAvailablePermissions).toBe('function')
   })
 
   it('should be able to create instances with required dependencies', () => {

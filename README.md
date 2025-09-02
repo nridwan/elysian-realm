@@ -66,39 +66,68 @@ elysian-realm/
 
 ## Getting Started
 
-### Prerequisites
+You can run this application in two ways: using Docker (recommended) or manually installing dependencies.
+
+### Prerequisites (Manual Installation)
 
 - [Bun](https://bun.sh/) installed
 - [PostgreSQL](https://www.postgresql.org/) installed locally or access to a PostgreSQL database
 
-### Backend Setup
+### Docker Setup (Recommended)
+
+1. Navigate to the project root directory
+2. Start all services with Docker Compose:
+   ```bash
+   docker-compose up --build
+   ```
+
+This will start all services:
+- PostgreSQL database on port 5432
+- Jaeger tracing on ports 16686 (UI), 4317 (gRPC), 4318 (HTTP)
+- Backend API on port 3000
+- Frontend on port 80
+
+For development with hot reloading:
+```bash
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+### Manual Setup
+
+#### Backend Setup
 
 1. Navigate to the project root directory
 2. Install dependencies:
    ```bash
    bun install
    ```
-3. Set up PostgreSQL database:
+3. Set up the environment variables:
+   - Copy the `.env.example` file to `.env`:
+     ```bash
+     cp .env.example .env
+   ```
+   - Update the values in the `.env` file with your actual configuration
+4. Set up PostgreSQL database:
    - Install PostgreSQL locally or use a cloud provider (e.g., Supabase, Render, etc.)
    - Create a new database named `elysian-realm`
-4. Update the `DATABASE_URL` in the `.env` file with your database credentials:
-   ```
+5. Update the `DATABASE_URL` in the `.env` file with your database credentials:
+   ```bash
    DATABASE_URL="postgresql://username:password@localhost:5432/elysian-realm?schema=public"
    ```
-5. Run Prisma migrations:
+6. Run Prisma migrations:
    ```bash
    bunx prisma migrate dev --name init
    ```
-6. Seed the database:
+7. Seed the database:
    ```bash
    bunx prisma db seed
    ```
-7. Start the server:
+8. Start the server:
    ```bash
    bun run src/index.ts
    ```
 
-### Frontend Setup
+#### Frontend Setup
 
 1. Navigate to the client directory:
    ```bash
@@ -117,6 +146,7 @@ elysian-realm/
 
 ### Backend
 - `bun run src/index.ts` - Start the development server
+- `bun run test` - Run the test suite
 - `bunx prisma migrate dev` - Run database migrations
 - `bunx prisma db seed` - Seed the database
 - `bunx prisma studio` - Open Prisma Studio
@@ -126,15 +156,40 @@ elysian-realm/
 - `npm run build` - Build for production
 - `npm run preview` - Preview the production build
 
+### Docker
+- `docker-compose up --build` - Start all services in production mode
+- `docker-compose -f docker-compose.dev.yml up --build` - Start all services in development mode with hot reloading
+- `docker-compose down` - Stop all services
+- `docker-compose logs` - View logs from all services
+
+## Testing
+
+This project uses Vitest for testing with the `vi` test utilities. To run tests:
+
+```bash
+bun run test        # Run all tests once
+bun run test:watch  # Run tests in watch mode
+```
+
+Note: Use `bun run test` rather than `bun test` to ensure compatibility with the Vitest test suite and `vi` utilities used in the test files.
+
 ## Environment Variables
 
-Create a `.env` file in the root directory with the following variables:
+Create a `.env` file in the root directory based on the `.env.example` template:
+
+```bash
+cp .env.example .env
+```
+
+Then update the values in the `.env` file with your actual configuration:
 
 ```
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/elysian-realm?schema=public"
-JWT_SECRET="your-jwt-secret"
+DATABASE_URL="postgresql://username:password@localhost:5432/elysian-realm?schema=public"
+JWT_SECRET="your-super-secret-jwt-key"
 PORT=3000
 ```
+
+The application now uses a centralized configuration approach. Instead of directly accessing `process.env`, configuration values are accessed through the `config` object imported from `src/config/config.ts`. This provides better type safety and default values.
 
 ## Default Credentials
 
@@ -164,6 +219,23 @@ After seeding the database, you can log in with:
 ### Permission Management
 - GET `/api/admin/permissions` - List all permissions
 - POST `/api/admin/permissions` - Create new permission
+
+## Docker Architecture
+
+This project includes a complete Docker setup with four services:
+
+1. **PostgreSQL Database** - For data persistence
+2. **Jaeger** - For distributed tracing and monitoring
+3. **Backend API** - ElysiaJS application with optimized Docker image
+4. **Frontend** - React application served by Nginx with optimized Docker image
+
+The production Docker images are optimized for size and security:
+- Both backend and frontend use Bun for building and running the applications
+- Backend uses a multi-stage build with Bun Alpine image
+- Frontend uses a multi-stage build with Bun for building and Nginx Alpine for serving static files
+- Non-root users for security
+- Health checks for all services
+- Proper caching strategies
 
 ## Type Safety
 

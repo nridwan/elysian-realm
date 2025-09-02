@@ -1,77 +1,133 @@
-import Elysia, { t } from 'elysia'
-import { LoginInput, RegisterInput, AuthService } from '../services/auth_service'
-import { LoginDto, RegisterDto, TokenResponseDto, ErrorResponseDto } from '../dto/auth_dto'
-import jwtPlugin, { type JWTPayload } from '../../../plugins/jwt'
+import Elysia from 'elysia'
+import { AuthService } from '../services/auth_service'
+import { LoginDto, RefreshTokenDto, TokenResponseDataDto, AuthTokenResponseDto } from '../dto/auth_dto'
+import { adminAccessTokenPlugin, adminRefreshTokenPlugin, type JWTPayload, type RefreshTokenPayload } from '../../../plugins/jwt'
 import { authService } from '../services/auth_service_factory'
 
 interface AuthControllerOptions {
   service?: AuthService
-  jwtPlugin?: typeof jwtPlugin
+  adminAccessTokenPlugin?: typeof adminAccessTokenPlugin
+  adminRefreshTokenPlugin?: typeof adminRefreshTokenPlugin
 }
 
 export const createAuthController = (options: AuthControllerOptions = {}) => {
   const service = options.service || authService
-  const jwt = options.jwtPlugin || jwtPlugin
+  const adminAccessTokenJwt = options.adminAccessTokenPlugin || adminAccessTokenPlugin
+  const adminRefreshTokenJwt = options.adminRefreshTokenPlugin || adminRefreshTokenPlugin
 
   return new Elysia({ name: 'auth-controller' })
-    .use(jwt)
+    .use(adminAccessTokenJwt)
+    .use(adminRefreshTokenJwt)
     .group('/api/auth', (app) =>
       app
         .post(
           '/login',
-          async ({ body, jwt, set }) => {
+          async ({ body, adminAccessToken, adminRefreshToken, set }) => {
             const { email, password } = body
-            const result = await service.login({ email, password } as LoginInput)
+            const result = await service.login({ email, password })
 
             if (result.error) {
               set.status = 401
-              return { error: result.error }
+              return {
+                meta: {
+                  code: 'AUTH-401',
+                  message: result.error,
+                },
+                data: null
+              }
             }
 
-            // Generate JWT token
-            const [id, emailFromToken, role] = result.token!.split('|')
-            const token = await jwt.sign({
-              id,
-              email: emailFromToken,
-              role,
+            // Generate access token with user profile and permissions
+            const user = result.user!
+            const accessTokenValue = await adminAccessToken.sign({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: {
+                name: user.role.name,
+                permissions: user.role.permissions
+              }
             } as JWTPayload)
 
-            return { token }
+            // Generate refresh token with user id and email
+            const refreshTokenValue = await adminRefreshToken.sign({
+              id: user.id,
+              email: user.email
+            } as RefreshTokenPayload)
+
+            return {
+              meta: {
+                code: 'AUTH-200',
+                message: 'Login successful',
+              },
+              data: {
+                access_token: accessTokenValue,
+                refresh_token: refreshTokenValue
+              }
+            }
           },
           {
             body: LoginDto,
             response: {
-              200: TokenResponseDto,
-              401: ErrorResponseDto,
+              200: AuthTokenResponseDto,
+              401: AuthTokenResponseDto,
             },
           }
         )
         .post(
-          '/register',
-          async ({ body, jwt, set }) => {
-            const { email, password, name } = body
-            const result = await service.register({ email, password, name } as RegisterInput)
-
-            if (result.error) {
-              set.status = 400
-              return { error: result.error }
+          '/refresh',
+          async ({ body, adminAccessToken, adminRefreshToken, set }) => {
+            const { refresh_token: refreshTokenValue } = body
+            
+            // Verify the refresh token
+            const payload = await adminRefreshToken.verify(refreshTokenValue)
+            if (!payload) {
+              set.status = 401
+              return {
+                meta: {
+                  code: 'AUTH-401',
+                  message: 'Invalid refresh token',
+                },
+                data: null
+              }
             }
 
-            // Generate JWT token
-            const [id, emailFromToken, role] = result.token!.split('|')
-            const token = await jwt.sign({
-              id,
-              email: emailFromToken,
-              role,
-            } as JWTPayload)
+            // In a real implementation, you would check if the refresh token exists in the database
+            // and hasn't been revoked. For now, we'll just generate new tokens.
 
-            return { token }
+            // Generate new access token
+            const newAccessToken = await adminAccessToken.sign({
+              id: payload.id,
+              email: payload.email,
+              name: payload.email.split('@')[0], // Simple name extraction
+              role: {
+                name: 'user', // Default role, in real implementation you would fetch from DB
+                permissions: []
+              }
+            } as unknown as JWTPayload)
+
+            // Generate new refresh token
+            const newRefreshToken = await adminRefreshToken.sign({
+              id: payload.id,
+              email: payload.email
+            } as RefreshTokenPayload)
+
+            return {
+              meta: {
+                code: 'AUTH-200',
+                message: 'Token refreshed successfully',
+              },
+              data: {
+                access_token: newAccessToken,
+                refresh_token: newRefreshToken
+              }
+            }
           },
           {
-            body: RegisterDto,
+            body: RefreshTokenDto,
             response: {
-              200: TokenResponseDto,
-              400: ErrorResponseDto,
+              200: AuthTokenResponseDto,
+              401: AuthTokenResponseDto,
             },
           }
         )

@@ -1,8 +1,5 @@
 import Elysia from 'elysia'
-import { PrismaClient } from '@prisma/client'
-import jwtPlugin from '../../../plugins/jwt'
-
-const prisma = new PrismaClient()
+import { adminAccessTokenPlugin, type JWTPayload } from '../../../plugins/jwt'
 
 // Extend the Elysia context to include our user type
 export interface UserContext {
@@ -15,34 +12,38 @@ export interface UserContext {
       id: string
       name: string
       description: string | null
-      permissions: {
-        id: string
-        name: string
-        description: string | null
-      }[]
+      permissions: string[] | null
     }
   } | null
 }
 
 export const authMiddleware = (app: Elysia) =>
-  app.use(jwtPlugin).derive(async ({ jwt, headers }) => {
+  app.use(adminAccessTokenPlugin).derive(async ({ adminAccessToken, headers }) => {
     const authHeader = headers.authorization
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return { user: null }
     }
 
     const token = authHeader.substring(7)
-    const payload = await jwt.verify(token)
+    const payload = await adminAccessToken.verify(token) as JWTPayload | null
 
     if (!payload) {
       return { user: null }
     }
 
-    // Fetch user with role and permissions
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      include: { role: { include: { permissions: true } } },
-    })
+    // Construct user object from JWT payload - no database query needed
+    const user = {
+      id: payload.id,
+      email: payload.email,
+      name: payload.name,
+      roleId: '', // Not available in JWT, will be empty
+      role: {
+        id: '', // Not available in JWT, will be empty
+        name: payload.role.name,
+        description: null, // Not available in JWT, will be null
+        permissions: payload.role.permissions
+      }
+    }
 
     return { user }
   })

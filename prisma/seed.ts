@@ -1,68 +1,32 @@
 import { PrismaClient } from '@prisma/client'
+import { getAdminPermissions, getSuperAdminPermissions } from '../src/modules/admin/permissions'
 
 const prisma = new PrismaClient()
 
-async function main() {
-  // Create default permissions
-  const permissions = await prisma.permission.createMany({
-    data: [
-      { name: 'read_users', description: 'Read users' },
-      { name: 'write_users', description: 'Create/Update users' },
-      { name: 'delete_users', description: 'Delete users' },
-      { name: 'manage_roles', description: 'Manage roles' },
-      { name: 'manage_permissions', description: 'Manage permissions' },
-    ],
-    skipDuplicates: true,
-  })
+async function seedRolesAndUsers() {
+  console.log('Seeding roles and users...')
 
-  // Create default roles
+  // Create default roles with permissions as JSON array
   const adminRole = await prisma.role.upsert({
     where: { name: 'admin' },
     update: {},
     create: {
       name: 'admin',
       description: 'Administrator role',
+      permissions: JSON.stringify(getAdminPermissions())
     },
   })
 
   const superAdminRole = await prisma.role.upsert({
     where: { name: 'superadmin' },
-    update: {},
+    update: {
+      // Update super admin permissions to ensure they have the latest permissions
+      permissions: JSON.stringify(getSuperAdminPermissions())
+    },
     create: {
       name: 'superadmin',
       description: 'Super Administrator role',
-    },
-  })
-
-  // Assign permissions to roles
-  // Admin role gets basic user management
-  const adminPermissions = await prisma.permission.findMany({
-    where: {
-      name: {
-        in: ['read_users', 'write_users'],
-      },
-    },
-  })
-
-  // Super admin gets all permissions
-  const allPermissions = await prisma.permission.findMany()
-
-  // Assign permissions to roles
-  await prisma.role.update({
-    where: { id: adminRole.id },
-    data: {
-      permissions: {
-        connect: adminPermissions.map((p) => ({ id: p.id })),
-      },
-    },
-  })
-
-  await prisma.role.update({
-    where: { id: superAdminRole.id },
-    data: {
-      permissions: {
-        connect: allPermissions.map((p) => ({ id: p.id })),
-      },
+      permissions: JSON.stringify(getSuperAdminPermissions())
     },
   })
 
@@ -78,15 +42,28 @@ async function main() {
     },
   })
 
-  console.log('Seed data created successfully')
+  console.log('Seed data created/updated successfully')
+  console.log(`Admin role: ${adminRole.name}`)
+  console.log(`Super Admin role: ${superAdminRole.name}`)
+  console.log(`Super Admin user: ${superAdminUser.email}`)
 }
 
-main()
-  .catch((e) => {
+async function main() {
+  try {
+    await seedRolesAndUsers()
+  } catch (e) {
     console.error(e)
     process.exit(1)
-  })
-  .finally(async () => {
+  } finally {
     await prisma.$disconnect()
     process.exit(0)
-  })
+  }
+}
+
+// Export the seeding function for use in custom scripts
+export { seedRolesAndUsers }
+
+// Run the main function if this file is executed directly
+if (require.main === module) {
+  main()
+}

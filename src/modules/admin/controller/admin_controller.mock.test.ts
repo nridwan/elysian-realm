@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Elysia } from 'elysia'
+import { PrismaClient } from '@prisma/client'
 import { createAdminController } from './admin_controller'
 import { AdminService } from '../services/admin_service'
+import { adminMiddleware } from '../middleware/admin_middleware'
 
 // Mock Prisma client
 const mockPrisma = {
@@ -20,16 +22,19 @@ const mockPrisma = {
     delete: vi.fn(),
     create: vi.fn(),
   },
-  permission: {
-    findMany: vi.fn(),
-    create: vi.fn(),
-  },
-}
+  $on: vi.fn(),
+  $connect: vi.fn(),
+  $disconnect: vi.fn(),
+  $executeRaw: vi.fn(),
+  $queryRaw: vi.fn(),
+  $transaction: vi.fn(),
+  $use: vi.fn(),
+} as unknown as PrismaClient
 
 // Create a mock admin service
 const mockAdminService = new AdminService(mockPrisma)
 
-// Create mock middleware that bypasses authentication
+// Create mock middleware that bypasses authentication and provides permissions
 const mockAuthMiddleware = (app: Elysia) => {
   return app.derive(() => ({
     user: {
@@ -41,14 +46,21 @@ const mockAuthMiddleware = (app: Elysia) => {
         id: '1',
         name: 'admin',
         description: null,
-        permissions: []
+        permissions: [
+          'users.read',
+          'users.create',
+          'users.update',
+          'users.delete',
+          'roles.read',
+          'roles.create',
+          'roles.update',
+          'roles.delete'
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     }
   }))
-}
-
-const mockAdminMiddleware = (app: Elysia) => {
-  return app
 }
 
 describe('AdminController - Mocked Service Tests', () => {
@@ -65,11 +77,17 @@ describe('AdminController - Mocked Service Tests', () => {
           id: '1',
           email: 'test@example.com',
           name: 'Test User',
+          password: 'hashedPassword',
           roleId: '1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
           role: {
             id: '1',
             name: 'admin',
-            description: null
+            description: null,
+            permissions: null,
+            createdAt: new Date(),
+            updatedAt: new Date()
           }
         }
       ],
@@ -84,8 +102,7 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        authMiddleware: mockAuthMiddleware,
-        adminMiddleware: mockAdminMiddleware
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any})
       }))
 
     const response = await app.handle(
@@ -96,8 +113,10 @@ describe('AdminController - Mocked Service Tests', () => {
 
     expect(response.status).toBe(200)
     const body = await response.json()
-    expect(body.users).toHaveLength(1)
-    expect(body.pagination.total).toBe(1)
+    expect(body.meta.code).toBe('ADMIN-200')
+    expect(body.meta.message).toBe('Users retrieved successfully')
+    expect(body.data.data).toHaveLength(1)
+    expect(body.data.total).toBe(1)
     expect(mockAdminService.getUsers).toHaveBeenCalledWith(1, 10)
   })
 
@@ -107,19 +126,24 @@ describe('AdminController - Mocked Service Tests', () => {
       id: '1',
       email: 'test@example.com',
       name: 'Test User',
+      password: 'hashedPassword',
       roleId: '1',
+      createdAt: new Date(),
+      updatedAt: new Date(),
       role: {
         id: '1',
         name: 'admin',
-        description: null
+        description: null,
+        permissions: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     })
 
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        authMiddleware: mockAuthMiddleware,
-        adminMiddleware: mockAdminMiddleware
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any})
       }))
 
     const response = await app.handle(
@@ -130,8 +154,10 @@ describe('AdminController - Mocked Service Tests', () => {
 
     expect(response.status).toBe(200)
     const body = await response.json()
-    expect(body.user.id).toBe('1')
-    expect(body.user.email).toBe('test@example.com')
+    expect(body.meta.code).toBe('ADMIN-200')
+    expect(body.meta.message).toBe('User retrieved successfully')
+    expect(body.data.user.id).toBe('1')
+    expect(body.data.user.email).toBe('test@example.com')
     expect(mockAdminService.getUserById).toHaveBeenCalledWith('1')
   })
 
@@ -142,8 +168,7 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        authMiddleware: mockAuthMiddleware,
-        adminMiddleware: mockAdminMiddleware
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any})
       }))
 
     const response = await app.handle(
@@ -154,7 +179,8 @@ describe('AdminController - Mocked Service Tests', () => {
 
     expect(response.status).toBe(200) // The endpoint returns 200 with error object
     const body = await response.json()
-    expect(body).toHaveProperty('error', 'User not found')
+    expect(body.meta.code).toBe('ADMIN-404')
+    expect(body.meta.message).toBe('User not found')
     expect(mockAdminService.getUserById).toHaveBeenCalledWith('999')
   })
 
@@ -164,19 +190,24 @@ describe('AdminController - Mocked Service Tests', () => {
       id: '1',
       email: 'updated@example.com',
       name: 'Updated User',
+      password: 'hashedPassword',
       roleId: '1',
+      createdAt: new Date(),
+      updatedAt: new Date(),
       role: {
         id: '1',
         name: 'admin',
-        description: null
+        description: null,
+        permissions: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     })
 
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        authMiddleware: mockAuthMiddleware,
-        adminMiddleware: mockAdminMiddleware
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any})
       }))
 
     const response = await app.handle(
@@ -194,22 +225,43 @@ describe('AdminController - Mocked Service Tests', () => {
 
     expect(response.status).toBe(200)
     const body = await response.json()
-    expect(body.user.email).toBe('updated@example.com')
+    expect(body.meta.code).toBe('ADMIN-200')
+    expect(body.meta.message).toBe('User updated successfully')
+    expect(body.data.user.email).toBe('updated@example.com')
     expect(mockAdminService.updateUser).toHaveBeenCalledWith('1', {
       name: 'Updated User',
       email: 'updated@example.com'
     })
   })
 
-  it('should delete user successfully', async () => {
-    // Mock the deleteUser method to return true
+  it('should deny access when user lacks required permission', async () => {
+    // Create a mock middleware that provides a user without the required permission
+    const mockAuthMiddlewareWithoutPermission = (app: Elysia) => {
+      return app.derive(() => ({
+        user: {
+          id: '1',
+          email: 'admin@example.com',
+          name: 'Admin User',
+          roleId: '1',
+          role: {
+            id: '1',
+            name: 'admin',
+            description: null,
+            permissions: ['users.read'], // Missing 'users.delete' permission
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        }
+      }))
+    }
+
+    // Mock the deleteUser method to return true (but it shouldn't be called due to permission denial)
     vi.spyOn(mockAdminService, 'deleteUser').mockResolvedValue(true)
 
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        authMiddleware: mockAuthMiddleware,
-        adminMiddleware: mockAdminMiddleware
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddlewareWithoutPermission as any})
       }))
 
     const response = await app.handle(
@@ -218,9 +270,44 @@ describe('AdminController - Mocked Service Tests', () => {
       })
     )
 
-    expect(response.status).toBe(200)
+    // Should get 403 Forbidden due to insufficient permissions
+    expect(response.status).toBe(403)
     const body = await response.json()
-    expect(body).toHaveProperty('message', 'User deleted successfully')
-    expect(mockAdminService.deleteUser).toHaveBeenCalledWith('1')
+    expect(body.meta.code).toBe('PERMISSION-403')
+    expect(body.meta.message).toBe('Forbidden: Insufficient permissions')
+    // The service method should not be called
+    expect(mockAdminService.deleteUser).not.toHaveBeenCalled()
+  })
+  
+  it('should deny access when user is not authenticated', async () => {
+    // Create a mock middleware that provides no user
+    const mockAuthMiddlewareNoUser = (app: Elysia) => {
+      return app.derive(() => ({
+        user: null
+      }))
+    }
+
+    // Mock the deleteUser method to return true (but it shouldn't be called due to authentication failure)
+    vi.spyOn(mockAdminService, 'deleteUser').mockResolvedValue(true)
+
+    const app = new Elysia()
+      .use(createAdminController({ 
+        service: mockAdminService,
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddlewareNoUser as any})
+      }))
+
+    const response = await app.handle(
+      new Request('http://localhost/api/admin/users/1', { 
+        method: 'DELETE'
+      })
+    )
+
+    // Should get 401 Unauthorized
+    expect(response.status).toBe(401)
+    const body = await response.json()
+    expect(body.meta.code).toBe('PERMISSION-401')
+    expect(body.meta.message).toBe('Unauthorized')
+    // The service method should not be called
+    expect(mockAdminService.deleteUser).not.toHaveBeenCalled()
   })
 })

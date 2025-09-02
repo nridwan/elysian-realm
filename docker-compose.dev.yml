@@ -2,7 +2,7 @@ services:
   # Database
   db:
     image: postgres:15-alpine
-    container_name: elysian-realm-db
+    container_name: elysian-realm-db-dev
     restart: always
     environment:
       POSTGRES_DB: elysian-realm
@@ -21,7 +21,7 @@ services:
   # Jaeger for distributed tracing
   jaeger:
     image: jaegertracing/all-in-one:latest
-    container_name: elysian-realm-jaeger
+    container_name: elysian-realm-jaeger-dev
     restart: always
     ports:
       - '6831:6831/udp'   # Jaeger agent
@@ -39,12 +39,12 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API
+  # Backend API with hot reloading
   backend:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: elysian-realm-backend
+      dockerfile: Dockerfile.dev
+    container_name: elysian-realm-backend-dev
     restart: always
     depends_on:
       db:
@@ -63,27 +63,34 @@ services:
       - OTEL_OTLP_ENDPOINT=http://jaeger:4318
     ports:
       - '3000:3000'
+      - '3001:3001'  # Health check port
+    volumes:
+      - .:/app
+      - /app/node_modules
     healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
+      test: ["CMD", "wget", "--spider", "http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Frontend
+  # Frontend with hot reloading
   frontend:
     build:
       context: .
-      dockerfile: client/Dockerfile
-    container_name: elysian-realm-frontend
+      dockerfile: client/Dockerfile.dev
+    container_name: elysian-realm-frontend-dev
     restart: always
     depends_on:
       - backend
     ports:
-      - '80:80'
+      - '5173:5173'
+    volumes:
+      - ./client:/app
+      - /app/node_modules
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
     healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "wget", "--spider", "http://localhost:5173/health"]
       interval: 30s
       timeout: 10s
       retries: 3

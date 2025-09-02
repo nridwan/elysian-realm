@@ -1,0 +1,30 @@
+# Development Dockerfile for backend
+FROM oven/bun:1.1.38-alpine
+
+# Set the working directory
+WORKDIR /app
+
+# Install system dependencies for Prisma
+RUN apk add --no-cache openssl
+
+# Copy package files
+COPY package.json bun.lockb ./
+
+# Copy Prisma files
+COPY prisma ./prisma/
+
+# Install dependencies
+RUN bun install
+
+# Generate Prisma client
+RUN bunx prisma generate
+
+# Copy entrypoint script
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
+
+# Expose the port the app runs on
+EXPOSE 3000
+
+# Command to run the application with hot reloading
+CMD ["./entrypoint.sh"]

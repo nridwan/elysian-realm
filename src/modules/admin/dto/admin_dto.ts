@@ -1,11 +1,12 @@
 import { t } from 'elysia'
+import { BaseMetaDto, PaginationQueryDto } from '../../../dto/base.dto'
 
 // User DTOs
 export const UserDto = t.Object({
   id: t.String(),
   email: t.String(),
   name: t.String(),
-  roleId: t.String(),
+  role_id: t.String(),
   role: t.Object({
     id: t.String(),
     name: t.String(),
@@ -13,18 +14,12 @@ export const UserDto = t.Object({
   }),
 })
 
-export const UsersResponseDto = t.Object({
-  users: t.Array(UserDto),
-  pagination: t.Object({
-    page: t.Number(),
-    limit: t.Number(),
-    total: t.Number(),
-    pages: t.Number(),
-  }),
-})
-
-export const UserResponseDto = t.Object({
-  user: UserDto,
+export const UsersResponseDataDto = t.Object({
+  page: t.Number(),
+  limit: t.Number(),
+  total: t.Number(),
+  pages: t.Number(),
+  data: t.Array(UserDto),
 })
 
 // Role DTOs
@@ -32,57 +27,64 @@ export const RoleDto = t.Object({
   id: t.String(),
   name: t.String(),
   description: t.Union([t.String(), t.Null()]),
-  permissions: t.Optional(
-    t.Array(
-      t.Object({
-        id: t.String(),
-        name: t.String(),
-        description: t.Union([t.String(), t.Null()]),
-      })
-    )
-  ),
+  permissions: t.Optional(t.Array(t.String())),
 })
 
-export const RolesResponseDto = t.Object({
+export const RolesResponseDataDto = t.Object({
   roles: t.Array(RoleDto),
 })
 
-export const RoleResponseDto = t.Object({
+export const UserResponseDataDto = t.Object({
+  user: UserDto,
+})
+
+export const RoleResponseDataDto = t.Object({
   role: RoleDto,
 })
 
-// Permission DTOs
-export const PermissionDto = t.Object({
-  id: t.String(),
-  name: t.String(),
-  description: t.Union([t.String(), t.Null()]),
+// Available Permissions DTO
+export const AvailablePermissionsResponseDataDto = t.Object({
+  permissions: t.Record(t.String(), t.Array(t.String())),
 })
 
-export const PermissionsResponseDto = t.Object({
-  permissions: t.Array(PermissionDto),
+// Admin Response DTOs - using union types to handle both success and error cases
+export const AdminUsersResponseDto = t.Object({
+  meta: BaseMetaDto,
+  data: t.Union([UsersResponseDataDto, t.Null()]),
 })
 
-export const PermissionResponseDto = t.Object({
-  permission: PermissionDto,
+export const AdminUserResponseDto = t.Object({
+  meta: BaseMetaDto,
+  data: t.Union([UserResponseDataDto, t.Null()]),
 })
 
-// Error DTO
-export const ErrorResponseDto = t.Object({
-  error: t.String(),
+export const AdminRolesResponseDto = t.Object({
+  meta: BaseMetaDto,
+  data: t.Union([RolesResponseDataDto, t.Null()]),
 })
 
-// Success DTO
-export const SuccessResponseDto = t.Object({
-  message: t.String(),
+export const AdminRoleResponseDto = t.Object({
+  meta: BaseMetaDto,
+  data: t.Union([RoleResponseDataDto, t.Null()]),
+})
+
+export const AdminAvailablePermissionsResponseDto = t.Object({
+  meta: BaseMetaDto,
+  data: t.Union([AvailablePermissionsResponseDataDto, t.Null()]),
+})
+
+export const AdminSuccessResponseDto = t.Object({
+  meta: BaseMetaDto,
+  data: t.Union([t.Object({}), t.Null()]),
+})
+
+export const AdminErrorResponseDto = t.Object({
+  meta: BaseMetaDto,
+  data: t.Null(),
 })
 
 // Query and param DTOs
-export const PaginationQueryDto = t.Optional(
-  t.Object({
-    page: t.Optional(t.String()),
-    limit: t.Optional(t.String()),
-  })
-)
+export const AdminPaginationQueryDto = PaginationQueryDto
 
 export const IdParamDto = t.Object({
   id: t.String(),

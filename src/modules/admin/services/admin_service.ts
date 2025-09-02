@@ -1,32 +1,13 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, User as PrismaUser, Role as PrismaRole } from '@prisma/client'
+import { PERMISSIONS, getAllPermissionStrings, getAdminPermissions, getSuperAdminPermissions } from '../permissions'
 
-export interface User {
-  id: string
-  email: string
-  name: string
-  roleId: string
-  role: {
-    id: string
-    name: string
-    description: string | null
-  }
+// Only create custom types where we need to transform data
+type RoleWithPermissions = Omit<PrismaRole, 'permissions'> & {
+  permissions?: string[] // Parsed from JSON
 }
 
-export interface Role {
-  id: string
-  name: string
-  description: string | null
-  permissions?: {
-    id: string
-    name: string
-    description: string | null
-  }[]
-}
-
-export interface Permission {
-  id: string
-  name: string
-  description: string | null
+type UserWithRole = PrismaUser & {
+  role: PrismaRole
 }
 
 export interface Pagination {
@@ -36,32 +17,10 @@ export interface Pagination {
   pages: number
 }
 
-export interface IPrismaClient {
-  user: {
-    findMany: (args: any) => Promise<any[]>
-    findUnique: (args: any) => Promise<any>
-    update: (args: any) => Promise<any>
-    delete: (args: any) => Promise<any>
-    count: (args?: any) => Promise<number>
-    create: (args: any) => Promise<any>
-  }
-  role: {
-    findMany: (args?: any) => Promise<any[]>
-    findUnique: (args: any) => Promise<any>
-    update: (args: any) => Promise<any>
-    delete: (args: any) => Promise<any>
-    create: (args: any) => Promise<any>
-  }
-  permission: {
-    findMany: (args?: any) => Promise<any[]>
-    create: (args: any) => Promise<any>
-  }
-}
-
 export class AdminService {
-  constructor(private prisma: IPrismaClient) {}
+  constructor(private prisma: PrismaClient) {}
 
-  async getUsers(page: number = 1, limit: number = 10): Promise<{ users: User[]; pagination: Pagination }> {
+  async getUsers(page: number = 1, limit: number = 10): Promise<{ users: UserWithRole[]; pagination: Pagination }> {
     const users = await this.prisma.user.findMany({
       skip: (page - 1) * limit,
       take: limit,
@@ -71,7 +30,7 @@ export class AdminService {
     const total = await this.prisma.user.count()
 
     return {
-      users: users as User[],
+      users: users as UserWithRole[],
       pagination: {
         page,
         limit,
@@ -81,16 +40,16 @@ export class AdminService {
     }
   }
 
-  async getUserById(id: string): Promise<User | null> {
+  async getUserById(id: string): Promise<UserWithRole | null> {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: { role: true },
     })
 
-    return user as User | null
+    return user as UserWithRole | null
   }
 
-  async updateUser(id: string, data: Partial<User>): Promise<User | null> {
+  async updateUser(id: string, data: Partial<PrismaUser>): Promise<UserWithRole | null> {
     try {
       const user = await this.prisma.user.update({
         where: { id },
@@ -98,7 +57,7 @@ export class AdminService {
         include: { role: true },
       })
 
-      return user as User
+      return user as UserWithRole
     } catch (error) {
       return null
     }
@@ -115,34 +74,52 @@ export class AdminService {
     }
   }
 
-  async getRoles(): Promise<Role[]> {
-    const roles = await this.prisma.role.findMany({
-      include: { permissions: true },
-    })
-
-    return roles as Role[]
+  async getRoles(): Promise<RoleWithPermissions[]> {
+    const roles = await this.prisma.role.findMany()
+    
+    // Parse permissions JSON for each role
+    return roles.map(role => ({
+      ...role,
+      permissions: role.permissions ? JSON.parse(role.permissions as string) : []
+    })) as RoleWithPermissions[]
   }
 
-  async createRole(data: { name: string; description?: string }): Promise<Role | null> {
+  async createRole(data: { name: string; description?: string; permissions?: string[] }): Promise<RoleWithPermissions | null> {
     try {
+      const roleData = {
+        ...data,
+        permissions: data.permissions ? JSON.stringify(data.permissions) : undefined
+      }
+      
       const role = await this.prisma.role.create({
-        data,
+        data: roleData,
       })
 
-      return role as Role
+      return {
+        ...role,
+        permissions: role.permissions ? JSON.parse(role.permissions as string) : []
+      } as RoleWithPermissions
     } catch (error) {
       return null
     }
   }
 
-  async updateRole(id: string, data: Partial<Role>): Promise<Role | null> {
+  async updateRole(id: string, data: { name?: string; description?: string; permissions?: string[] }): Promise<RoleWithPermissions | null> {
     try {
+      const roleData = {
+        ...data,
+        permissions: data.permissions !== undefined ? JSON.stringify(data.permissions) : undefined
+      }
+      
       const role = await this.prisma.role.update({
         where: { id },
-        data,
+        data: roleData,
       })
 
-      return role as Role
+      return {
+        ...role,
+        permissions: role.permissions ? JSON.parse(role.permissions as string) : []
+      } as RoleWithPermissions
     } catch (error) {
       return null
     }
@@ -158,21 +135,29 @@ export class AdminService {
       return false
     }
   }
-
-  async getPermissions(): Promise<Permission[]> {
-    const permissions = await this.prisma.permission.findMany()
-    return permissions as Permission[]
-  }
-
-  async createPermission(data: { name: string; description?: string }): Promise<Permission | null> {
-    try {
-      const permission = await this.prisma.permission.create({
-        data,
-      })
-
-      return permission as Permission
-    } catch (error) {
-      return null
+  
+  // Get all available permissions in the required format
+  getAllAvailablePermissions(): Record<string, string[]> {
+    // Create a mutable copy of the permissions
+    const mutablePermissions: Record<string, string[]> = {}
+    for (const [key, value] of Object.entries(PERMISSIONS)) {
+      mutablePermissions[key] = [...value]
     }
+    return mutablePermissions
+  }
+  
+  // Get all permission strings
+  getAllPermissionStrings(): string[] {
+    return getAllPermissionStrings()
+  }
+  
+  // Get super admin permissions
+  getSuperAdminPermissions(): string[] {
+    return getSuperAdminPermissions()
+  }
+  
+  // Get admin permissions
+  getAdminPermissions(): string[] {
+    return getAdminPermissions()
   }
 }

@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { Elysia } from 'elysia'
-import { jwtPlugin } from '../../../plugins/jwt'
+import { adminAccessTokenPlugin, adminRefreshTokenPlugin } from '../../../plugins/jwt'
 import { adminController } from './admin_controller'
 
 describe('AdminController - Endpoint Tests', () => {
   it('should register admin routes correctly', async () => {
-    const app = new Elysia().use(jwtPlugin).use(adminController)
+    const app = new Elysia().use(adminAccessTokenPlugin).use(adminRefreshTokenPlugin).use(adminController)
     
     // Test that routes are registered by checking a non-existent route returns 404
     const response = await app.handle(new Request('http://localhost/non-existent'))
@@ -13,7 +13,7 @@ describe('AdminController - Endpoint Tests', () => {
   })
 
   it('should have users endpoint that accepts GET requests', async () => {
-    const app = new Elysia().use(jwtPlugin).use(adminController)
+    const app = new Elysia().use(adminAccessTokenPlugin).use(adminRefreshTokenPlugin).use(adminController)
     
     // Test that the users endpoint exists and accepts GET
     const response = await app.handle(
@@ -24,7 +24,7 @@ describe('AdminController - Endpoint Tests', () => {
   })
 
   it('should have roles endpoint that accepts GET requests', async () => {
-    const app = new Elysia().use(jwtPlugin).use(adminController)
+    const app = new Elysia().use(adminAccessTokenPlugin).use(adminRefreshTokenPlugin).use(adminController)
     
     // Test that the roles endpoint exists and accepts GET
     const response = await app.handle(
@@ -35,7 +35,7 @@ describe('AdminController - Endpoint Tests', () => {
   })
 
   it('should return 404 for undefined routes', async () => {
-    const app = new Elysia().use(jwtPlugin).use(adminController)
+    const app = new Elysia().use(adminAccessTokenPlugin).use(adminRefreshTokenPlugin).use(adminController)
     
     // Test undefined route
     const response = await app.handle(
@@ -46,7 +46,7 @@ describe('AdminController - Endpoint Tests', () => {
   })
 
   it('should validate request body for role creation', async () => {
-    const app = new Elysia().use(jwtPlugin).use(adminController)
+    const app = new Elysia().use(adminAccessTokenPlugin).use(adminRefreshTokenPlugin).use(adminController)
     
     // Test validation with invalid body for role creation
     const response = await app.handle(
@@ -62,7 +62,7 @@ describe('AdminController - Endpoint Tests', () => {
   })
 
   it('should have user detail endpoint', async () => {
-    const app = new Elysia().use(jwtPlugin).use(adminController)
+    const app = new Elysia().use(adminAccessTokenPlugin).use(adminRefreshTokenPlugin).use(adminController)
     
     // Test that the user detail endpoint exists
     const response = await app.handle(
@@ -73,7 +73,7 @@ describe('AdminController - Endpoint Tests', () => {
   })
 
   it('should handle PUT requests to user endpoint', async () => {
-    const app = new Elysia().use(jwtPlugin).use(adminController)
+    const app = new Elysia().use(adminAccessTokenPlugin).use(adminRefreshTokenPlugin).use(adminController)
     
     // Test PUT to user endpoint
     const response = await app.handle(
@@ -88,7 +88,7 @@ describe('AdminController - Endpoint Tests', () => {
   })
 
   it('should handle DELETE requests to user endpoint', async () => {
-    const app = new Elysia().use(jwtPlugin).use(adminController)
+    const app = new Elysia().use(adminAccessTokenPlugin).use(adminRefreshTokenPlugin).use(adminController)
     
     // Test DELETE to user endpoint
     const response = await app.handle(

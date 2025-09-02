@@ -1,26 +1,22 @@
 import Elysia, { t } from 'elysia'
 import * as dto from '../dto/admin_dto'
-import { authMiddleware } from '../../auth/middleware/auth_middleware'
 import { adminMiddleware } from '../middleware/admin_middleware'
 import { adminService } from '../services/admin_service_factory'
 import { AdminService } from '../services/admin_service'
 
 interface AdminControllerOptions {
   service?: AdminService
-  authMiddleware?: typeof authMiddleware
-  adminMiddleware?: typeof adminMiddleware
+  adminMiddleware?: ReturnType<typeof adminMiddleware>
 }
 
 export const createAdminController = (options: AdminControllerOptions = {}) => {
   const service = options.service || adminService
-  const auth = options.authMiddleware || authMiddleware
-  const admin = options.adminMiddleware || adminMiddleware
+  const admin = options.adminMiddleware || adminMiddleware()
 
   return new Elysia({ name: 'admin-controller' })
-    .use(auth)
-    .use(admin)
     .group('/api/admin', (app) =>
       app
+        .use(admin)
         // User management
         .get(
           '/users',
@@ -29,11 +25,36 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const pageNum = parseInt(page)
             const limitNum = parseInt(limit)
 
-            return await service.getUsers(pageNum, limitNum)
+            const result = await service.getUsers(pageNum, limitNum)
+            
+            return {
+              meta: {
+                code: 'ADMIN-200',
+                message: 'Users retrieved successfully',
+              },
+              data: {
+                page: result.pagination.page,
+                limit: result.pagination.limit,
+                total: result.pagination.total,
+                pages: result.pagination.pages,
+                data: result.users.map(user => ({
+                  id: user.id,
+                  email: user.email,
+                  name: user.name,
+                  role_id: user.roleId,
+                  role: {
+                    id: user.role.id,
+                    name: user.role.name,
+                    description: user.role.description,
+                  }
+                }))
+              }
+            }
           },
           {
-            query: dto.PaginationQueryDto,
-            response: dto.UsersResponseDto,
+            query: dto.AdminPaginationQueryDto,
+            response: dto.AdminUsersResponseDto,
+            hasPermission: 'users.read'
           }
         )
         .get(
@@ -43,14 +64,39 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const user = await service.getUserById(id)
 
             if (!user) {
-              return { error: 'User not found' }
+              return {
+                meta: {
+                  code: 'ADMIN-404',
+                  message: 'User not found',
+                },
+                data: null
+              }
             }
 
-            return { user }
+            return {
+              meta: {
+                code: 'ADMIN-200',
+                message: 'User retrieved successfully',
+              },
+              data: {
+                user: {
+                  id: user.id,
+                  email: user.email,
+                  name: user.name,
+                  role_id: user.roleId,
+                  role: {
+                    id: user.role.id,
+                    name: user.role.name,
+                    description: user.role.description,
+                  }
+                }
+              }
+            }
           },
           {
             params: dto.IdParamDto,
-            response: t.Union([dto.UserResponseDto, dto.ErrorResponseDto]),
+            response: dto.AdminUserResponseDto,
+            hasPermission: 'users.read'
           }
         )
         .put(
@@ -60,10 +106,34 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const user = await service.updateUser(id, body)
 
             if (!user) {
-              return { error: 'Failed to update user' }
+              return {
+                meta: {
+                  code: 'ADMIN-400',
+                  message: 'Failed to update user',
+                },
+                data: null
+              }
             }
 
-            return { user }
+            return {
+              meta: {
+                code: 'ADMIN-200',
+                message: 'User updated successfully',
+              },
+              data: {
+                user: {
+                  id: user.id,
+                  email: user.email,
+                  name: user.name,
+                  role_id: user.roleId,
+                  role: {
+                    id: user.role.id,
+                    name: user.role.name,
+                    description: user.role.description,
+                  }
+                }
+              }
+            }
           },
           {
             params: dto.IdParamDto,
@@ -71,10 +141,11 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
               t.Object({
                 name: t.String(),
                 email: t.String(),
-                roleId: t.String(),
+                role_id: t.String(),
               })
             ),
-            response: t.Union([dto.UserResponseDto, dto.ErrorResponseDto]),
+            response: dto.AdminUserResponseDto,
+            hasPermission: 'users.update'
           }
         )
         .delete(
@@ -84,14 +155,27 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const success = await service.deleteUser(id)
 
             if (!success) {
-              return { error: 'Failed to delete user' }
+              return {
+                meta: {
+                  code: 'ADMIN-400',
+                  message: 'Failed to delete user',
+                },
+                data: {}
+              }
             }
 
-            return { message: 'User deleted successfully' }
+            return {
+              meta: {
+                code: 'ADMIN-200',
+                message: 'User deleted successfully',
+              },
+              data: {}
+            }
           },
           {
             params: dto.IdParamDto,
-            response: t.Union([dto.SuccessResponseDto, dto.ErrorResponseDto]),
+            response: dto.AdminSuccessResponseDto,
+            hasPermission: 'users.delete'
           }
         )
         // Role management
@@ -99,10 +183,25 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           '/roles',
           async () => {
             const roles = await service.getRoles()
-            return { roles }
+            
+            return {
+              meta: {
+                code: 'ADMIN-200',
+                message: 'Roles retrieved successfully',
+              },
+              data: {
+                roles: roles.map(role => ({
+                  id: role.id,
+                  name: role.name,
+                  description: role.description,
+                  permissions: role.permissions
+                }))
+              }
+            }
           },
           {
-            response: dto.RolesResponseDto,
+            response: dto.AdminRolesResponseDto,
+            hasPermission: 'roles.read'
           }
         )
         .post(
@@ -111,17 +210,38 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const role = await service.createRole(body)
 
             if (!role) {
-              return { error: 'Failed to create role' }
+              return {
+                meta: {
+                  code: 'ADMIN-400',
+                  message: 'Failed to create role',
+                },
+                data: null
+              }
             }
 
-            return { role }
+            return {
+              meta: {
+                code: 'ADMIN-200',
+                message: 'Role created successfully',
+              },
+              data: {
+                role: {
+                  id: role.id,
+                  name: role.name,
+                  description: role.description,
+                  permissions: role.permissions
+                }
+              }
+            }
           },
           {
             body: t.Object({
               name: t.String(),
               description: t.Optional(t.String()),
+              permissions: t.Optional(t.Array(t.String())),
             }),
-            response: t.Union([dto.RoleResponseDto, dto.ErrorResponseDto]),
+            response: dto.AdminRoleResponseDto,
+            hasPermission: 'roles.create'
           }
         )
         .put(
@@ -131,10 +251,29 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const role = await service.updateRole(id, body)
 
             if (!role) {
-              return { error: 'Failed to update role' }
+              return {
+                meta: {
+                  code: 'ADMIN-400',
+                  message: 'Failed to update role',
+                },
+                data: null
+              }
             }
 
-            return { role }
+            return {
+              meta: {
+                code: 'ADMIN-200',
+                message: 'Role updated successfully',
+              },
+              data: {
+                role: {
+                  id: role.id,
+                  name: role.name,
+                  description: role.description,
+                  permissions: role.permissions
+                }
+              }
+            }
           },
           {
             params: dto.IdParamDto,
@@ -142,9 +281,11 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
               t.Object({
                 name: t.String(),
                 description: t.Optional(t.String()),
+                permissions: t.Optional(t.Array(t.String())),
               })
             ),
-            response: t.Union([dto.RoleResponseDto, dto.ErrorResponseDto]),
+            response: dto.AdminRoleResponseDto,
+            hasPermission: 'roles.read'
           }
         )
         .delete(
@@ -154,44 +295,45 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const success = await service.deleteRole(id)
 
             if (!success) {
-              return { error: 'Failed to delete role' }
+              return {
+                meta: {
+                  code: 'ADMIN-400',
+                  message: 'Failed to delete role',
+                },
+                data: {}
+              }
             }
 
-            return { message: 'Role deleted successfully' }
+            return {
+              meta: {
+                code: 'ADMIN-200',
+                message: 'Role deleted successfully',
+              },
+              data: {}
+            }
           },
           {
             params: dto.IdParamDto,
-            response: t.Union([dto.SuccessResponseDto, dto.ErrorResponseDto]),
+            response: dto.AdminSuccessResponseDto,
+            hasPermission: 'roles.delete'
           }
         )
-        // Permission management
+        // Available permissions
         .get(
-          '/permissions',
+          '/permissions/available',
           async () => {
-            const permissions = await service.getPermissions()
-            return { permissions }
-          },
-          {
-            response: dto.PermissionsResponseDto,
-          }
-        )
-        .post(
-          '/permissions',
-          async ({ body }) => {
-            const permission = await service.createPermission(body)
-
-            if (!permission) {
-              return { error: 'Failed to create permission' }
+            const permissions = service.getAllAvailablePermissions()
+            
+            return {
+              meta: {
+                code: 'ADMIN-200',
+                message: 'Permissions retrieved successfully',
+              },
+              data: { permissions }
             }
-
-            return { permission }
           },
           {
-            body: t.Object({
-              name: t.String(),
-              description: t.Optional(t.String()),
-            }),
-            response: t.Union([dto.PermissionResponseDto, dto.ErrorResponseDto]),
+            response: dto.AdminAvailablePermissionsResponseDto,
           }
         )
     )
