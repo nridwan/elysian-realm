@@ -54,7 +54,13 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           {
             query: dto.AdminPaginationQueryDto,
             response: dto.AdminUsersResponseDto,
-            hasPermission: 'users.read'
+            hasPermission: 'users.read',
+            detail: {
+              tags: ['Admin'],
+              summary: 'Get Users',
+              description: 'Retrieve a paginated list of users',
+              security: [{ jwt: [] }]
+            }
           }
         )
         .get(
@@ -96,7 +102,13 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           {
             params: dto.IdParamDto,
             response: dto.AdminUserResponseDto,
-            hasPermission: 'users.read'
+            hasPermission: 'users.read',
+            detail: {
+              tags: ['Admin'],
+              summary: 'Get User by ID',
+              description: 'Retrieve a specific user by their ID',
+              security: [{ jwt: [] }]
+            }
           }
         )
         .put(
@@ -139,13 +151,28 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             params: dto.IdParamDto,
             body: t.Partial(
               t.Object({
-                name: t.String(),
-                email: t.String(),
-                role_id: t.String(),
+                name: t.String({
+                  description: 'User full name',
+                  examples: ['John Doe']
+                }),
+                email: t.String({
+                  description: 'User email address',
+                  examples: ['user@example.com']
+                }),
+                role_id: t.String({
+                  description: 'Role identifier to assign to the user',
+                  examples: ['role_admin']
+                }),
               })
             ),
             response: dto.AdminUserResponseDto,
-            hasPermission: 'users.update'
+            hasPermission: 'users.update',
+            detail: {
+              tags: ['Admin'],
+              summary: 'Update User',
+              description: 'Update a user by their ID',
+              security: [{ jwt: [] }]
+            }
           }
         )
         .delete(
@@ -175,7 +202,13 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           {
             params: dto.IdParamDto,
             response: dto.AdminSuccessResponseDto,
-            hasPermission: 'users.delete'
+            hasPermission: 'users.delete',
+            detail: {
+              tags: ['Admin'],
+              summary: 'Delete User',
+              description: 'Delete a user by their ID',
+              security: [{ jwt: [] }]
+            }
           }
         )
         // Role management
@@ -201,7 +234,13 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           },
           {
             response: dto.AdminRolesResponseDto,
-            hasPermission: 'roles.read'
+            hasPermission: 'roles.read',
+            detail: {
+              tags: ['Admin'],
+              summary: 'Get Roles',
+              description: 'Retrieve all roles',
+              security: [{ jwt: [] }]
+            }
           }
         )
         .post(
@@ -236,12 +275,29 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           },
           {
             body: t.Object({
-              name: t.String(),
-              description: t.Optional(t.String()),
-              permissions: t.Optional(t.Array(t.String())),
+              name: t.String({
+                description: 'Role name',
+                examples: ['Administrator']
+              }),
+              description: t.Optional(t.String({
+                description: 'Role description',
+                examples: ['Full system access']
+              })),
+              permissions: t.Optional(t.Array(t.String({
+                description: 'Array of permissions for this role',
+                examples: ['users.read', 'users.create']
+              }), {
+                description: 'Optional array of permissions'
+              })),
             }),
             response: dto.AdminRoleResponseDto,
-            hasPermission: 'roles.create'
+            hasPermission: 'roles.create',
+            detail: {
+              tags: ['Admin'],
+              summary: 'Create Role',
+              description: 'Create a new role',
+              security: [{ jwt: [] }]
+            }
           }
         )
         .put(
@@ -279,13 +335,30 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             params: dto.IdParamDto,
             body: t.Partial(
               t.Object({
-                name: t.String(),
-                description: t.Optional(t.String()),
-                permissions: t.Optional(t.Array(t.String())),
+                name: t.String({
+                  description: 'Role name',
+                  examples: ['Administrator']
+                }),
+                description: t.Optional(t.String({
+                  description: 'Role description',
+                  examples: ['Full system access']
+                })),
+                permissions: t.Optional(t.Array(t.String({
+                  description: 'Array of permissions for this role',
+                  examples: ['users.read', 'users.create']
+                }), {
+                  description: 'Optional array of permissions'
+                })),
               })
             ),
             response: dto.AdminRoleResponseDto,
-            hasPermission: 'roles.read'
+            hasPermission: 'roles.read',
+            detail: {
+              tags: ['Admin'],
+              summary: 'Update Role',
+              description: 'Update a role by its ID',
+              security: [{ jwt: [] }]
+            }
           }
         )
         .delete(
@@ -315,7 +388,13 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           {
             params: dto.IdParamDto,
             response: dto.AdminSuccessResponseDto,
-            hasPermission: 'roles.delete'
+            hasPermission: 'roles.delete',
+            detail: {
+              tags: ['Admin'],
+              summary: 'Delete Role',
+              description: 'Delete a role by its ID',
+              security: [{ jwt: [] }]
+            }
           }
         )
         // Available permissions
@@ -334,6 +413,12 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           },
           {
             response: dto.AdminAvailablePermissionsResponseDto,
+            detail: {
+              tags: ['Admin'],
+              summary: 'Get Available Permissions',
+              description: 'Retrieve all available permissions',
+              security: [{ jwt: [] }]
+            }
           }
         )
     )

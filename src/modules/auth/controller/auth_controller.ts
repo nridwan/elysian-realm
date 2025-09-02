@@ -1,7 +1,7 @@
 import Elysia from 'elysia'
 import { AuthService } from '../services/auth_service'
-import { LoginDto, RefreshTokenDto, TokenResponseDataDto, AuthTokenResponseDto } from '../dto/auth_dto'
-import { adminAccessTokenPlugin, adminRefreshTokenPlugin, type JWTPayload, type RefreshTokenPayload } from '../../../plugins/jwt'
+import { LoginDto, RefreshTokenDto, AuthTokenResponseDto } from '../dto/auth_dto'
+import { adminAccessTokenPlugin, adminRefreshTokenPlugin, type RefreshTokenPayload } from '../../../plugins/jwt'
 import { authService } from '../services/auth_service_factory'
 
 interface AuthControllerOptions {
@@ -45,15 +45,15 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
               name: user.name,
               role: {
                 name: user.role.name,
-                permissions: user.role.permissions
+                permissions: (user.role.permissions ?? []) as string[]
               }
-            } as JWTPayload)
+            })
 
             // Generate refresh token with user id and email
             const refreshTokenValue = await adminRefreshToken.sign({
               id: user.id,
               email: user.email
-            } as RefreshTokenPayload)
+            })
 
             return {
               meta: {
@@ -72,6 +72,11 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
               200: AuthTokenResponseDto,
               401: AuthTokenResponseDto,
             },
+            detail: {
+              tags: ['Auth'],
+              summary: 'User Login',
+              description: 'Authenticate a user with email and password to receive access and refresh tokens'
+            }
           }
         )
         .post(
@@ -92,25 +97,38 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
               }
             }
 
-            // In a real implementation, you would check if the refresh token exists in the database
-            // and hasn't been revoked. For now, we'll just generate new tokens.
-
-            // Generate new access token
-            const newAccessToken = await adminAccessToken.sign({
-              id: payload.id,
-              email: payload.email,
-              name: payload.email.split('@')[0], // Simple name extraction
-              role: {
-                name: 'user', // Default role, in real implementation you would fetch from DB
-                permissions: []
+            // Requery user by ID to get fresh user data including role and permissions
+            const result = await service.refreshAccessToken(payload.id)
+            
+            // If there was an error during token refresh
+            if (result.error) {
+              set.status = 401
+              return {
+                meta: {
+                  code: 'AUTH-401',
+                  message: result.error,
+                },
+                data: null
               }
-            } as unknown as JWTPayload)
+            }
+
+            // Generate new access token with fresh user data
+            const user = result.user!
+            const newAccessToken = await adminAccessToken.sign({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: {
+                name: user.role.name,
+                permissions: (user.role.permissions ?? []) as string[]
+              }
+            })
 
             // Generate new refresh token
             const newRefreshToken = await adminRefreshToken.sign({
-              id: payload.id,
-              email: payload.email
-            } as RefreshTokenPayload)
+              id: user.id,
+              email: user.email
+            })
 
             return {
               meta: {
@@ -129,6 +147,11 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
               200: AuthTokenResponseDto,
               401: AuthTokenResponseDto,
             },
+            detail: {
+              tags: ['Auth'],
+              summary: 'Refresh Token',
+              description: 'Refresh access token using a valid refresh token'
+            }
           }
         )
     )

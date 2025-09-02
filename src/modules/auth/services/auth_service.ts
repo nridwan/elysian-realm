@@ -16,13 +16,8 @@ export interface LoginResponse {
   error?: string
 }
 
-export interface RefreshTokenInput {
-  refreshToken: string
-}
-
 export interface RefreshTokenResponse {
-  accessToken?: string
-  refreshToken?: string
+  user?: UserWithRole
   error?: string
 }
 
@@ -49,17 +44,22 @@ export class AuthService {
     return { user: user as UserWithRole }
   }
 
-  async refreshAccessToken({ refreshToken }: RefreshTokenInput): Promise<RefreshTokenResponse> {
-    // In a real implementation, you would verify the refresh token against a database
-    // For now, we'll just return a success response
-    // But for the test, we'll check if it's the "invalid" token
-    if (refreshToken === 'invalid-refresh-token') {
-      return { error: 'Invalid refresh token' }
-    }
-    
-    return { 
-      accessToken: 'new-access-token',
-      refreshToken: 'new-refresh-token'
+  async refreshAccessToken(userId: string): Promise<RefreshTokenResponse> {
+    try {
+      // Requery the user from the database to get fresh data including role and permissions
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: { role: true },
+      })
+
+      if (!user) {
+        return { error: 'User not found' }
+      }
+
+      return { user: user as UserWithRole }
+    } catch (error) {
+      console.error('Error refreshing access token:', error)
+      return { error: 'Failed to refresh token' }
     }
   }
 }

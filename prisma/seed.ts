@@ -13,7 +13,7 @@ async function seedRolesAndUsers() {
     create: {
       name: 'admin',
       description: 'Administrator role',
-      permissions: JSON.stringify(getAdminPermissions())
+      permissions: getAdminPermissions()
     },
   })
 
@@ -21,12 +21,12 @@ async function seedRolesAndUsers() {
     where: { name: 'superadmin' },
     update: {
       // Update super admin permissions to ensure they have the latest permissions
-      permissions: JSON.stringify(getSuperAdminPermissions())
+      permissions: getSuperAdminPermissions()
     },
     create: {
       name: 'superadmin',
       description: 'Super Administrator role',
-      permissions: JSON.stringify(getSuperAdminPermissions())
+      permissions: getSuperAdminPermissions()
     },
   })
 
@@ -36,7 +36,7 @@ async function seedRolesAndUsers() {
     update: {},
     create: {
       email: 'superadmin@example.com',
-      password: '$2b$10$rVvAXbLzG8tOTpSWH1H3qOq4A3QVQD7bR5gQ4H3cH2b3cH2b3cH2b', // 'password' hashed
+      password: '$2a$12$gQkFcBZFwyy6uEU6QDj8EOcQZfE1frPF5nLZSPfjfTLKltY3Hwo0y', // 'password' hashed
       name: 'Super Admin',
       roleId: superAdminRole.id,
     },
@@ -63,7 +63,4 @@ async function main() {
 // Export the seeding function for use in custom scripts
 export { seedRolesAndUsers }
 
-// Run the main function if this file is executed directly
-if (require.main === module) {
-  main()
-}
+main()

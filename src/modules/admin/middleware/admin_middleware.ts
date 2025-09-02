@@ -19,7 +19,7 @@ export const adminMiddleware = ({ auth }: AdminMiddlewareOptions = {}) => {
               set.status = 401;
               return {
                 meta: {
-                  code: "PERMISSION-401",
+                  code: "AUTH-401",
                   message: "Unauthorized",
                 },
                 data: null,
@@ -31,7 +31,6 @@ export const adminMiddleware = ({ auth }: AdminMiddlewareOptions = {}) => {
           return {
             beforeHandle({ user, set }) {
               // Check if user is authenticated
-              console.log(!user)
               if (!user) {
                 set.status = 401;
                 return {

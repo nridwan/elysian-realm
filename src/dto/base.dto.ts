@@ -2,12 +2,26 @@ import { t, TSchema } from 'elysia'
 
 // Base response meta structure
 export const BaseMetaDto = t.Object({
-  code: t.String(),
-  message: t.String(),
+  code: t.String({
+    description: 'Response status code',
+    examples: ['AUTH-200', 'ADMIN-404']
+  }),
+  message: t.String({
+    description: 'Human-readable response message',
+    examples: ['Login successful', 'User not found']
+  }),
   errors: t.Optional(t.Array(t.Object({
-    field: t.String(),
-    message: t.String()
-  })))
+    field: t.String({
+      description: 'Field that caused the error',
+      examples: ['email', 'password']
+    }),
+    message: t.String({
+      description: 'Error message for the field',
+      examples: ['Email is required', 'Password must be at least 8 characters']
+    })
+  }), {
+    description: 'List of validation errors'
+  }))
 })
 
 // Generic base response structure
@@ -21,18 +35,38 @@ export const createBaseResponseDto = <T extends TSchema>(dataSchema: T) => {
 // Generic pagination structure
 export const createPaginationDto = <T extends TSchema>(itemSchema: T) => {
   return t.Object({
-    page: t.Number(),
-    limit: t.Number(),
-    total: t.Number(),
-    pages: t.Number(),
-    data: t.Array(itemSchema)
+    page: t.Number({
+      description: 'Current page number',
+      examples: [1]
+    }),
+    limit: t.Number({
+      description: 'Number of items per page',
+      examples: [10]
+    }),
+    total: t.Number({
+      description: 'Total number of items',
+      examples: [100]
+    }),
+    pages: t.Number({
+      description: 'Total number of pages',
+      examples: [10]
+    }),
+    data: t.Array(itemSchema, {
+      description: 'Array of items for the current page'
+    })
   })
 }
 
 // Pagination query parameters
 export const PaginationQueryDto = t.Object({
-  page: t.Optional(t.String()),
-  limit: t.Optional(t.String())
+  page: t.Optional(t.String({
+    description: 'Page number to retrieve (default: 1)',
+    examples: ['1']
+  })),
+  limit: t.Optional(t.String({
+    description: 'Number of items per page (default: 10)',
+    examples: ['10']
+  }))
 })
 
 // Re-export the base response and pagination DTOs for convenience

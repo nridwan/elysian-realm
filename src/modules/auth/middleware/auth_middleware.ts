@@ -1,5 +1,5 @@
 import Elysia from 'elysia'
-import { adminAccessTokenPlugin, type JWTPayload } from '../../../plugins/jwt'
+import { adminAccessTokenPlugin } from '../../../plugins/jwt'
 
 // Extend the Elysia context to include our user type
 export interface UserContext {
@@ -25,7 +25,7 @@ export const authMiddleware = (app: Elysia) =>
     }
 
     const token = authHeader.substring(7)
-    const payload = await adminAccessToken.verify(token) as JWTPayload | null
+    const payload = await adminAccessToken.verify(token)
 
     if (!payload) {
       return { user: null }

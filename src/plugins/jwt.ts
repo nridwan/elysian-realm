@@ -4,21 +4,21 @@ import { tokenConfig } from '../config/token.config'
 import { config } from '../config/config'
 
 // Define the JWT payload type
-export interface JWTPayload {
-  id: string
-  email: string
-  name: string
-  role: {
-    name: string
-    permissions: string[] | null
-  }
-}
+export const JWTPayload = t.Object({
+  id: t.String(),
+  email: t.String(),
+  name: t.String(),
+  role: t.Object({
+    name: t.String(),
+    permissions: t.Array(t.String())
+  })
+})
 
 // Define the refresh token payload type
-export interface RefreshTokenPayload {
-  id: string
-  email: string
-}
+export const RefreshTokenPayload = t.Object({
+    id: t.String(),
+    email: t.String(),
+  })
 
 // Create JWT plugins for admin access and refresh tokens
 export const adminAccessTokenPlugin = jwt({
@@ -27,15 +27,7 @@ export const adminAccessTokenPlugin = jwt({
   alg: 'HS256',
   aud: 'adminAccessToken',
   exp: tokenConfig.accessToken.expiresIn,
-  schema: t.Object({
-    id: t.String(),
-    email: t.String(),
-    name: t.String(),
-    role: t.Object({
-      name: t.String(),
-      permissions: t.Union([t.Array(t.String()), t.Null()])
-    })
-  }),
+  schema: JWTPayload,
 })
 
 export const adminRefreshTokenPlugin = jwt({
@@ -44,10 +36,7 @@ export const adminRefreshTokenPlugin = jwt({
   alg: 'HS256',
   aud: 'adminAuthToken',
   exp: tokenConfig.refreshToken.expiresIn,
-  schema: t.Object({
-    id: t.String(),
-    email: t.String(),
-  }),
+  schema: RefreshTokenPayload,
 })
 
 export default adminAccessTokenPlugin
