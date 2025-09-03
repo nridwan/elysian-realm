@@ -252,3 +252,46 @@ The types are automatically generated from the Prisma schema and manually define
 - Request/response validation schemas
 
 This ensures proper type inference throughout the application, even when using the JWT plugin across different modules.
+
+## Data Transfer Objects (DTOs)
+
+This project uses Data Transfer Objects (DTOs) for defining API response structures and validation schemas. The base DTOs are defined in `src/dto/base.dto.ts` and provide common response formats and pagination structures.
+
+### Base Response Structure
+
+All API responses follow a consistent structure with a `meta` field containing status information and a `data` field containing the actual response data:
+
+```typescript
+{
+  meta: {
+    code: string,     // Response status code (e.g., 'AUTH-200', 'ADMIN-404')
+    message: string,  // Human-readable response message
+    errors?: Array<{  // Optional validation errors
+      field: string,  // Field that caused the error
+      messages: string[] // Array of error messages for the field
+    }>
+  },
+  data: T           // Generic data payload
+}
+```
+
+### Pagination Structure
+
+Paginated responses follow a standard format with page information and an array of items:
+
+```typescript
+{
+  page: number,     // Current page number
+  limit: number,    // Number of items per page
+  total: number,    // Total number of items
+  pages: number,    // Total number of pages
+  data: T[]         // Array of items for the current page
+}
+```
+
+### Pagination Query Parameters
+
+Pagination can be controlled via query parameters:
+
+- `page`: Page number to retrieve (default: 1)
+- `limit`: Number of items per page (default: 10)

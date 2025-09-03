@@ -63,6 +63,41 @@ export class AdminService {
     }
   }
 
+  async createUser(data: { name: string; email: string; role_id: string }): Promise<UserWithRole | null> {
+    try {
+      // Check if user with this email already exists
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: data.email }
+      })
+
+      if (existingUser) {
+        return null // User already exists
+      }
+
+      // Check if the role exists
+      const role = await this.prisma.role.findUnique({
+        where: { id: data.role_id }
+      })
+
+      if (!role) {
+        return null // Role doesn't exist
+      }
+
+      // Create the user with a placeholder password (will need to be reset)
+      const user = await this.prisma.user.create({
+        data: {
+          ...data,
+          password: 'temporary_password', // Temporary password, should be reset by user
+        },
+        include: { role: true },
+      })
+
+      return user as UserWithRole
+    } catch (error) {
+      return null
+    }
+  }
+
   async deleteUser(id: string): Promise<boolean> {
     try {
       await this.prisma.user.delete({

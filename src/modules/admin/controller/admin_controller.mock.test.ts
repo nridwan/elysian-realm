@@ -41,7 +41,7 @@ const mockAuthMiddleware = (app: Elysia) => {
       id: '1',
       email: 'admin@example.com',
       name: 'Admin User',
-      roleId: '1',
+      role_id: '1',
       role: {
         id: '1',
         name: 'admin',
@@ -56,8 +56,8 @@ const mockAuthMiddleware = (app: Elysia) => {
           'roles.update',
           'roles.delete'
         ],
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }
     }
   }))
@@ -78,16 +78,16 @@ describe('AdminController - Mocked Service Tests', () => {
           email: 'test@example.com',
           name: 'Test User',
           password: 'hashedPassword',
-          roleId: '1',
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          role_id: '1',
+          created_at: new Date(),
+          updated_at: new Date(),
           role: {
             id: '1',
             name: 'admin',
             description: null,
             permissions: null,
-            createdAt: new Date(),
-            updatedAt: new Date()
+            created_at: new Date(),
+            updated_at: new Date()
           }
         }
       ],
@@ -127,16 +127,16 @@ describe('AdminController - Mocked Service Tests', () => {
       email: 'test@example.com',
       name: 'Test User',
       password: 'hashedPassword',
-      roleId: '1',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      role_id: '1',
+      created_at: new Date(),
+      updated_at: new Date(),
       role: {
         id: '1',
         name: 'admin',
         description: null,
         permissions: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }
     })
 
@@ -191,16 +191,16 @@ describe('AdminController - Mocked Service Tests', () => {
       email: 'updated@example.com',
       name: 'Updated User',
       password: 'hashedPassword',
-      roleId: '1',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      role_id: '1',
+      created_at: new Date(),
+      updated_at: new Date(),
       role: {
         id: '1',
         name: 'admin',
         description: null,
         permissions: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }
     })
 
@@ -242,14 +242,14 @@ describe('AdminController - Mocked Service Tests', () => {
           id: '1',
           email: 'admin@example.com',
           name: 'Admin User',
-          roleId: '1',
+          role_id: '1',
           role: {
             id: '1',
             name: 'admin',
             description: null,
             permissions: ['users.read'], // Missing 'users.delete' permission
-            createdAt: new Date(),
-            updatedAt: new Date()
+            created_at: new Date(),
+            updated_at: new Date()
           }
         }
       }))

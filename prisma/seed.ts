@@ -38,7 +38,7 @@ async function seedRolesAndUsers() {
       email: 'superadmin@example.com',
       password: '$2a$12$gQkFcBZFwyy6uEU6QDj8EOcQZfE1frPF5nLZSPfjfTLKltY3Hwo0y', // 'password' hashed
       name: 'Super Admin',
-      roleId: superAdminRole.id,
+      role_id: superAdminRole.id,
     },
   })
 

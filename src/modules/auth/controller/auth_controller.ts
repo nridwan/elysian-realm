@@ -2,6 +2,7 @@ import Elysia from 'elysia'
 import { AuthService } from '../services/auth_service'
 import { LoginDto, RefreshTokenDto, AuthTokenResponseDto } from '../dto/auth_dto'
 import { adminAccessTokenPlugin, adminRefreshTokenPlugin, type RefreshTokenPayload } from '../../../plugins/jwt'
+import { responsePlugin } from '../../../plugins/response_plugin'
 import { authService } from '../services/auth_service_factory'
 
 interface AuthControllerOptions {
@@ -16,25 +17,20 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
   const adminRefreshTokenJwt = options.adminRefreshTokenPlugin || adminRefreshTokenPlugin
 
   return new Elysia({ name: 'auth-controller' })
+    .use(responsePlugin({ defaultServiceName: 'AUTH' }))
     .use(adminAccessTokenJwt)
     .use(adminRefreshTokenJwt)
     .group('/api/auth', (app) =>
       app
         .post(
           '/login',
-          async ({ body, adminAccessToken, adminRefreshToken, set }) => {
+          async ({ body, adminAccessToken, adminRefreshToken, set, responseTools }) => {
             const { email, password } = body
             const result = await service.login({ email, password })
 
             if (result.error) {
               set.status = 401
-              return {
-                meta: {
-                  code: 'AUTH-401',
-                  message: result.error,
-                },
-                data: null
-              }
+              return responseTools.generateErrorResponse(result.error, '401', result.error)
             }
 
             // Generate access token with user profile and permissions
@@ -55,16 +51,10 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
               email: user.email
             })
 
-            return {
-              meta: {
-                code: 'AUTH-200',
-                message: 'Login successful',
-              },
-              data: {
-                access_token: accessTokenValue,
-                refresh_token: refreshTokenValue
-              }
-            }
+            return responseTools.generateResponse({
+              access_token: accessTokenValue,
+              refresh_token: refreshTokenValue
+            }, '200', 'Login successful')
           },
           {
             body: LoginDto,
@@ -81,20 +71,14 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
         )
         .post(
           '/refresh',
-          async ({ body, adminAccessToken, adminRefreshToken, set }) => {
+          async ({ body, adminAccessToken, adminRefreshToken, set, responseTools }) => {
             const { refresh_token: refreshTokenValue } = body
             
             // Verify the refresh token
             const payload = await adminRefreshToken.verify(refreshTokenValue)
             if (!payload) {
               set.status = 401
-              return {
-                meta: {
-                  code: 'AUTH-401',
-                  message: 'Invalid refresh token',
-                },
-                data: null
-              }
+              return responseTools.generateErrorResponse('Invalid refresh token', '401', 'Invalid refresh token')
             }
 
             // Requery user by ID to get fresh user data including role and permissions
@@ -103,13 +87,7 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
             // If there was an error during token refresh
             if (result.error) {
               set.status = 401
-              return {
-                meta: {
-                  code: 'AUTH-401',
-                  message: result.error,
-                },
-                data: null
-              }
+              return responseTools.generateErrorResponse(result.error, '401', result.error)
             }
 
             // Generate new access token with fresh user data
@@ -130,16 +108,10 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
               email: user.email
             })
 
-            return {
-              meta: {
-                code: 'AUTH-200',
-                message: 'Token refreshed successfully',
-              },
-              data: {
-                access_token: newAccessToken,
-                refresh_token: newRefreshToken
-              }
-            }
+            return responseTools.generateResponse({
+              access_token: newAccessToken,
+              refresh_token: newRefreshToken
+            }, '200', 'Token refreshed successfully')
           },
           {
             body: RefreshTokenDto,

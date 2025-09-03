@@ -7,7 +7,7 @@ export interface UserContext {
     id: string
     email: string
     name: string
-    roleId: string
+    role_id: string
     role: {
       id: string
       name: string
@@ -36,7 +36,7 @@ export const authMiddleware = (app: Elysia) =>
       id: payload.id,
       email: payload.email,
       name: payload.name,
-      roleId: '', // Not available in JWT, will be empty
+      role_id: '', // Not available in JWT, will be empty
       role: {
         id: '', // Not available in JWT, will be empty
         name: payload.role.name,

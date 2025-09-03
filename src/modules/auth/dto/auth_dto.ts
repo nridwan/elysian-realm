@@ -4,11 +4,14 @@ import { BaseMetaDto, PaginationQueryDto } from '../../../dto/base.dto'
 export const LoginDto = t.Object({
   email: t.String({
     description: 'User email address for authentication',
-    examples: ['user@example.com']
+    examples: ['user@example.com'],
+    minLength: 5,
+    format: 'email',
   }),
   password: t.String({
     description: 'User password for authentication',
-    examples: ['password123']
+    examples: ['password123'],
+    minLength: 8,
   }),
 })
 
@@ -26,7 +29,8 @@ export const TokenResponseDataDto = t.Object({
 export const RefreshTokenDto = t.Object({
   refresh_token: t.String({
     description: 'Valid refresh token for obtaining new access tokens',
-    examples: ['dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gdGV4dA==']
+    examples: ['dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gdGV4dA=='],
+    minLength: 10,
   }),
 })
 

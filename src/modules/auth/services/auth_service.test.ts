@@ -42,13 +42,45 @@ describe('AuthService - Logic Tests', () => {
   })
 
   describe('refreshAccessToken', () => {
-    it('should return new tokens', async () => {
+    it('should return user data when user exists', async () => {
+      // Mock the Prisma client to return a user
+      const mockUser = {
+        id: 'test-user-id',
+        email: 'test@example.com',
+        role: {
+          id: 'role-id',
+          name: 'admin',
+          description: 'Administrator role',
+          permissions: [],
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        created_at: new Date(),
+        updated_at: new Date(),
+      }
+
+      mockPrisma.user.findUnique = vi.fn().mockResolvedValue(mockUser)
+
       const service = new AuthService(mockPrisma)
-      const result = await service.refreshAccessToken({ refreshToken: 'test-token' })
+      const result = await service.refreshAccessToken('test-user-id')
       
       expect(result).toEqual({
-        accessToken: 'new-access-token',
-        refreshToken: 'new-refresh-token'
+        user: expect.objectContaining({
+          id: 'test-user-id',
+          email: 'test@example.com',
+        })
+      })
+    })
+
+    it('should return error when user does not exist', async () => {
+      // Mock the Prisma client to return null (user not found)
+      mockPrisma.user.findUnique = vi.fn().mockResolvedValue(null)
+
+      const service = new AuthService(mockPrisma)
+      const result = await service.refreshAccessToken('non-existent-user-id')
+      
+      expect(result).toEqual({
+        error: 'User not found'
       })
     })
   })

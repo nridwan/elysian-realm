@@ -3,6 +3,7 @@ import * as dto from '../dto/admin_dto'
 import { adminMiddleware } from '../middleware/admin_middleware'
 import { adminService } from '../services/admin_service_factory'
 import { AdminService } from '../services/admin_service'
+import { responsePlugin } from '../../../plugins/response_plugin'
 
 interface AdminControllerOptions {
   service?: AdminService
@@ -14,42 +15,37 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
   const admin = options.adminMiddleware || adminMiddleware()
 
   return new Elysia({ name: 'admin-controller' })
+    .use(responsePlugin({ defaultServiceName: 'ADMIN' }))
     .group('/api/admin', (app) =>
       app
         .use(admin)
         // User management
         .get(
           '/users',
-          async ({ query }) => {
+          async ({ query, responseTools }) => {
             const { page = '1', limit = '10' } = query
             const pageNum = parseInt(page)
             const limitNum = parseInt(limit)
 
             const result = await service.getUsers(pageNum, limitNum)
             
-            return {
-              meta: {
-                code: 'ADMIN-200',
-                message: 'Users retrieved successfully',
-              },
-              data: {
-                page: result.pagination.page,
-                limit: result.pagination.limit,
-                total: result.pagination.total,
-                pages: result.pagination.pages,
-                data: result.users.map(user => ({
-                  id: user.id,
-                  email: user.email,
-                  name: user.name,
-                  role_id: user.roleId,
-                  role: {
-                    id: user.role.id,
-                    name: user.role.name,
-                    description: user.role.description,
-                  }
-                }))
-              }
-            }
+            return responseTools.generateResponse({
+              page: result.pagination.page,
+              limit: result.pagination.limit,
+              total: result.pagination.total,
+              pages: result.pagination.pages,
+              data: result.users.map(user => ({
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role_id: user.role_id,
+                role: {
+                  id: user.role.id,
+                  name: user.role.name,
+                  description: user.role.description,
+                }
+              }))
+            }, '200', 'Users retrieved successfully')
           },
           {
             query: dto.AdminPaginationQueryDto,
@@ -65,39 +61,27 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
         )
         .get(
           '/users/:id',
-          async ({ params }) => {
+          async ({ params, responseTools }) => {
             const { id } = params
             const user = await service.getUserById(id)
 
             if (!user) {
-              return {
-                meta: {
-                  code: 'ADMIN-404',
-                  message: 'User not found',
-                },
-                data: null
-              }
+              return responseTools.generateErrorResponse('User not found', '404', 'User not found')
             }
 
-            return {
-              meta: {
-                code: 'ADMIN-200',
-                message: 'User retrieved successfully',
-              },
-              data: {
-                user: {
-                  id: user.id,
-                  email: user.email,
-                  name: user.name,
-                  role_id: user.roleId,
-                  role: {
-                    id: user.role.id,
-                    name: user.role.name,
-                    description: user.role.description,
-                  }
+            return responseTools.generateResponse({
+              user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role_id: user.role_id,
+                role: {
+                  id: user.role.id,
+                  name: user.role.name,
+                  description: user.role.description,
                 }
               }
-            }
+            }, '200', 'User retrieved successfully')
           },
           {
             params: dto.IdParamDto,
@@ -113,58 +97,31 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
         )
         .put(
           '/users/:id',
-          async ({ params, body }) => {
+          async ({ params, body, responseTools }) => {
             const { id } = params
             const user = await service.updateUser(id, body)
 
             if (!user) {
-              return {
-                meta: {
-                  code: 'ADMIN-400',
-                  message: 'Failed to update user',
-                },
-                data: null
-              }
+              return responseTools.generateErrorResponse('Failed to update user', '400', 'Failed to update user')
             }
 
-            return {
-              meta: {
-                code: 'ADMIN-200',
-                message: 'User updated successfully',
-              },
-              data: {
-                user: {
-                  id: user.id,
-                  email: user.email,
-                  name: user.name,
-                  role_id: user.roleId,
-                  role: {
-                    id: user.role.id,
-                    name: user.role.name,
-                    description: user.role.description,
-                  }
+            return responseTools.generateResponse({
+              user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role_id: user.role_id,
+                role: {
+                  id: user.role.id,
+                  name: user.role.name,
+                  description: user.role.description,
                 }
               }
-            }
+            }, '200', 'User updated successfully')
           },
           {
             params: dto.IdParamDto,
-            body: t.Partial(
-              t.Object({
-                name: t.String({
-                  description: 'User full name',
-                  examples: ['John Doe']
-                }),
-                email: t.String({
-                  description: 'User email address',
-                  examples: ['user@example.com']
-                }),
-                role_id: t.String({
-                  description: 'Role identifier to assign to the user',
-                  examples: ['role_admin']
-                }),
-              })
-            ),
+            body: dto.UpdateUserRequestDto,
             response: dto.AdminUserResponseDto,
             hasPermission: 'users.update',
             detail: {
@@ -175,29 +132,52 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             }
           }
         )
+        .post(
+          '/users',
+          async ({ body, responseTools }) => {
+            const user = await service.createUser(body)
+
+            if (!user) {
+              return responseTools.generateErrorResponse('Failed to create user', '400', 'Failed to create user')
+            }
+
+            return responseTools.generateResponse({
+              user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role_id: user.role_id,
+                role: {
+                  id: user.role.id,
+                  name: user.role.name,
+                  description: user.role.description,
+                }
+              }
+            }, '200', 'User created successfully')
+          },
+          {
+            body: dto.CreateUserRequestDto,
+            response: dto.AdminUserResponseDto,
+            hasPermission: 'users.create',
+            detail: {
+              tags: ['Admin'],
+              summary: 'Create User',
+              description: 'Create a new user',
+              security: [{ jwt: [] }]
+            }
+          }
+        )
         .delete(
           '/users/:id',
-          async ({ params }) => {
+          async ({ params, responseTools }) => {
             const { id } = params
             const success = await service.deleteUser(id)
 
             if (!success) {
-              return {
-                meta: {
-                  code: 'ADMIN-400',
-                  message: 'Failed to delete user',
-                },
-                data: {}
-              }
+              return responseTools.generateErrorResponse('Failed to delete user', '400', 'Failed to delete user')
             }
 
-            return {
-              meta: {
-                code: 'ADMIN-200',
-                message: 'User deleted successfully',
-              },
-              data: {}
-            }
+            return responseTools.generateResponse({}, '200', 'User deleted successfully')
           },
           {
             params: dto.IdParamDto,
@@ -214,23 +194,17 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
         // Role management
         .get(
           '/roles',
-          async () => {
+          async ({ responseTools }) => {
             const roles = await service.getRoles()
             
-            return {
-              meta: {
-                code: 'ADMIN-200',
-                message: 'Roles retrieved successfully',
-              },
-              data: {
-                roles: roles.map(role => ({
-                  id: role.id,
-                  name: role.name,
-                  description: role.description,
-                  permissions: role.permissions
-                }))
-              }
-            }
+            return responseTools.generateResponse({
+              roles: roles.map(role => ({
+                id: role.id,
+                name: role.name,
+                description: role.description,
+                permissions: role.permissions
+              }))
+            }, '200', 'Roles retrieved successfully')
           },
           {
             response: dto.AdminRolesResponseDto,
@@ -245,51 +219,24 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
         )
         .post(
           '/roles',
-          async ({ body }) => {
+          async ({ body, responseTools }) => {
             const role = await service.createRole(body)
 
             if (!role) {
-              return {
-                meta: {
-                  code: 'ADMIN-400',
-                  message: 'Failed to create role',
-                },
-                data: null
-              }
+              return responseTools.generateErrorResponse('Failed to create role', '400', 'Failed to create role')
             }
 
-            return {
-              meta: {
-                code: 'ADMIN-200',
-                message: 'Role created successfully',
-              },
-              data: {
-                role: {
-                  id: role.id,
-                  name: role.name,
-                  description: role.description,
-                  permissions: role.permissions
-                }
+            return responseTools.generateResponse({
+              role: {
+                id: role.id,
+                name: role.name,
+                description: role.description,
+                permissions: role.permissions
               }
-            }
+            }, '200', 'Role created successfully')
           },
           {
-            body: t.Object({
-              name: t.String({
-                description: 'Role name',
-                examples: ['Administrator']
-              }),
-              description: t.Optional(t.String({
-                description: 'Role description',
-                examples: ['Full system access']
-              })),
-              permissions: t.Optional(t.Array(t.String({
-                description: 'Array of permissions for this role',
-                examples: ['users.read', 'users.create']
-              }), {
-                description: 'Optional array of permissions'
-              })),
-            }),
+            body: dto.CreateRoleRequestDto,
             response: dto.AdminRoleResponseDto,
             hasPermission: 'roles.create',
             detail: {
@@ -302,55 +249,26 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
         )
         .put(
           '/roles/:id',
-          async ({ params, body }) => {
+          async ({ params, body, responseTools }) => {
             const { id } = params
             const role = await service.updateRole(id, body)
 
             if (!role) {
-              return {
-                meta: {
-                  code: 'ADMIN-400',
-                  message: 'Failed to update role',
-                },
-                data: null
-              }
+              return responseTools.generateErrorResponse('Failed to update role', '400', 'Failed to update role')
             }
 
-            return {
-              meta: {
-                code: 'ADMIN-200',
-                message: 'Role updated successfully',
-              },
-              data: {
-                role: {
-                  id: role.id,
-                  name: role.name,
-                  description: role.description,
-                  permissions: role.permissions
-                }
+            return responseTools.generateResponse({
+              role: {
+                id: role.id,
+                name: role.name,
+                description: role.description,
+                permissions: role.permissions
               }
-            }
+            }, '200', 'Role updated successfully')
           },
           {
             params: dto.IdParamDto,
-            body: t.Partial(
-              t.Object({
-                name: t.String({
-                  description: 'Role name',
-                  examples: ['Administrator']
-                }),
-                description: t.Optional(t.String({
-                  description: 'Role description',
-                  examples: ['Full system access']
-                })),
-                permissions: t.Optional(t.Array(t.String({
-                  description: 'Array of permissions for this role',
-                  examples: ['users.read', 'users.create']
-                }), {
-                  description: 'Optional array of permissions'
-                })),
-              })
-            ),
+            body: dto.UpdateRoleRequestDto,
             response: dto.AdminRoleResponseDto,
             hasPermission: 'roles.read',
             detail: {
@@ -363,27 +281,15 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
         )
         .delete(
           '/roles/:id',
-          async ({ params }) => {
+          async ({ params, responseTools }) => {
             const { id } = params
             const success = await service.deleteRole(id)
 
             if (!success) {
-              return {
-                meta: {
-                  code: 'ADMIN-400',
-                  message: 'Failed to delete role',
-                },
-                data: {}
-              }
+              return responseTools.generateErrorResponse('Failed to delete role', '400', 'Failed to delete role')
             }
 
-            return {
-              meta: {
-                code: 'ADMIN-200',
-                message: 'Role deleted successfully',
-              },
-              data: {}
-            }
+            return responseTools.generateResponse({}, '200', 'Role deleted successfully')
           },
           {
             params: dto.IdParamDto,
@@ -400,16 +306,10 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
         // Available permissions
         .get(
           '/permissions/available',
-          async () => {
+          async ({ responseTools }) => {
             const permissions = service.getAllAvailablePermissions()
             
-            return {
-              meta: {
-                code: 'ADMIN-200',
-                message: 'Permissions retrieved successfully',
-              },
-              data: { permissions }
-            }
+            return responseTools.generateResponse({ permissions }, '200', 'Permissions retrieved successfully')
           },
           {
             response: dto.AdminAvailablePermissionsResponseDto,

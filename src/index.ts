@@ -4,6 +4,9 @@ import { loadModules } from './modules'
 import { otel } from './plugins/otel'
 import { config } from './config/config'
 import { swaggerPlugin } from './plugins/swagger'
+import { errorHandlerPlugin } from './plugins/error_handler_plugin'
+
+errorHandlerPlugin()
 
 const app = new Elysia()
   .use(otel({ enabled: true }))

@@ -86,16 +86,16 @@ describe('Module Structure', () => {
       email: 'test@example.com',
       password: '$2b$10$hashedPassword', // Properly hashed password
       name: 'Test User',
-      roleId: '1',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      role_id: '1',
+      created_at: new Date(),
+      updated_at: new Date(),
       role: { 
         id: '1', 
         name: 'admin', 
         description: null,
         permissions: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }
     }) as any
     
@@ -134,16 +134,16 @@ describe('Module Structure', () => {
         email: 'test@example.com', 
         name: 'Test User', 
         password: 'hashedPassword',
-        roleId: '1', 
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        role_id: '1', 
+        created_at: new Date(),
+        updated_at: new Date(),
         role: { 
           id: '1', 
           name: 'admin', 
           description: null,
           permissions: null,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         }
       }
     ]) as any

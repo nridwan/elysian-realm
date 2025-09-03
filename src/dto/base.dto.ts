@@ -15,9 +15,9 @@ export const BaseMetaDto = t.Object({
       description: 'Field that caused the error',
       examples: ['email', 'password']
     }),
-    message: t.String({
-      description: 'Error message for the field',
-      examples: ['Email is required', 'Password must be at least 8 characters']
+    messages: t.Array(t.String(), {
+      description: 'Error messages for the field',
+      examples: [['Email is required', 'Email must be valid']]
     })
   }), {
     description: 'List of validation errors'

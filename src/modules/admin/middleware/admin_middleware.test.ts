@@ -28,7 +28,7 @@ describe('AdminMiddleware - Integration Tests', () => {
           id: '1', 
           email: 'test@example.com', 
           name: 'Test User',
-          roleId: '1',
+          role_id: '1',
           role: { 
             id: '1', 
             name: 'admin', 
@@ -63,7 +63,7 @@ describe('AdminMiddleware - Integration Tests', () => {
           id: '1', 
           email: 'test@example.com', 
           name: 'Test User',
-          roleId: '1',
+          role_id: '1',
           role: { 
             id: '1', 
             name: 'admin', 
@@ -88,7 +88,7 @@ describe('AdminMiddleware - Integration Tests', () => {
           id: '1', 
           email: 'test@example.com', 
           name: 'Test User',
-          roleId: '1',
+          role_id: '1',
           role: { 
             id: '1', 
             name: 'admin', 

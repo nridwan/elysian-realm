@@ -9,11 +9,14 @@ export const UserDto = t.Object({
   }),
   email: t.String({
     description: 'User email address',
-    examples: ['user@example.com']
+    examples: ['user@example.com'],
+    minLength: 5,
+    format: 'email',
   }),
   name: t.String({
     description: 'User full name',
-    examples: ['John Doe']
+    examples: ['John Doe'],
+    minLength: 2,
   }),
   role_id: t.String({
     description: 'Identifier of the role assigned to the user',
@@ -26,7 +29,8 @@ export const UserDto = t.Object({
     }),
     name: t.String({
       description: 'Role name',
-      examples: ['Administrator']
+      examples: ['Administrator'],
+      minLength: 2,
     }),
     description: t.Union([t.String({
       description: 'Role description',
@@ -71,18 +75,21 @@ export const RoleDto = t.Object({
   }),
   name: t.String({
     description: 'Role name',
-    examples: ['Administrator']
+    examples: ['Administrator'],
+    minLength: 2,
   }),
   description: t.Union([t.String({
     description: 'Role description',
-    examples: ['Full system access']
+    examples: ['Full system access'],
+    maxLength: 255,
   }), t.Null()]),
   permissions: t.Optional(t.Array(t.String({
     description: 'Array of permissions assigned to the role',
-    examples: ['users.read', 'users.create']
-  })), {
+    examples: ['users.read', 'users.create'],
+    minLength: 1,
+  }), {
     description: 'Optional array of permissions'
-  }),
+  })),
 }, {
   description: 'Role data structure'
 })
@@ -170,12 +177,96 @@ export const AdminErrorResponseDto = t.Object({
   data: t.Null(),
 })
 
+// Request DTOs for creating/updating entities
+export const CreateUserRequestDto = t.Object({
+  name: t.String({
+    description: 'User full name',
+    examples: ['John Doe'],
+    minLength: 2,
+  }),
+  email: t.String({
+    description: 'User email address',
+    examples: ['user@example.com'],
+    minLength: 5,
+    format: 'email',
+  }),
+  role_id: t.String({
+    description: 'Role identifier to assign to the user',
+    examples: ['role_admin'],
+    minLength: 1,
+  }),
+})
+
+export const UpdateUserRequestDto = t.Partial(
+  t.Object({
+    name: t.String({
+      description: 'User full name',
+      examples: ['John Doe'],
+      minLength: 2,
+    }),
+    email: t.String({
+      description: 'User email address',
+      examples: ['user@example.com'],
+      minLength: 5,
+      format: 'email',
+    }),
+    role_id: t.String({
+      description: 'Role identifier to assign to the user',
+      examples: ['role_admin'],
+      minLength: 1,
+    }),
+  })
+)
+
+export const CreateRoleRequestDto = t.Object({
+  name: t.String({
+    description: 'Role name',
+    examples: ['Administrator'],
+    minLength: 2,
+  }),
+  description: t.Optional(t.String({
+    description: 'Role description',
+    examples: ['Full system access'],
+    maxLength: 255,
+  })),
+  permissions: t.Optional(t.Array(t.String({
+    description: 'Array of permissions for this role',
+    examples: ['users.read', 'users.create'],
+    minLength: 1,
+  }), {
+    description: 'Optional array of permissions'
+  })),
+})
+
+export const UpdateRoleRequestDto = t.Partial(
+  t.Object({
+    name: t.String({
+      description: 'Role name',
+      examples: ['Administrator'],
+      minLength: 2,
+    }),
+    description: t.Optional(t.String({
+      description: 'Role description',
+      examples: ['Full system access'],
+      maxLength: 255,
+    })),
+    permissions: t.Optional(t.Array(t.String({
+      description: 'Array of permissions for this role',
+      examples: ['users.read', 'users.create'],
+      minLength: 1,
+    }), {
+      description: 'Optional array of permissions'
+    })),
+  })
+)
+
 // Query and param DTOs
 export const AdminPaginationQueryDto = PaginationQueryDto
 
 export const IdParamDto = t.Object({
   id: t.String({
     description: 'Unique identifier',
-    examples: ['user_123456', 'role_admin']
+    examples: ['user_123456', 'role_admin'],
+    minLength: 1,
   }),
 })

@@ -67,16 +67,16 @@ describe('AuthController - Mocked Service Tests', () => {
         email: 'test@example.com',
         name: 'Test User',
         password: 'hashedPassword',
-        roleId: '1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        role_id: '1',
+        created_at: new Date(),
+        updated_at: new Date(),
         role: {
           id: '1',
           name: 'admin',
           description: null,
           permissions: JSON.stringify(['users.read', 'users.create']),
-          createdAt: new Date(),
-          updatedAt: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         }
       }
     })
@@ -150,6 +150,27 @@ describe('AuthController - Mocked Service Tests', () => {
     mockAdminRefreshToken.verify.mockResolvedValue({ 
       id: '1', 
       email: 'test@example.com'
+    })
+
+    // Mock the refreshAccessToken method to return a user
+    vi.spyOn(mockAuthService, 'refreshAccessToken').mockResolvedValue({
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        name: 'Test User',
+        password: 'hashedPassword',
+        role_id: '1',
+        created_at: new Date(),
+        updated_at: new Date(),
+        role: {
+          id: '1',
+          name: 'admin',
+          description: null,
+          permissions: JSON.stringify(['users.read', 'users.create']),
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      }
     })
 
     const app = new Elysia()
