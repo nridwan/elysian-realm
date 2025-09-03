@@ -1,0 +1,46 @@
+// Indonesian translations
+export default {
+  success: "Berhasil",
+  error: "Kesalahan",
+  validation_error: "Kesalahan Validasi",
+  not_found: "Tidak ditemukan",
+  resource_not_found: "Sumber daya tidak ditemukan",
+  internal_server_error: "Kesalahan server internal",
+  unexpected_error: "Terjadi kesalahan yang tidak terduga",
+  user_created: "Pengguna berhasil dibuat",
+  user_updated: "Pengguna berhasil diperbarui",
+  user_deleted: "Pengguna berhasil dihapus",
+  role_created: "Peran berhasil dibuat",
+  role_updated: "Peran berhasil diperbarui",
+  role_deleted: "Peran berhasil dihapus",
+  auth_success: "Autentikasi berhasil",
+  invalid_credentials: "Kredensial tidak valid",
+  token_expired: "Token telah kedaluwarsa",
+  access_denied: "Akses ditolak",
+  permission_required: "Izin tidak mencukupi",
+  email_required: "Email wajib diisi",
+  password_required: "Kata sandi wajib diisi",
+  invalid_email: "Email harus merupakan alamat email yang valid",
+  password_min_length: "Kata sandi harus minimal 8 karakter",
+  name_required: "Nama wajib diisi",
+  role_required: "Peran wajib diisi",
+  
+  // Validation error messages
+  validation: {
+    string_format: "Properti '{{field}}' format error",
+    string_format_email: "Properti '{{field}}' harus merupakan alamat email yang valid",
+    string_format_uuid: "Properti '{{field}}' harus merupakan UUID yang valid",
+    string_format_uri: "Properti '{{field}}' harus merupakan URI yang valid",
+    string_format_datetime: "Properti '{{field}}' harus merupakan tanggal-waktu ISO 8601 yang valid",
+    string_min_length: "Properti '{{field}}' harus minimal {{minLength}} karakter",
+    string_max_length: "Properti '{{field}}' harus maksimal {{maxLength}} karakter",
+    string_pattern: "Properti '{{field}}' harus sesuai dengan pola yang diperlukan",
+    required_property: "Properti '{{field}}' wajib diisi",
+    string_type: "Properti '{{field}}' harus berupa teks",
+    number_type: "Properti '{{field}}' harus berupa angka",
+    boolean_type: "Properti '{{field}}' harus berupa boolean",
+    array_type: "Properti '{{field}}' harus berupa array",
+    array_min_items: "Properti '{{field}}' harus memiliki minimal {{minItems}} item",
+    array_max_items: "Properti '{{field}}' harus memiliki maksimal {{maxItems}} item"
+  }
+} as const;

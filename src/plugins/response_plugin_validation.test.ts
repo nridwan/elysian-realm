@@ -1,12 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { Elysia } from "elysia";
 import { responsePlugin } from "./response_plugin";
+import { ErrorKeys } from "./error_handler_plugin";
 
 describe("ResponsePlugin Validation Error Handling", () => {
   it("should transform validation errors to BaseResponse format", async () => {
     const app = new Elysia()
       .use(responsePlugin())
-      .post("/login", ({ responseTools, body }) => {
+      .post("/login", ({ responseTools, body, localizationTools }) => {
         // This would normally be handled by Elysia's validation
         // But for testing purposes, we'll simulate a validation error
         responseTools.setServiceName("AUTH");
@@ -25,7 +26,7 @@ describe("ResponsePlugin Validation Error Handling", () => {
               },
               path: "/email",
               value: "invalid",
-              message: "property 'email' format error",
+              message: ErrorKeys.STRING_FORMAT_EMAIL,
               errors: [],
               summary: "Property 'email' should be email",
             },
@@ -40,14 +41,15 @@ describe("ResponsePlugin Validation Error Handling", () => {
               },
               path: "/password",
               value: "p",
-              message: "Expected string length greater or equal to 8",
+              message: ErrorKeys.STRING_MIN_LENGTH,
               errors: [],
             },
           ],
         } as any;
 
         return responseTools.generateValidationErrorResponse(
-          mockValidationError
+          mockValidationError,
+          localizationTools
         );
       });
 
@@ -85,9 +87,13 @@ describe("ResponsePlugin Validation Error Handling", () => {
     expect(Array.isArray(body.meta.errors)).toBe(true);
     expect(body.data).toBeNull();
 
-    // Check that we have errors for both fields
-    const errorFields = body.meta.errors.map((e: any) => e.field);
-    expect(errorFields).toContain("email");
-    expect(errorFields).toContain("password");
+    // Check that we have errors for both fields with translated messages
+    const emailError = body.meta.errors.find((e: any) => e.field === "email");
+    expect(emailError).toBeDefined();
+    expect(emailError.messages[0]).toBe("Property 'email' must be a valid email address");
+
+    const passwordError = body.meta.errors.find((e: any) => e.field === "password");
+    expect(passwordError).toBeDefined();
+    expect(passwordError.messages[0]).toBe("Property 'password' must be at least 8 characters");
   });
 });

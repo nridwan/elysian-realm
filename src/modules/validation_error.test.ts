@@ -135,7 +135,7 @@ describe('Validation Error Responses', () => {
     // Check that we have the correct error for email field
     const emailErrors = body.meta.errors.find((e: any) => e.field === 'email')
     expect(emailErrors).toBeDefined()
-    expect(emailErrors.messages).toContain('Email must be a valid email address')
+    expect(emailErrors.messages).toContain("Property 'email' must be a valid email address")
     
     expect(body.data).toBeNull()
   })
@@ -173,7 +173,7 @@ describe('Validation Error Responses', () => {
     // Check that we have the correct error for password field
     const passwordErrors = body.meta.errors.find((e: any) => e.field === 'password')
     expect(passwordErrors).toBeDefined()
-    expect(passwordErrors.messages).toContain('Must be at least 8 characters')
+    expect(passwordErrors.messages).toContain("Property 'password' must be at least 8 characters")
     
     expect(body.data).toBeNull()
   })

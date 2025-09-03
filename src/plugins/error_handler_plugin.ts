@@ -1,5 +1,24 @@
 import { DefaultErrorFunction, SetErrorFunction, ValueErrorType } from "@sinclair/typebox/errors"
 
+// Define error keys for localization
+export const ErrorKeys = {
+  STRING_FORMAT: 'validation.string_format',
+  STRING_FORMAT_EMAIL: 'validation.string_format_email',
+  STRING_FORMAT_UUID: 'validation.string_format_uuid',
+  STRING_FORMAT_URI: 'validation.string_format_uri',
+  STRING_FORMAT_DATETIME: 'validation.string_format_datetime',
+  STRING_MIN_LENGTH: 'validation.string_min_length',
+  STRING_MAX_LENGTH: 'validation.string_max_length',
+  STRING_PATTERN: 'validation.string_pattern',
+  OBJECT_REQUIRED_PROPERTY: 'validation.required_property',
+  STRING_TYPE: 'validation.string_type',
+  NUMBER_TYPE: 'validation.number_type',
+  BOOLEAN_TYPE: 'validation.boolean_type',
+  ARRAY_TYPE: 'validation.array_type',
+  ARRAY_MIN_ITEMS: 'validation.array_min_items',
+  ARRAY_MAX_ITEMS: 'validation.array_max_items',
+} as const
+
 /**
  * Custom error handler plugin for Elysia validation errors
  * 
@@ -27,52 +46,48 @@ export function errorHandlerPlugin() {
             case ValueErrorType.StringFormat:
                 // Handle different string formats with specific messages
                 if (err.schema.format === 'email') {
-                    return `Email must be a valid email address`
+                    return ErrorKeys.STRING_FORMAT_EMAIL
                 }
                 if (err.schema.format === 'uuid') {
-                    return `Must be a valid UUID`
+                    return ErrorKeys.STRING_FORMAT_UUID
                 }
                 if (err.schema.format === 'uri') {
-                    return `Must be a valid URI`
+                    return ErrorKeys.STRING_FORMAT_URI
                 }
                 if (err.schema.format === 'date-time') {
-                    return `Must be a valid ISO 8601 date-time`
+                    return ErrorKeys.STRING_FORMAT_DATETIME
                 }
-                return `property '${formattedPath}' format error`
+                return ErrorKeys.STRING_FORMAT
                 
             case ValueErrorType.StringMinLength:
-                const minLength = err.schema.minLength ?? 0
-                return `Must be at least ${minLength} characters`
+                return ErrorKeys.STRING_MIN_LENGTH
                 
             case ValueErrorType.StringMaxLength:
-                const maxLength = err.schema.maxLength ?? 0
-                return `Must be no more than ${maxLength} characters`
+                return ErrorKeys.STRING_MAX_LENGTH
                 
             case ValueErrorType.StringPattern:
-                return `Must match the required pattern`
+                return ErrorKeys.STRING_PATTERN
                 
             case ValueErrorType.ObjectRequiredProperty:
-                return `This field is required`
+                return ErrorKeys.OBJECT_REQUIRED_PROPERTY
                 
             case ValueErrorType.String:
-                return `Must be a string`
+                return ErrorKeys.STRING_TYPE
                 
             case ValueErrorType.Number:
-                return `Must be a number`
+                return ErrorKeys.NUMBER_TYPE
                 
             case ValueErrorType.Boolean:
-                return `Must be a boolean`
+                return ErrorKeys.BOOLEAN_TYPE
                 
             case ValueErrorType.Array:
-                return `Must be an array`
+                return ErrorKeys.ARRAY_TYPE
                 
             case ValueErrorType.ArrayMinItems:
-                const minItems = err.schema.minItems ?? 0
-                return `Must have at least ${minItems} items`
+                return ErrorKeys.ARRAY_MIN_ITEMS
                 
             case ValueErrorType.ArrayMaxItems:
-                const maxItems = err.schema.maxItems ?? 0
-                return `Must have no more than ${maxItems} items`
+                return ErrorKeys.ARRAY_MAX_ITEMS
                 
             default:
                 // Fall back to the default error handler for unhandled cases

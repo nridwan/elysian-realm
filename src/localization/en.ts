@@ -1,0 +1,46 @@
+// English translations
+export default {
+  success: "Success",
+  error: "Error",
+  validation_error: "Validation Error",
+  not_found: "Not found",
+  resource_not_found: "Resource not found",
+  internal_server_error: "Internal server error",
+  unexpected_error: "An unexpected error occurred",
+  user_created: "User created successfully",
+  user_updated: "User updated successfully",
+  user_deleted: "User deleted successfully",
+  role_created: "Role created successfully",
+  role_updated: "Role updated successfully",
+  role_deleted: "Role deleted successfully",
+  auth_success: "Authentication successful",
+  invalid_credentials: "Invalid credentials",
+  token_expired: "Token has expired",
+  access_denied: "Access denied",
+  permission_required: "Insufficient permissions",
+  email_required: "Email is required",
+  password_required: "Password is required",
+  invalid_email: "Email must be a valid email address",
+  password_min_length: "Password must be at least 8 characters",
+  name_required: "Name is required",
+  role_required: "Role is required",
+  
+  // Validation error messages
+  validation: {
+    string_format: "Property '{{field}}' format error",
+    string_format_email: "Property '{{field}}' must be a valid email address",
+    string_format_uuid: "Property '{{field}}' must be a valid UUID",
+    string_format_uri: "Property '{{field}}' must be a valid URI",
+    string_format_datetime: "Property '{{field}}' must be a valid ISO 8601 date-time",
+    string_min_length: "Property '{{field}}' must be at least {{minLength}} characters",
+    string_max_length: "Property '{{field}}' must be no more than {{maxLength}} characters",
+    string_pattern: "Property '{{field}}' must match the required pattern",
+    required_property: "Property '{{field}}' is required",
+    string_type: "Property '{{field}}' must be a string",
+    number_type: "Property '{{field}}' must be a number",
+    boolean_type: "Property '{{field}}' must be a boolean",
+    array_type: "Property '{{field}}' must be an array",
+    array_min_items: "Property '{{field}}' must have at least {{minItems}} items",
+    array_max_items: "Property '{{field}}' must have no more than {{maxItems}} items"
+  }
+} as const;

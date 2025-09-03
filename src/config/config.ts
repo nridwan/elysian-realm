@@ -28,4 +28,9 @@ export const config = {
     exporterType: process.env.OTEL_EXPORTER_TYPE || 'console',
     otlpEndpoint: process.env.OTEL_OTLP_ENDPOINT || '',
   },
+
+  // Localization configuration
+  localization: {
+    defaultLanguage: process.env.DEFAULT_LANGUAGE || 'en',
+  },
 }

@@ -1,4 +1,6 @@
 import Elysia, { type ValidationError } from "elysia";
+import { ErrorKeys } from "./error_handler_plugin";
+import { localizationPlugin } from "./localization_plugin";
 
 // Define the service name type
 type ServiceName = "AUTH" | "ADMIN" | "USER" | string;
@@ -35,7 +37,8 @@ export interface ResponseTools {
     message?: string
   ) => BaseResponse<null>;
   generateValidationErrorResponse: (
-    validationError: ValidationError
+    validationError: ValidationError,
+    localizationTools?: any
   ) => BaseResponse<null>;
 }
 
@@ -48,7 +51,8 @@ interface PluginState {
 export const responsePlugin =
   (config?: { defaultServiceName?: ServiceName }) => (app: Elysia) =>
     app
-      .derive(({ store }) => {
+      .use(localizationPlugin())
+      .derive(({ localizationTools }) => {
         const responseTools: ResponseTools = {
           serviceName: config?.defaultServiceName ?? "SERVICE",
           setServiceName(name: ServiceName) {
@@ -61,7 +65,9 @@ export const responsePlugin =
           ): BaseResponse<T> {
             const serviceName = this.serviceName || "APP";
             const statusCode = code || "200";
-            const statusMessage = message || "Success";
+            // Use localization if available, otherwise fallback to default messages
+            const statusMessage = message || 
+              (localizationTools?.getTranslation ? localizationTools.getTranslation('success') : "Success");
 
             return {
               meta: {
@@ -78,7 +84,9 @@ export const responsePlugin =
           ): BaseResponse<null> {
             const serviceName = this.serviceName || "APP";
             const statusCode = code || "500";
-            const statusMessage = message || error;
+            // Use localization if available, otherwise fallback to provided message or error
+            const statusMessage = message || 
+              (localizationTools?.getTranslation ? localizationTools.getTranslation('error') : error);
 
             return {
               meta: {
@@ -95,15 +103,35 @@ export const responsePlugin =
 
             // Transform validation errors to our format
             let errors: ErrorDetail[] = [];
-            let message = "Validation Error";
+            // Use localization if available, otherwise fallback to default message
+            let message = localizationTools?.getTranslation ? 
+              localizationTools.getTranslation('validation_error') : "Validation Error";
 
             // Handle different error structures
             if (validationError.all) {
               errors = (validationError.all as any[]).map(
-                ({path, message}: {message: string, path: string}) => ({
-                  field: path.replace(/^\//, '').replace(/\//g, '.'),
-                  messages: [message],
-                })
+                ({path, message, schema}: {message: string, path: string, schema: Record<string, any>}) => {
+                  const field = path.replace(/^\//, '').replace(/\//g, '.');
+                  
+                  // If the message is one of our error keys, translate it with parameters
+                  let translatedMessage = message;
+                  if (localizationTools?.getTranslation) {
+                    const params = {
+                      field,
+                      ...schema,
+                    };
+                    
+                    // Check if the message is one of our error keys
+                    if (Object.values(ErrorKeys).includes(message as any)) {
+                      translatedMessage = localizationTools.getTranslation(message, params);
+                    }
+                  }
+                  
+                  return {
+                    field,
+                    messages: [translatedMessage],
+                  };
+                }
               );
             } else if (validationError.message) {
               // Single error
@@ -123,14 +151,12 @@ export const responsePlugin =
 
         return { responseTools };
       })
-      .onError(({ code, error, set, responseTools }) => {
+      .onError(({ code, error, set, responseTools, localizationTools }) => {
         responseTools = responseTools!;
         // Handle validation errors
         if (code === "VALIDATION") {
           set.status = 400;
-          return responseTools.generateValidationErrorResponse(
-            error as ValidationError,
-          );
+          return responseTools.generateValidationErrorResponse(error as ValidationError);
         }
 
         // Handle other common errors only if they haven't been handled already
@@ -138,23 +164,23 @@ export const responsePlugin =
           case "NOT_FOUND":
             set.status = 404;
             return responseTools.generateErrorResponse(
-              "Not found",
+              localizationTools?.getTranslation ? localizationTools.getTranslation('not_found') : "Not found",
               "404",
-              "Resource not found"
+              localizationTools?.getTranslation ? localizationTools.getTranslation('resource_not_found') : "Resource not found"
             );
           default:
             // Only handle if status hasn't been set yet
             if (set.status === 200 || !set.status) {
               set.status = 500;
               return responseTools.generateErrorResponse(
-                "Internal server error",
+                localizationTools?.getTranslation ? localizationTools.getTranslation('internal_server_error') : "Internal server error",
                 "500",
-                "An unexpected error occurred"
+                localizationTools?.getTranslation ? localizationTools.getTranslation('unexpected_error') : "An unexpected error occurred"
               );
             }
             // If status was already set, don't interfere
             return responseTools.generateErrorResponse(
-              "Internal server error",
+              localizationTools?.getTranslation ? localizationTools.getTranslation('internal_server_error') : "Internal server error",
               "500",
               error.toString()
             );
