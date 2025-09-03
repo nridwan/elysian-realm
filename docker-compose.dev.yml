@@ -61,6 +61,7 @@ services:
       - OTEL_SERVICE_NAME=elysian-realm-backend
       - OTEL_EXPORTER_TYPE=otlp
       - OTEL_OTLP_ENDPOINT=http://jaeger:4318/v1/traces
+      - SWAGGER_ENABLED=true
     ports:
       - '3000:3000'
       - '3001:3001'  # Health check port

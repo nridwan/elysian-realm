@@ -33,4 +33,9 @@ export const config = {
   localization: {
     defaultLanguage: process.env.DEFAULT_LANGUAGE || 'en',
   },
+
+  // Swagger configuration
+  swagger: {
+    enabled: process.env.SWAGGER_ENABLED === 'true',
+  },
 }
