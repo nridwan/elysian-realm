@@ -60,7 +60,8 @@ services:
       - REFRESH_TOKEN_EXPIRES_IN=60d
       - OTEL_SERVICE_NAME=elysian-realm-backend
       - OTEL_EXPORTER_TYPE=otlp
-      - OTEL_OTLP_ENDPOINT=http://jaeger:4318
+      - OTEL_OTLP_ENDPOINT=http://jaeger:4318/v1/traces
+      - OTEL_LOG_LEVEL=debug
     ports:
       - '3000:3000'
     healthcheck:

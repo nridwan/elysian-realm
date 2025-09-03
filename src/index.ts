@@ -5,11 +5,23 @@ import { otel } from './plugins/otel'
 import { config } from './config/config'
 import { swaggerPlugin } from './plugins/swagger'
 import { errorHandlerPlugin } from './plugins/error_handler_plugin'
+import {
+  trace,
+  context as otelContext,
+  propagation,
+  SpanStatusCode,
+  ProxyTracer,
+  SpanKind,
+  Span
+} from "@opentelemetry/api";
 
 errorHandlerPlugin()
 
+let rootContext: Span | undefined
+
 const app = new Elysia()
   .use(otel({ enabled: true }))
+  .on('mapResponse', () => {}) // hack otel bun 1.2
   .use(swaggerPlugin)
   .use(adminAccessTokenPlugin)
   .use(adminRefreshTokenPlugin)

@@ -19,12 +19,8 @@ RUN bun install
 # Generate Prisma client
 RUN bunx prisma generate
 
-# Copy entrypoint script
-COPY entrypoint.sh ./
-RUN chmod +x entrypoint.sh
-
 # Expose the port the app runs on
 EXPOSE 3000
 
 # Command to run the application with hot reloading
-CMD ["./entrypoint.sh"]
+CMD ["bun","run","src/index.ts"]
