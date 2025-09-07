@@ -1,42 +1,132 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+@import 'tailwindcss';
+
+@plugin "daisyui" {
+	themes: light --default --prefersdark, elysia-light, elysia-dark;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+@plugin "daisyui/theme" {
+	name: 'light';
+	prefersdark: true;
+	
+	--color-base-100: #FFFFFF;
+	--color-base-200: #F4FBF8;
+	--color-base-300: #E9EFEC;
+	--color-base-content: #171D1B;
+	--color-primary: #006B5F;
+	--color-primary-content: #FFFFFF;
+	--color-secondary: #4A635E;
+	--color-secondary-content: #FFFFFF;
+	--color-accent: #456179;
+	--color-accent-content: #FFFFFF;
+	--color-neutral: #3F4946;
+	--color-neutral-content: #ECF2EF;
+	--color-info: #CBE6FF;
+	--color-info-content: #2D4A60;
+	--color-success: #9EF2E3;
+	--color-success-content: #005047;
+	--color-warning: #FFDAD6;
+	--color-warning-content: #93000A;
+	--color-error: #BA1A1A;
+	--color-error-content: #FFFFFF;
+
+	/* border radius */
+	--radius-selector: 1rem;
+	--radius-field: 0.25rem;
+	--radius-box: 0.5rem;
+
+	/* base sizes */
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+
+	/* border size */
+	--border: 1px;
+
+	/* effects */
+	--depth: 1;
+	--noise: 0;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@plugin "daisyui/theme" {
+	name: 'elysia-light';
+	
+	--color-base-100: #FFF7F9;
+	--color-base-200: #FDF0F6;
+	--color-base-300: #F7EAF1;
+	--color-base-content: #201A1E;
+	--color-primary: #804D79;
+	--color-primary-content: #FFFFFF;
+	--color-primary-focus: #663560;
+	--color-secondary: #6E5868;
+	--color-secondary-content: #FFFFFF;
+	--color-accent: #815344;
+	--color-accent-content: #FFFFFF;
+	--color-neutral: #3F4946;
+	--color-neutral-content: #ECDFE5;
+	--color-info: #CBE6FF;
+	--color-info-content: #2D4A60;
+	--color-success: #9EF2E3;
+	--color-success-content: #005047;
+	--color-warning: #FFDAD6;
+	--color-warning-content: #93000A;
+	--color-error: #BA1A1A;
+	--color-error-content: #FFFFFF;
+
+	/* border radius */
+	--radius-selector: 1rem;
+	--radius-field: 0.25rem;
+	--radius-box: 0.5rem;
+
+	/* base sizes */
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+
+	/* border size */
+	--border: 1px;
+
+	/* effects */
+	--depth: 1;
+	--noise: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
+@plugin "daisyui/theme" {
+	name: 'elysia-dark';
+	dark: true;
+	
+	--color-base-100: #171216;
+	--color-base-200: #201A1E;
+	--color-base-300: #241E22;
+	--color-base-content: #ECDFE5;
+	--color-primary: #F2B3E5;
+	--color-primary-content: #4C1F48;
+	--color-primary-focus: #663560;
+	--color-secondary: #DABFD2;
+	--color-secondary-content: #3D2B3A;
+	--color-accent: #F5B8A6;
+	--color-accent-content: #4C261A;
+	--color-neutral: #3F4946;
+	--color-neutral-content: #ECDFE5;
+	--color-info: #CBE6FF;
+	--color-info-content: #2D4A60;
+	--color-success: #9EF2E3;
+	--color-success-content: #005047;
+	--color-warning: #FFDAD6;
+	--color-warning-content: #93000A;
+	--color-error: #BA1A1A;
+	--color-error-content: #FFFFFF;
 
-.card {
-  padding: 2em;
-}
+	/* border radius */
+	--radius-selector: 1rem;
+	--radius-field: 0.25rem;
+	--radius-box: 0.5rem;
 
-.read-the-docs {
-  color: #888;
+	/* base sizes */
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+
+	/* border size */
+	--border: 1px;
+
+	/* effects */
+	--depth: 1;
+	--noise: 0;
 }

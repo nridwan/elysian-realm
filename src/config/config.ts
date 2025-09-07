@@ -38,4 +38,10 @@ export const config = {
   swagger: {
     enabled: process.env.SWAGGER_ENABLED === 'true',
   },
+
+  // CORS configuration
+  cors: {
+    origin: process.env.CORS_ORIGIN || '*',
+    credentials: process.env.CORS_CREDENTIALS === 'true',
+  },
 }

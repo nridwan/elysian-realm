@@ -1,14 +1,14 @@
 # Elysian Realm
 
-A fullstack admin panel application with React frontend and ElysiaJS backend.
+A fullstack admin panel application with SvelteKit 5 frontend and ElysiaJS backend.
 
 ## Tech Stack
 
 ### Frontend (client/)
-- ReactJS with Vite
-- TypeScript
-- TailwindCSS for styling
+- SvelteKit 5 with TypeScript
+- TailwindCSS with DaisyUI for styling
 - Bun as the package manager
+- Vite for build tooling
 
 ### Backend (server)
 - ElysiaJS framework
@@ -32,20 +32,24 @@ A fullstack admin panel application with React frontend and ElysiaJS backend.
 
 ```
 elysian-realm/
-├── client/                 # React frontend
-│   ├── public/
+├── client/                 # SvelteKit 5 frontend
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   ├── context/
-│   │   ├── utils/
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   ├── index.html
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   └── tailwind.config.js
+│   │   ├── lib/            # Shared components, utilities, and types
+│   │   │   ├── assets/     # Static assets like images and icons
+│   │   │   ├── components/ # Reusable UI components
+│   │   │   ├── datasource/ # Data fetching utilities
+│   │   │   ├── state/      # Application state management
+│   │   │   ├── types/      # TypeScript types
+│   │   │   └── utils/      # Utility functions
+│   │   ├── routes/         # SvelteKit routes with file-based routing
+│   │   ├── app.css         # Global CSS with TailwindCSS
+│   │   ├── app.html        # HTML entry point
+│   │   └── hooks/
+│   ├── static/             # Static assets
+│   ├── svelte.config.js    # SvelteKit configuration
+│   ├── vite.config.ts      # Vite configuration
+│   ├── tailwind.config.js  # TailwindCSS configuration
+│   └── package.json
 ├── src/                    # Elysia backend
 │   ├── routes/
 │   ├── controllers/
@@ -135,11 +139,11 @@ docker-compose -f docker-compose.dev.yml up --build
    ```
 2. Install dependencies:
    ```bash
-   npm install
+   bun install
    ```
 3. Start the development server:
    ```bash
-   npm run dev
+   bun run dev
    ```
 
 ## Available Scripts
@@ -152,9 +156,9 @@ docker-compose -f docker-compose.dev.yml up --build
 - `bunx prisma studio` - Open Prisma Studio
 
 ### Frontend
-- `npm run dev` - Start the development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview the production build
+- `bun run dev` - Start the development server
+- `bun run build` - Build for production
+- `bun run preview` - Preview the production build
 
 ### Docker
 - `docker-compose up --build` - Start all services in production mode
@@ -227,7 +231,7 @@ This project includes a complete Docker setup with four services:
 1. **PostgreSQL Database** - For data persistence
 2. **Jaeger** - For distributed tracing and monitoring
 3. **Backend API** - ElysiaJS application with optimized Docker image
-4. **Frontend** - React application served by Nginx with optimized Docker image
+4. **Frontend** - SvelteKit application served by Nginx with optimized Docker image
 
 The production Docker images are optimized for size and security:
 - Both backend and frontend use Bun for building and running the applications

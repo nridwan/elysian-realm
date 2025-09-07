@@ -115,7 +115,7 @@ export class AdminService {
     // Parse permissions JSON for each role
     return roles.map(role => ({
       ...role,
-      permissions: role.permissions ? JSON.parse(role.permissions as string) : []
+      permissions: role.permissions ? role.permissions : []
     })) as RoleWithPermissions[]
   }
 
@@ -123,7 +123,7 @@ export class AdminService {
     try {
       const roleData = {
         ...data,
-        permissions: data.permissions ? JSON.stringify(data.permissions) : undefined
+        permissions: data.permissions ? data.permissions : undefined
       }
       
       const role = await this.prisma.role.create({
@@ -132,7 +132,7 @@ export class AdminService {
 
       return {
         ...role,
-        permissions: role.permissions ? JSON.parse(role.permissions as string) : []
+        permissions: role.permissions ? role.permissions : []
       } as RoleWithPermissions
     } catch (error) {
       return null
@@ -143,7 +143,7 @@ export class AdminService {
     try {
       const roleData = {
         ...data,
-        permissions: data.permissions !== undefined ? JSON.stringify(data.permissions) : undefined
+        permissions: data.permissions !== undefined ? data.permissions : undefined
       }
       
       const role = await this.prisma.role.update({
@@ -153,7 +153,7 @@ export class AdminService {
 
       return {
         ...role,
-        permissions: role.permissions ? JSON.parse(role.permissions as string) : []
+        permissions: role.permissions ? role.permissions : []
       } as RoleWithPermissions
     } catch (error) {
       return null
