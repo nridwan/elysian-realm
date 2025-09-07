@@ -1,12 +1,11 @@
 @import 'tailwindcss';
 
 @plugin "daisyui" {
-	themes: light --default --prefersdark, elysia-light, elysia-dark;
+	themes: elysia-light --default, elysia-dark;
 }
 
 @plugin "daisyui/theme" {
 	name: 'light';
-	prefersdark: true;
 	
 	--color-base-100: #FFFFFF;
 	--color-base-200: #F4FBF8;
@@ -48,6 +47,7 @@
 
 @plugin "daisyui/theme" {
 	name: 'elysia-light';
+	default: true;
 	
 	--color-base-100: #FFF7F9;
 	--color-base-200: #FDF0F6;

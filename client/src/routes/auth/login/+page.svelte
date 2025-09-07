@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { login, authStateStore } from '$lib/state/auth.state.svelte';
+  import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 
   let email = $state('');
   let password = $state('');
@@ -51,6 +52,9 @@
 <div class="min-h-screen flex items-center justify-center bg-base-200 p-4">
   <div class="card w-full max-w-md shadow-xl bg-base-100">
     <div class="card-body">
+      <div class="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div class="text-center mb-6">
         <div class="flex justify-center mb-4">
           <div class="bg-primary w-16 h-16 rounded-full flex items-center justify-center">
