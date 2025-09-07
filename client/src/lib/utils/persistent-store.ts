@@ -5,7 +5,7 @@ class EncryptionManager {
   private static instance: EncryptionManager;
   private key: CryptoKey | null = null;
   private keyName = "persistent_store_key";
-  private encryptionDisabled = true; // Temporarily disable encryption
+  private encryptionDisabled = false; // Temporarily disable encryption
 
   private constructor() {}
 
@@ -94,17 +94,17 @@ class EncryptionManager {
         }
       };
 
-      request.onsuccess = () => {
+      request.onsuccess = async () => {
+        const exportedKey = await crypto.subtle.exportKey("raw", key);
+
         const db = request.result;
         const transaction = db.transaction("keys", "readwrite");
         const store = transaction.objectStore("keys");
         
         // Export and save the key within the same transaction
-        crypto.subtle.exportKey("raw", key).then(exportedKey => {
-          const saveRequest = store.put(exportedKey, this.keyName);
-          saveRequest.onsuccess = () => resolve();
-          saveRequest.onerror = () => reject(saveRequest.error);
-        }).catch(reject);
+        const saveRequest = store.put(exportedKey, this.keyName);
+        saveRequest.onsuccess = () => resolve();
+        saveRequest.onerror = () => reject(saveRequest.error);
       };
 
       request.onerror = () => reject(request.error);

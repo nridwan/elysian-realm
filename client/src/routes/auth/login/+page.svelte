@@ -111,11 +111,10 @@
           <button 
             class="btn btn-primary w-full" 
             type="submit"
-            class:loading={isLoading}
             disabled={isLoading}
           >
             {#if isLoading}
-              <span class="loading loading-spinner"></span>
+              <span class="loading loading-spinner loading-sm mr-2"></span>
               Signing in...
             {:else}
               Sign In
