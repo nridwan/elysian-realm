@@ -209,12 +209,9 @@ export class PersistentStore<T> {
     this.#initialized = this.#encryptionManager.initialize();
     this.#value = initialValue; // Start with initial value
     this.#setupStorageListener();
-    
-    // Load actual value asynchronously
-    this.#load(initialValue);
   }
 
-  async #load(initialValue: T): Promise<void> {
+  async load(initialValue: T): Promise<void> {
     if (typeof localStorage === "undefined") {
       this.#value = initialValue;
       this.#notifySubscribers();
@@ -258,7 +255,7 @@ export class PersistentStore<T> {
         });
       } else if (e.key === this.#key && e.newValue === null) {
         // Item was removed from storage
-        this.#load(undefined as any);
+        this.load(undefined as any);
       }
     };
 

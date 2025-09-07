@@ -232,8 +232,7 @@ export async function refreshToken(): Promise<boolean> {
 
 // Initialize auth state on app load - unpack user from persisted token
 export async function initializeAuth() {
-  // The persistent store loads asynchronously, so we just need to wait for it
-  // The subscription will handle updating the auth state when tokens are loaded
+  await persistentTokensStore.load(persistentTokensStore.value)
   
   // Check if we have tokens and they're still valid
   if (authState.tokens.accessToken) {
