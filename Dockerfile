@@ -1,5 +1,5 @@
 # Use the official Bun image as the base image
-FROM oven/bun:1.2.21-alpine as base
+FROM oven/bun:1.2.21-alpine AS base
 
 # Set the working directory
 WORKDIR /app
@@ -21,7 +21,7 @@ RUN bun install --frozen-lockfile
 RUN bunx prisma generate
 
 # Production stage
-FROM oven/bun:1.2.21-alpine as production
+FROM oven/bun:1.2.21-alpine AS production
 
 # Set the working directory
 WORKDIR /app
