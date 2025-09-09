@@ -8,8 +8,8 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 # Copy package files
-COPY package.json ./
-COPY bun.lockb ./
+COPY package.json ./package.json
+COPY bun.lockb ./bun.lockb
 
 # Copy Prisma files
 COPY prisma ./prisma/
@@ -20,8 +20,8 @@ RUN bun install --frozen-lockfile
 # Generate Prisma client
 RUN bunx prisma generate
 
-# Production stage
-FROM oven/bun:1.2.21-alpine AS production
+# Build stage
+FROM oven/bun:1.2.21-alpine AS build
 
 # Set the working directory
 WORKDIR /app
@@ -40,12 +40,36 @@ COPY --from=base /app/prisma ./prisma/
 COPY src ./src
 COPY index.ts prisma.config.ts tsconfig.json ./
 
+# Build optimized binary
+RUN bun build \
+    --compile \
+    --minify-whitespace \
+    --minify-syntax \
+    --target bun \
+    --outfile server \
+    ./src/index.ts
+
+# Production stage
+FROM base AS production
+
+# Install system dependencies
+RUN apk add --no-cache openssl
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the compiled binary from build stage
+COPY --from=build /app/server ./server
+
+# Copy Prisma files
+COPY --from=base /app/prisma ./prisma/
+
 # Expose the port the app runs on
 EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+  CMD ./server --health || exit 1
 
 # Command to run the application
-ENTRYPOINT ["bun","run","src/index.ts"]
+ENTRYPOINT ["./server"]

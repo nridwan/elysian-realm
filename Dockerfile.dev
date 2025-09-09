@@ -1,10 +1,10 @@
 # Development Dockerfile for backend
-FROM oven/bun:1.1.38-alpine
+FROM oven/bun:1.2.21-alpine
 
 # Set the working directory
 WORKDIR /app
 
-# Install system dependencies for Prisma
+# Install system dependencies for Prisma and native modules
 RUN apk add --no-cache openssl
 
 # Copy package files
@@ -14,7 +14,7 @@ COPY package.json bun.lockb ./
 COPY prisma ./prisma/
 
 # Install dependencies
-RUN bun install
+RUN bun install --frozen-lockfile
 
 # Generate Prisma client
 RUN bunx prisma generate
@@ -23,4 +23,4 @@ RUN bunx prisma generate
 EXPOSE 3000
 
 # Command to run the application with hot reloading
-CMD ["bun","run","src/index.ts"]
+CMD ["bun", "run", "--watch", "src/index.ts"]
