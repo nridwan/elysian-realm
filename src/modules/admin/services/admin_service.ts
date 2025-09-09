@@ -1,5 +1,6 @@
 import { PrismaClient, User as PrismaUser, Role as PrismaRole } from '@prisma/client'
 import { PERMISSIONS, getAllPermissionStrings, getAdminPermissions, getSuperAdminPermissions } from '../permissions'
+import { hashPassword } from '../../../utils/password'
 
 // Only create custom types where we need to transform data
 type RoleWithPermissions = Omit<PrismaRole, 'permissions'> & {
@@ -63,7 +64,7 @@ export class AdminService {
     }
   }
 
-  async createUser(data: { name: string; email: string; role_id: string }): Promise<UserWithRole | null> {
+  async createUser(data: { name: string; email: string; password: string; role_id: string }): Promise<UserWithRole | null> {
     try {
       // Check if user with this email already exists
       const existingUser = await this.prisma.user.findUnique({
@@ -83,11 +84,16 @@ export class AdminService {
         return null // Role doesn't exist
       }
 
-      // Create the user with a placeholder password (will need to be reset)
+      // Hash the password before storing
+      const hashedPassword = await hashPassword(data.password);
+
+      // Create the user with the hashed password
       const user = await this.prisma.user.create({
         data: {
-          ...data,
-          password: 'temporary_password', // Temporary password, should be reset by user
+          name: data.name,
+          email: data.email,
+          password: hashedPassword,
+          role_id: data.role_id,
         },
         include: { role: true },
       })

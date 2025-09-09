@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { getAdminPermissions, getSuperAdminPermissions } from '../src/modules/admin/permissions'
+import { hashPassword } from '../src/utils/password'
 
 const prisma = new PrismaClient()
 
@@ -30,13 +31,16 @@ async function seedRolesAndUsers() {
     },
   })
 
+  // Hash the password for the super admin user
+  const superAdminPassword = await hashPassword('password');
+
   // Create super admin user
   const superAdminUser = await prisma.user.upsert({
     where: { email: 'superadmin@example.com' },
     update: {},
     create: {
       email: 'superadmin@example.com',
-      password: '$2a$12$gQkFcBZFwyy6uEU6QDj8EOcQZfE1frPF5nLZSPfjfTLKltY3Hwo0y', // 'password' hashed
+      password: superAdminPassword,
       name: 'Super Admin',
       role_id: superAdminRole.id,
     },

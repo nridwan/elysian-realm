@@ -190,6 +190,11 @@ export const CreateUserRequestDto = t.Object({
     minLength: 5,
     format: 'email',
   }),
+  password: t.String({
+    description: 'User password',
+    examples: ['securePassword123'],
+    minLength: 8,
+  }),
   role_id: t.String({
     description: 'Role identifier to assign to the user',
     examples: ['role_admin'],

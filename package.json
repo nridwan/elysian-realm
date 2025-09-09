@@ -40,8 +40,6 @@
     "@prisma/client": "^6.15.0",
     "@prisma/instrumentation": "^6.15.0",
     "@sinclair/typebox": "^0.34.41",
-    "@types/bcrypt": "^6.0.0",
-    "bcrypt": "^6.0.0",
     "elysia": "^1.3.21"
   }
 }

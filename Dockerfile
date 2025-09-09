@@ -41,19 +41,13 @@ COPY src ./src
 COPY index.ts prisma.config.ts tsconfig.json ./
 
 # Build optimized binary
-RUN bun build \
-    --compile \
-    --minify-whitespace \
-    --minify-syntax \
-    --target bun \
-    --outfile server \
-    ./src/index.ts
+RUN bun run build
 
 # Production stage
-FROM base AS production
+FROM alpine:3.22 AS production
 
 # Install system dependencies
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl libstdc++ libgcc
 
 # Set the working directory
 WORKDIR /app
@@ -63,6 +57,9 @@ COPY --from=build /app/server ./server
 
 # Copy Prisma files
 COPY --from=base /app/prisma ./prisma/
+
+# Copy Prisma files
+COPY --from=base /app/node_modules/.prisma/client ./node_modules/.prisma/client/
 
 # Expose the port the app runs on
 EXPOSE 3000

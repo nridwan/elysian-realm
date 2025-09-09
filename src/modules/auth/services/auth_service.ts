@@ -1,5 +1,4 @@
 import { PrismaClient, User as PrismaUser, Role as PrismaRole } from '@prisma/client'
-import { compareSync } from 'bcrypt'
 
 // Define the user type with role included
 type UserWithRole = PrismaUser & {
@@ -35,8 +34,8 @@ export class AuthService {
       return { error: 'Invalid credentials' }
     }
 
-    // Check password
-    const isValid = compareSync(password, user.password)
+    // Check password using Bun's password verification
+    const isValid = await Bun.password.verify(password, user.password)
     if (!isValid) {
       return { error: 'Invalid credentials' }
     }
