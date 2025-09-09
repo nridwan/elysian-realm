@@ -77,8 +77,12 @@ services:
   # Frontend with hot reloading
   frontend:
     build:
-      context: .
-      dockerfile: client/Dockerfile.dev
+      context: ./client
+      dockerfile: Dockerfile.dev
+      args:
+        - VITE_API_BASE_URL=http://localhost:3000
+        - VITE_USE_HTTPS=false
+        - NODE_ENV=development
     container_name: elysian-realm-frontend-dev
     restart: always
     depends_on:
@@ -90,6 +94,8 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:3000
+      - VITE_USE_HTTPS=false
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:5173/health"]
       interval: 30s

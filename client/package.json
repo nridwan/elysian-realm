@@ -53,7 +53,8 @@
     "test": "npm run test:unit -- --run && npm run test:e2e",
     "test:e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "health": "node -e 'console.log(\"OK\")'"
   },
   "type": "module"
 }
