@@ -19,10 +19,10 @@ const allMenus: Menu[] = [
     </svg>`,
   },
   {
-    name: 'User Management',
+    name: 'Admin Management',
     submenus: [
       {
-        name: 'Users',
+        name: 'Admins',
         path: '/admin/users',
         icon: `<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -30,7 +30,7 @@ const allMenus: Menu[] = [
           <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>`,
-        permission: 'users.read'
+        permission: 'admins.read'
       },
       {
         name: 'Roles',
@@ -44,7 +44,7 @@ const allMenus: Menu[] = [
   },
 ];
 
-// Filter menus based on user permissions
+// Filter menus based on admin permissions
 function getFilteredMenus(): Menu[] {
   if (!authStateStore.isAuthenticated) {
     return [];
@@ -55,7 +55,7 @@ function getFilteredMenus(): Menu[] {
     // If menu has no permission requirement, show it
     if (!menu.permission) return true;
     
-    // Check if user has the required permission
+    // Check if admin has the required permission
     return hasPermission(menu.permission);
   }).map(menu => {
     // If menu has submenus, filter them too
@@ -64,7 +64,7 @@ function getFilteredMenus(): Menu[] {
         // If submenu has no permission requirement, show it
         if (!submenu.permission) return true;
         
-        // Check if user has the required permission
+        // Check if admin has the required permission
         return hasPermission(submenu.permission);
       });
       
@@ -83,27 +83,6 @@ function getFilteredMenus(): Menu[] {
     // Menu without submenus
     return menu;
   }).filter((menu): menu is Menu => menu !== null);
-}
-
-function findInnerFirstMenu(menu: Menu | undefined): Menu | undefined {
-  if (menu?.submenus) return findInnerFirstMenu(menu.submenus[0]);
-  return menu;
-}
-
-function findActiveMenus(menus: Menu[], path: string): Menu | undefined {
-  for (const menu of menus) {
-    if (menu.submenus) {
-      const activeSubmenus = findActiveMenus(menu.submenus, path);
-      if (activeSubmenus) {
-        return {
-          ...menu,
-          submenus: [activeSubmenus],
-        };
-      }
-    } else if (menu.path === path) {
-      return menu;
-    }
-  }
 }
 
 export const menuState = {

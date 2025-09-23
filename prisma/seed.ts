@@ -35,7 +35,7 @@ async function seedRolesAndUsers() {
   const superAdminPassword = await hashPassword('password');
 
   // Create super admin user
-  const superAdminUser = await prisma.user.upsert({
+  const superAdminUser = await prisma.admin.upsert({
     where: { email: 'superadmin@example.com' },
     update: {},
     create: {

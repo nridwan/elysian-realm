@@ -4,7 +4,7 @@ import { AuthService } from './auth_service'
 
 // Mock Prisma client
 const mockPrisma = {
-  user: {
+  admin: {
     findUnique: vi.fn(),
     create: vi.fn(),
   },
@@ -59,7 +59,7 @@ describe('AuthService - Logic Tests', () => {
         updated_at: new Date(),
       }
 
-      mockPrisma.user.findUnique = vi.fn().mockResolvedValue(mockUser)
+      mockPrisma.admin.findUnique = vi.fn().mockResolvedValue(mockUser)
 
       const service = new AuthService(mockPrisma)
       const result = await service.refreshAccessToken('test-user-id')
@@ -74,7 +74,7 @@ describe('AuthService - Logic Tests', () => {
 
     it('should return error when user does not exist', async () => {
       // Mock the Prisma client to return null (user not found)
-      mockPrisma.user.findUnique = vi.fn().mockResolvedValue(null)
+      mockPrisma.admin.findUnique = vi.fn().mockResolvedValue(null)
 
       const service = new AuthService(mockPrisma)
       const result = await service.refreshAccessToken('non-existent-user-id')

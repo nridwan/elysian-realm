@@ -1,4 +1,4 @@
-import { PrismaClient, User as PrismaUser, Role as PrismaRole } from '@prisma/client'
+import { PrismaClient, Admin as PrismaAdmin, Role as PrismaRole } from '@prisma/client'
 import { PERMISSIONS, getAllPermissionStrings, getAdminPermissions, getSuperAdminPermissions } from '../permissions'
 import { hashPassword } from '../../../utils/password'
 
@@ -7,7 +7,7 @@ type RoleWithPermissions = Omit<PrismaRole, 'permissions'> & {
   permissions?: string[] // Parsed from JSON
 }
 
-type UserWithRole = PrismaUser & {
+type AdminWithRole = PrismaAdmin & {
   role: PrismaRole
 }
 
@@ -21,17 +21,17 @@ export interface Pagination {
 export class AdminService {
   constructor(private prisma: PrismaClient) {}
 
-  async getUsers(page: number = 1, limit: number = 10): Promise<{ users: UserWithRole[]; pagination: Pagination }> {
-    const users = await this.prisma.user.findMany({
+  async getUsers(page: number = 1, limit: number = 10): Promise<{ users: AdminWithRole[]; pagination: Pagination }> {
+    const users = await this.prisma.admin.findMany({
       skip: (page - 1) * limit,
       take: limit,
       include: { role: true },
     })
 
-    const total = await this.prisma.user.count()
+    const total = await this.prisma.admin.count()
 
     return {
-      users: users as UserWithRole[],
+      users: users as AdminWithRole[],
       pagination: {
         page,
         limit,
@@ -41,33 +41,33 @@ export class AdminService {
     }
   }
 
-  async getUserById(id: string): Promise<UserWithRole | null> {
-    const user = await this.prisma.user.findUnique({
+  async getUserById(id: string): Promise<AdminWithRole | null> {
+    const user = await this.prisma.admin.findUnique({
       where: { id },
       include: { role: true },
     })
 
-    return user as UserWithRole | null
+    return user as AdminWithRole | null
   }
 
-  async updateUser(id: string, data: Partial<PrismaUser>): Promise<UserWithRole | null> {
+  async updateUser(id: string, data: Partial<PrismaAdmin>): Promise<AdminWithRole | null> {
     try {
-      const user = await this.prisma.user.update({
+      const user = await this.prisma.admin.update({
         where: { id },
         data,
         include: { role: true },
       })
 
-      return user as UserWithRole
+      return user as AdminWithRole
     } catch (error) {
       return null
     }
   }
 
-  async createUser(data: { name: string; email: string; password: string; role_id: string }): Promise<UserWithRole | null> {
+  async createUser(data: { name: string; email: string; password: string; role_id: string }): Promise<AdminWithRole | null> {
     try {
       // Check if user with this email already exists
-      const existingUser = await this.prisma.user.findUnique({
+      const existingUser = await this.prisma.admin.findUnique({
         where: { email: data.email }
       })
 
@@ -88,7 +88,7 @@ export class AdminService {
       const hashedPassword = await hashPassword(data.password);
 
       // Create the user with the hashed password
-      const user = await this.prisma.user.create({
+      const user = await this.prisma.admin.create({
         data: {
           name: data.name,
           email: data.email,
@@ -98,7 +98,7 @@ export class AdminService {
         include: { role: true },
       })
 
-      return user as UserWithRole
+      return user as AdminWithRole
     } catch (error) {
       return null
     }
@@ -106,7 +106,7 @@ export class AdminService {
 
   async deleteUser(id: string): Promise<boolean> {
     try {
-      await this.prisma.user.delete({
+      await this.prisma.admin.delete({
         where: { id },
       })
       return true

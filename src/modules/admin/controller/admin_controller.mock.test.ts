@@ -7,7 +7,7 @@ import { adminMiddleware } from '../middleware/admin_middleware'
 
 // Mock Prisma client
 const mockPrisma = {
-  user: {
+  admin: {
     findMany: vi.fn(),
     findUnique: vi.fn(),
     update: vi.fn(),
@@ -47,10 +47,10 @@ const mockAuthMiddleware = (app: Elysia) => {
         name: 'admin',
         description: null,
         permissions: [
-          'users.read',
-          'users.create',
-          'users.update',
-          'users.delete',
+          'admins.read',
+          'admins.create',
+          'admins.update',
+          'admins.delete',
           'roles.read',
           'roles.create',
           'roles.update',
@@ -69,14 +69,14 @@ describe('AdminController - Mocked Service Tests', () => {
     vi.clearAllMocks()
   })
 
-  it('should get users list successfully', async () => {
+  it('should get admins list successfully', async () => {
     // Mock the getUsers method
     vi.spyOn(mockAdminService, 'getUsers').mockResolvedValue({
       users: [
         {
           id: '1',
           email: 'test@example.com',
-          name: 'Test User',
+          name: 'Test Admin',
           password: 'hashedPassword',
           role_id: '1',
           created_at: new Date(),
@@ -114,18 +114,18 @@ describe('AdminController - Mocked Service Tests', () => {
     expect(response.status).toBe(200)
     const body = await response.json()
     expect(body.meta.code).toBe('ADMIN-200')
-    expect(body.meta.message).toBe('Users retrieved successfully')
+    expect(body.meta.message).toBe('Admins retrieved successfully')
     expect(body.data.data).toHaveLength(1)
     expect(body.data.total).toBe(1)
     expect(mockAdminService.getUsers).toHaveBeenCalledWith(1, 10)
   })
 
-  it('should get user by ID successfully', async () => {
+  it('should get admin by ID successfully', async () => {
     // Mock the getUserById method
     vi.spyOn(mockAdminService, 'getUserById').mockResolvedValue({
       id: '1',
       email: 'test@example.com',
-      name: 'Test User',
+      name: 'Test Admin',
       password: 'hashedPassword',
       role_id: '1',
       created_at: new Date(),
@@ -155,13 +155,13 @@ describe('AdminController - Mocked Service Tests', () => {
     expect(response.status).toBe(200)
     const body = await response.json()
     expect(body.meta.code).toBe('ADMIN-200')
-    expect(body.meta.message).toBe('User retrieved successfully')
+    expect(body.meta.message).toBe('Admin retrieved successfully')
     expect(body.data.user.id).toBe('1')
     expect(body.data.user.email).toBe('test@example.com')
     expect(mockAdminService.getUserById).toHaveBeenCalledWith('1')
   })
 
-  it('should return error when user not found', async () => {
+  it('should return error when admin not found', async () => {
     // Mock the getUserById method to return null
     vi.spyOn(mockAdminService, 'getUserById').mockResolvedValue(null)
 
@@ -180,16 +180,16 @@ describe('AdminController - Mocked Service Tests', () => {
     expect(response.status).toBe(200) // The endpoint returns 200 with error object
     const body = await response.json()
     expect(body.meta.code).toBe('ADMIN-404')
-    expect(body.meta.message).toBe('User not found')
+    expect(body.meta.message).toBe('Admin not found')
     expect(mockAdminService.getUserById).toHaveBeenCalledWith('999')
   })
 
-  it('should update user successfully', async () => {
+  it('should update admin successfully', async () => {
     // Mock the updateUser method
     vi.spyOn(mockAdminService, 'updateUser').mockResolvedValue({
       id: '1',
       email: 'updated@example.com',
-      name: 'Updated User',
+      name: 'Updated Admin',
       password: 'hashedPassword',
       role_id: '1',
       created_at: new Date(),
@@ -217,7 +217,7 @@ describe('AdminController - Mocked Service Tests', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          name: 'Updated User',
+          name: 'Updated Admin',
           email: 'updated@example.com'
         })
       })
@@ -226,15 +226,15 @@ describe('AdminController - Mocked Service Tests', () => {
     expect(response.status).toBe(200)
     const body = await response.json()
     expect(body.meta.code).toBe('ADMIN-200')
-    expect(body.meta.message).toBe('User updated successfully')
+    expect(body.meta.message).toBe('Admin updated successfully')
     expect(body.data.user.email).toBe('updated@example.com')
     expect(mockAdminService.updateUser).toHaveBeenCalledWith('1', {
-      name: 'Updated User',
+      name: 'Updated Admin',
       email: 'updated@example.com'
     })
   })
 
-  it('should deny access when user lacks required permission', async () => {
+  it('should deny access when admin lacks required permission', async () => {
     // Create a mock middleware that provides a user without the required permission
     const mockAuthMiddlewareWithoutPermission = (app: Elysia) => {
       return app.derive(() => ({
@@ -247,7 +247,7 @@ describe('AdminController - Mocked Service Tests', () => {
             id: '1',
             name: 'admin',
             description: null,
-            permissions: ['users.read'], // Missing 'users.delete' permission
+            permissions: ['admins.read'], // Missing 'admins.delete' permission
             created_at: new Date(),
             updated_at: new Date()
           }
@@ -279,7 +279,7 @@ describe('AdminController - Mocked Service Tests', () => {
     expect(mockAdminService.deleteUser).not.toHaveBeenCalled()
   })
   
-  it('should deny access when user is not authenticated', async () => {
+  it('should deny access when admin is not authenticated', async () => {
     // Create a mock middleware that provides no user
     const mockAuthMiddlewareNoUser = (app: Elysia) => {
       return app.derive(() => ({

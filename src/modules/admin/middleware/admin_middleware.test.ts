@@ -33,7 +33,7 @@ describe('AdminMiddleware - Integration Tests', () => {
             id: '1', 
             name: 'admin', 
             description: null,
-            permissions: ['users.read', 'users.create']
+            permissions: ['admins.read', 'admins.create']
           }
         } 
       }))
@@ -48,7 +48,7 @@ describe('AdminMiddleware - Integration Tests', () => {
       .use(adminMiddleware())
       .derive(() => ({ user: null }))
       .get('/test', () => ({ message: 'success' }), {
-        hasPermission: 'users.read'
+        hasPermission: 'admins.read'
       })
 
     const response = await app.handle(new Request('http://localhost/test'))
@@ -68,12 +68,12 @@ describe('AdminMiddleware - Integration Tests', () => {
             id: '1', 
             name: 'admin', 
             description: null,
-            permissions: ['users.read', 'users.create']
+            permissions: ['admins.read', 'admins.create']
           }
         } 
       }))
       .get('/test', () => ({ message: 'success' }), {
-        hasPermission: 'users.read'
+        hasPermission: 'admins.read'
       })
 
     const response = await app.handle(new Request('http://localhost/test'))
@@ -93,12 +93,12 @@ describe('AdminMiddleware - Integration Tests', () => {
             id: '1', 
             name: 'admin', 
             description: null,
-            permissions: ['users.read'] as string[] | null
+            permissions: ['admins.read'] as string[] | null
           }
         } 
       }))
       .get('/test', () => ({ message: 'success' }), {
-        hasPermission: 'users.delete'
+        hasPermission: 'admins.delete'
       })
 
     const response = await app.handle(new Request('http://localhost/test'))

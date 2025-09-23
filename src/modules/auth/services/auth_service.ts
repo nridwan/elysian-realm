@@ -1,7 +1,7 @@
-import { PrismaClient, User as PrismaUser, Role as PrismaRole } from '@prisma/client'
+import { PrismaClient, Admin as PrismaAdmin, Role as PrismaRole } from '@prisma/client'
 
 // Define the user type with role included
-type UserWithRole = PrismaUser & {
+type AdminWithRole = PrismaAdmin & {
   role: PrismaRole
 }
 
@@ -11,12 +11,12 @@ export interface LoginInput {
 }
 
 export interface LoginResponse {
-  user?: UserWithRole
+  user?: AdminWithRole
   error?: string
 }
 
 export interface RefreshTokenResponse {
-  user?: UserWithRole
+  user?: AdminWithRole
   error?: string
 }
 
@@ -25,7 +25,7 @@ export class AuthService {
 
   async login({ email, password }: LoginInput): Promise<LoginResponse> {
     // Find user
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.admin.findUnique({
       where: { email },
       include: { role: true },
     })
@@ -40,13 +40,13 @@ export class AuthService {
       return { error: 'Invalid credentials' }
     }
 
-    return { user: user as UserWithRole }
+    return { user: user as AdminWithRole }
   }
 
   async refreshAccessToken(userId: string): Promise<RefreshTokenResponse> {
     try {
       // Requery the user from the database to get fresh data including role and permissions
-      const user = await this.prisma.user.findUnique({
+      const user = await this.prisma.admin.findUnique({
         where: { id: userId },
         include: { role: true },
       })
@@ -55,7 +55,7 @@ export class AuthService {
         return { error: 'User not found' }
       }
 
-      return { user: user as UserWithRole }
+      return { user: user as AdminWithRole }
     } catch (error) {
       console.error('Error refreshing access token:', error)
       return { error: 'Failed to refresh token' }

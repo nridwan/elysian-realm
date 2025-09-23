@@ -4,14 +4,14 @@
   "type": "module",
   "types": "src/types/index.ts",
   "scripts": {
-    "dev": "concurrently \"bun run src/index.ts\" \"cd client && bun run dev\"",
+    "dev": "concurrently \"bun run --watch src/index.ts\" \"cd client && bun run dev\"",
     "dev:backend": "bun run --watch src/index.ts",
     "dev:frontend": "cd client && bun run dev",
     "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server ./src/index.ts",
     "start": "./server",
     "test": "vitest run",
     "test:watch": "vitest",
-    "reseed": "npx tsx prisma/reseed.ts"
+    "reseed": "bun run prisma/reseed.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

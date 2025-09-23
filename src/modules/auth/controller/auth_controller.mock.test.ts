@@ -34,7 +34,7 @@ const mockAdminAccessToken = {
     name: 'Test User',
     role: {
       name: 'admin',
-      permissions: ['users.read', 'users.create']
+      permissions: ['admins.read', 'admins.create']
     }
   })
 }
@@ -74,7 +74,7 @@ describe('AuthController - Mocked Service Tests', () => {
           id: '1',
           name: 'admin',
           description: null,
-          permissions: JSON.stringify(['users.read', 'users.create']),
+          permissions: JSON.stringify(['admins.read', 'admins.create']),
           created_at: new Date(),
           updated_at: new Date()
         }
@@ -166,7 +166,7 @@ describe('AuthController - Mocked Service Tests', () => {
           id: '1',
           name: 'admin',
           description: null,
-          permissions: JSON.stringify(['users.read', 'users.create']),
+          permissions: JSON.stringify(['admins.read', 'admins.create']),
           created_at: new Date(),
           updated_at: new Date()
         }

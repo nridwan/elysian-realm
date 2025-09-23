@@ -1,33 +1,33 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import * as usersDatasource from '$lib/datasource/users.datasource';
+  import * as adminsDatasource from '$lib/datasource/users.datasource';
   import * as rolesDatasource from '$lib/datasource/roles.datasource';
   import PermissionGuard from '$lib/components/PermissionGuard.svelte';
 
-  let users = $state<usersDatasource.User[]>([]);
+  let admins = $state<adminsDatasource.Admin[]>([]);
   let roles = $state<rolesDatasource.Role[]>([]);
   let loading = $state(true);
   let error = $state<string | null>(null);
   let showCreateModal = $state(false);
   let showEditModal = $state(false);
   let showDeleteModal = $state(false);
-  let selectedUser = $state<usersDatasource.User | null>(null);
-  let newUser = $state<usersDatasource.CreateUserRequest>({ name: '', email: '', role_id: '' });
-  let editingUser = $state<Partial<usersDatasource.UpdateUserRequest>>({ name: '', email: '', role_id: '' });
+  let selectedAdmin = $state<adminsDatasource.Admin | null>(null);
+  let newAdmin = $state<adminsDatasource.CreateAdminRequest>({ name: '', email: '', role_id: '' });
+  let editingAdmin = $state<Partial<adminsDatasource.UpdateAdminRequest>>({ name: '', email: '', role_id: '' });
 
   onMount(async () => {
-    await Promise.all([loadUsers(), loadRoles()]);
+    await Promise.all([loadAdmins(), loadRoles()]);
   });
 
-  async function loadUsers() {
+  async function loadAdmins() {
     try {
       loading = true;
       error = null;
       
-      const response = await usersDatasource.getUsers();
-      users = response.data;
+      const response = await adminsDatasource.getAdmins();
+      admins = response.data;
     } catch (err) {
-      error = 'Failed to load users';
+      error = 'Failed to load admins';
       console.error(err);
     } finally {
       loading = false;
@@ -39,93 +39,93 @@
       const response = await rolesDatasource.getRoles();
       roles = response.roles;
     } catch (err) {
-      console.error('Failed to load roles for user form', err);
+      console.error('Failed to load roles for admin form', err);
     }
   }
 
-  async function handleCreateUser(event: Event) {
+  async function handleCreateAdmin(event: Event) {
     event.preventDefault();
     try {
-      await usersDatasource.createUser(newUser);
-      await loadUsers();
+      await adminsDatasource.createAdmin(newAdmin);
+      await loadAdmins();
       showCreateModal = false;
-      newUser = { name: '', email: '', role_id: '' };
+      newAdmin = { name: '', email: '', role_id: '' };
     } catch (err) {
-      error = 'Failed to create user';
+      error = 'Failed to create admin';
       console.error(err);
     }
   }
 
-  function openEditModal(user: usersDatasource.User) {
-    selectedUser = user;
-    editingUser = { 
-      name: user.name, 
-      email: user.email, 
-      role_id: user.role_id 
+  function openEditModal(admin: adminsDatasource.Admin) {
+    selectedAdmin = admin;
+    editingAdmin = { 
+      name: admin.name, 
+      email: admin.email, 
+      role_id: admin.role_id 
     };
     showEditModal = true;
   }
 
-  async function handleUpdateUser(event: Event) {
+  async function handleUpdateAdmin(event: Event) {
     event.preventDefault();
-    if (!selectedUser) return;
+    if (!selectedAdmin) return;
     
     try {
-      // Convert to proper UpdateUserRequest type
-      const updateRequest: usersDatasource.UpdateUserRequest = {};
-      if (editingUser.name !== undefined) updateRequest.name = editingUser.name;
-      if (editingUser.email !== undefined) updateRequest.email = editingUser.email;
-      if (editingUser.role_id !== undefined) updateRequest.role_id = editingUser.role_id;
+      // Convert to proper UpdateAdminRequest type
+      const updateRequest: adminsDatasource.UpdateAdminRequest = {};
+      if (editingAdmin.name !== undefined) updateRequest.name = editingAdmin.name;
+      if (editingAdmin.email !== undefined) updateRequest.email = editingAdmin.email;
+      if (editingAdmin.role_id !== undefined) updateRequest.role_id = editingAdmin.role_id;
       
-      await usersDatasource.updateUser(selectedUser.id, updateRequest);
-      await loadUsers();
+      await adminsDatasource.updateAdmin(selectedAdmin.id, updateRequest);
+      await loadAdmins();
       showEditModal = false;
-      selectedUser = null;
-      editingUser = { name: '', email: '', role_id: '' };
+      selectedAdmin = null;
+      editingAdmin = { name: '', email: '', role_id: '' };
     } catch (err) {
-      error = 'Failed to update user';
+      error = 'Failed to update admin';
       console.error(err);
     }
   }
 
-  function openDeleteModal(user: usersDatasource.User) {
-    selectedUser = user;
+  function openDeleteModal(admin: adminsDatasource.Admin) {
+    selectedAdmin = admin;
     showDeleteModal = true;
   }
 
-  async function handleDeleteUser(event: Event) {
+  async function handleDeleteAdmin(event: Event) {
     event.preventDefault();
-    if (!selectedUser) return;
+    if (!selectedAdmin) return;
     
     try {
-      await usersDatasource.deleteUser(selectedUser.id);
-      await loadUsers();
+      await adminsDatasource.deleteAdmin(selectedAdmin.id);
+      await loadAdmins();
       showDeleteModal = false;
-      selectedUser = null;
+      selectedAdmin = null;
     } catch (err) {
-      error = 'Failed to delete user';
+      error = 'Failed to delete admin';
       console.error(err);
     }
   }
 </script>
 
 <svelte:head>
-  <title>User Management - Elysian Realm</title>
+  <title>Admin Management - Elysian Realm</title>
 </svelte:head>
 
-<PermissionGuard permissions={['users.read']} showDenied>
+<PermissionGuard permissions={['admins.read']} showDenied>
   <div class="p-4 md:p-6">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold">User Management</h1>
-        <p class="text-base-content/70">Manage users and their roles</p>
+        <h1 class="text-2xl md:text-3xl font-bold">Admin Management</h1>
+        <p class="text-base-content/70">Manage admins and their roles</p>
       </div>
-      <PermissionGuard permissions={['users.create']}>
+      <PermissionGuard permissions={['admins.create']}>
         <button class="btn btn-primary" onclick={() => showCreateModal = true}>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
           </svg>
-          Add User
+          Add Admin
         </button>
       </PermissionGuard>
     </div>
@@ -153,21 +153,21 @@
             </tr>
           </thead>
           <tbody>
-            {#each users as user}
+            {#each admins as admin}
               <tr class="hover">
-                <td class="font-medium">{user.name}</td>
-                <td>{user.email}</td>
+                <td class="font-medium">{admin.name}</td>
+                <td>{admin.email}</td>
                 <td>
                   <div class="badge badge-ghost badge-sm">
-                    {user.role.name}
+                    {admin.role.name}
                   </div>
                 </td>
                 <td class="text-right">
                   <div class="flex justify-end gap-2">
-                    <PermissionGuard permissions={['users.update']}>
+                    <PermissionGuard permissions={['admins.update']}>
                       <button 
                         class="btn btn-sm btn-ghost" 
-                        onclick={() => openEditModal(user)}
+                        onclick={() => openEditModal(admin)}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                           <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -175,10 +175,10 @@
                         Edit
                       </button>
                     </PermissionGuard>
-                    <PermissionGuard permissions={['users.delete']}>
+                    <PermissionGuard permissions={['admins.delete']}>
                       <button 
                         class="btn btn-sm btn-ghost text-error" 
-                        onclick={() => openDeleteModal(user)}
+                        onclick={() => openDeleteModal(admin)}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                           <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
@@ -196,7 +196,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-base-content/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <p class="text-base-content/70">No users found</p>
+                    <p class="text-base-content/70">No admins found</p>
                   </div>
                 </td>
               </tr>
@@ -207,42 +207,42 @@
     {/if}
   </div>
 
-  <!-- Create User Modal -->
+  <!-- Create Admin Modal -->
   {#if showCreateModal}
     <div class="modal modal-open modal-bottom sm:modal-middle">
       <div class="modal-box max-w-lg">
-        <form onsubmit={handleCreateUser}>
-          <h3 class="font-bold text-lg">Create New User</h3>
+        <form onsubmit={handleCreateAdmin}>
+          <h3 class="font-bold text-lg">Create New Admin</h3>
           <div class="py-4 space-y-4">
             <div class="form-control">
-              <label class="label" for="user-name-create">
+              <label class="label" for="admin-name-create">
                 <span class="label-text">Full Name</span>
               </label>
               <input 
-                id="user-name-create"
+                id="admin-name-create"
                 type="text" 
-                placeholder="User full name" 
+                placeholder="Admin full name" 
                 class="input input-bordered w-full" 
-                bind:value={newUser.name}
+                bind:value={newAdmin.name}
               />
             </div>
             <div class="form-control">
-              <label class="label" for="user-email-create">
+              <label class="label" for="admin-email-create">
                 <span class="label-text">Email Address</span>
               </label>
               <input 
-                id="user-email-create"
+                id="admin-email-create"
                 type="email" 
-                placeholder="user@example.com" 
+                placeholder="admin@example.com" 
                 class="input input-bordered w-full" 
-                bind:value={newUser.email}
+                bind:value={newAdmin.email}
               />
             </div>
             <div class="form-control">
-              <label class="label" for="user-role-create">
+              <label class="label" for="admin-role-create">
                 <span class="label-text">Role</span>
               </label>
-              <select id="user-role-create" class="select select-bordered w-full" bind:value={newUser.role_id}>
+              <select id="admin-role-create" class="select select-bordered w-full" bind:value={newAdmin.role_id}>
                 <option disabled selected value="">Select a role</option>
                 {#each roles as role}
                   <option value={role.id}>{role.name}</option>
@@ -259,42 +259,42 @@
     </div>
   {/if}
 
-  <!-- Edit User Modal -->
+  <!-- Edit Admin Modal -->
   {#if showEditModal}
     <div class="modal modal-open modal-bottom sm:modal-middle">
       <div class="modal-box max-w-lg">
-        <form onsubmit={handleUpdateUser}>
-          <h3 class="font-bold text-lg">Edit User</h3>
+        <form onsubmit={handleUpdateAdmin}>
+          <h3 class="font-bold text-lg">Edit Admin</h3>
           <div class="py-4 space-y-4">
             <div class="form-control">
-              <label class="label" for="user-name-edit">
+              <label class="label" for="admin-name-edit">
                 <span class="label-text">Full Name</span>
               </label>
               <input 
-                id="user-name-edit"
+                id="admin-name-edit"
                 type="text" 
-                placeholder="User full name" 
+                placeholder="Admin full name" 
                 class="input input-bordered w-full" 
-                bind:value={editingUser.name}
+                bind:value={editingAdmin.name}
               />
             </div>
             <div class="form-control">
-              <label class="label" for="user-email-edit">
+              <label class="label" for="admin-email-edit">
                 <span class="label-text">Email Address</span>
               </label>
               <input 
-                id="user-email-edit"
+                id="admin-email-edit"
                 type="email" 
-                placeholder="user@example.com" 
+                placeholder="admin@example.com" 
                 class="input input-bordered w-full" 
-                bind:value={editingUser.email}
+                bind:value={editingAdmin.email}
               />
             </div>
             <div class="form-control">
-              <label class="label" for="user-role-edit">
+              <label class="label" for="admin-role-edit">
                 <span class="label-text">Role</span>
               </label>
-              <select id="user-role-edit" class="select select-bordered w-full" bind:value={editingUser.role_id}>
+              <select id="admin-role-edit" class="select select-bordered w-full" bind:value={editingAdmin.role_id}>
                 <option disabled value="">Select a role</option>
                 {#each roles as role}
                   <option value={role.id}>{role.name}</option>
@@ -311,12 +311,12 @@
     </div>
   {/if}
 
-  <!-- Delete User Modal -->
+  <!-- Delete Admin Modal -->
   {#if showDeleteModal}
     <div class="modal modal-open modal-bottom sm:modal-middle">
       <div class="modal-box">
-        <form onsubmit={handleDeleteUser}>
-          <h3 class="font-bold text-lg">Delete User</h3>
+        <form onsubmit={handleDeleteAdmin}>
+          <h3 class="font-bold text-lg">Delete Admin</h3>
           <div class="py-4">
             <div class="flex items-center gap-4 p-4 bg-warning/10 rounded-lg">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-warning" viewBox="0 0 20 20" fill="currentColor">
@@ -324,7 +324,7 @@
               </svg>
               <div>
                 <p class="font-medium">Are you sure?</p>
-                <p class="text-sm">You're about to delete the user <span class="font-semibold">"{selectedUser?.name}"</span>. This action cannot be undone.</p>
+                <p class="text-sm">You're about to delete the admin <span class="font-semibold">"{selectedAdmin?.name}"</span>. This action cannot be undone.</p>
               </div>
             </div>
           </div>

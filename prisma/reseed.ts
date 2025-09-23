@@ -17,26 +17,26 @@ async function reseedRoles() {
     const superAdminRole = await prisma.role.update({
       where: { name: 'superadmin' },
       data: {
-        permissions: JSON.stringify(getSuperAdminPermissions())
+        permissions: getSuperAdminPermissions()
       }
     })
     
     console.log('Super Admin role updated successfully')
-    console.log(`Permissions: ${JSON.stringify(JSON.parse(superAdminRole.permissions as string), null, 2)}`)
+    console.log(`Permissions: ${JSON.stringify(superAdminRole.permissions as string, null, 2)}`)
     
     // Optionally, update other roles as needed
     const adminRole = await prisma.role.update({
       where: { name: 'admin' },
       data: {
-        permissions: JSON.stringify([
-          "users.read",
-          "users.create"
-        ])
+        permissions: [
+          "admins.read",
+          "admins.create"
+        ]
       }
     })
     
     console.log('Admin role updated successfully')
-    console.log(`Permissions: ${JSON.stringify(JSON.parse(adminRole.permissions as string), null, 2)}`)
+    console.log(`Permissions: ${JSON.stringify(adminRole.permissions as string, null, 2)}`)
     
   } catch (error) {
     console.error('Error updating roles:', error)

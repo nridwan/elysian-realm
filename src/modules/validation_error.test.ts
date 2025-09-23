@@ -43,7 +43,7 @@ const mockAdminAccessToken = {
     name: 'Test User',
     role: {
       name: 'admin',
-      permissions: ['users.create', 'roles.create']
+      permissions: ['admins.create', 'roles.create']
     }
   })
 }
@@ -74,7 +74,7 @@ const createMockAdminMiddleware = () => {
         id: 'admin-role', 
         name: 'admin', 
         description: null, 
-        permissions: ['users.create', 'roles.create'] 
+        permissions: ['admins.create', 'roles.create'] 
       } 
     } 
   }))

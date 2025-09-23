@@ -37,7 +37,7 @@ export async function createUserWithHashedPassword(
   const { password, ...rest } = userData;
   const hashedPassword = await hashPassword(password);
   
-  return await prisma.user.create({
+  return await prisma.admin.create({
     data: {
       ...rest,
       password: hashedPassword,

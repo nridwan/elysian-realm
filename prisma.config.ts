@@ -6,6 +6,7 @@ import { resolve } from "path";
 config({ path: resolve(__dirname, ".env") });
 
 export default defineConfig({
+  schema: "./prisma/schema",
   migrations: {
     seed: `bun run prisma/seed.ts`,
   },

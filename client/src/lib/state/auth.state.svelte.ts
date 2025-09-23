@@ -1,6 +1,6 @@
 import { goto } from "$app/navigation";
 import * as authJwtDatasource from "$lib/datasource/auth-jwt.datasource";
-import type { User } from "$lib/types/user.type";
+import type { Admin } from "$lib/types/user.type";
 import { PersistentStore } from "$lib/utils/persistent-store";
 
 // Define types for our auth state
@@ -11,7 +11,7 @@ interface AuthTokens {
 
 interface AuthState {
   isAuthenticated: boolean;
-  user: User | null;
+  user: Admin | null;
   tokens: AuthTokens;
 }
 
@@ -41,13 +41,14 @@ function parseJwt(token: string): authJwtDatasource.TokenPayload | null {
     }).join(''));
     
     return JSON.parse(jsonPayload);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return null;
   }
 }
 
 // Unpack user info from token
-function unpackUserFromToken(accessToken: string): User | null {
+function unpackUserFromToken(accessToken: string): Admin | null {
   const tokenPayload = parseJwt(accessToken);
   if (!tokenPayload) {
     return null;
@@ -223,7 +224,8 @@ export async function refreshToken(): Promise<boolean> {
     isUpdatingFromStorage = false;
     
     return true;
-  } catch (error) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (e) {
     // If refresh fails, logout the user
     await logout();
     return false;

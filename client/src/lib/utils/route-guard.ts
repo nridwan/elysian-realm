@@ -3,13 +3,13 @@ import { authStateStore, hasPermission } from "$lib/state/auth.state.svelte";
 
 // Map of routes to required permissions following the backend format
 const routePermissions: Record<string, string> = {
-  // User Management
-  '/admin/users': 'users.read',
+  // Admin Management
+  '/admin/users': 'admins.read',
   '/admin/roles': 'roles.read',
 };
 
 export function checkRouteAccess(pathname: string): boolean {
-  // If user is not authenticated, redirect to login
+  // If admin is not authenticated, redirect to login
   if (!authStateStore.isAuthenticated) {
     goto('/auth/login');
     return false;
@@ -18,7 +18,7 @@ export function checkRouteAccess(pathname: string): boolean {
   // Check if this route requires specific permissions
   const requiredPermission = routePermissions[pathname];
   if (requiredPermission) {
-    // Check if user has the required permission
+    // Check if admin has the required permission
     if (!hasPermission(requiredPermission)) {
       // Redirect to unauthorized page or dashboard
       goto('/');
@@ -26,6 +26,6 @@ export function checkRouteAccess(pathname: string): boolean {
     }
   }
   
-  // User has access
+  // Admin has access
   return true;
 }

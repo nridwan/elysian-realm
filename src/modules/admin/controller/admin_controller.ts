@@ -19,9 +19,9 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
     .group('/api/admin', (app) =>
       app
         .use(admin)
-        // User management
+        // Admin management
         .get(
-          '/users',
+          '/admins',
           async ({ query, responseTools }) => {
             const { page = '1', limit = '10' } = query
             const pageNum = parseInt(page)
@@ -45,28 +45,28 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                   description: user.role.description,
                 }
               }))
-            }, '200', 'Users retrieved successfully')
+            }, '200', 'Admins retrieved successfully')
           },
           {
             query: dto.AdminPaginationQueryDto,
             response: dto.AdminUsersResponseDto,
-            hasPermission: 'users.read',
+            hasPermission: 'admins.read',
             detail: {
               tags: ['Admin'],
-              summary: 'Get Users',
-              description: 'Retrieve a paginated list of users',
+              summary: 'Get Admins',
+              description: 'Retrieve a paginated list of admins',
               security: [{ jwt: [] }]
             }
           }
         )
         .get(
-          '/users/:id',
+          '/admins/:id',
           async ({ params, responseTools }) => {
             const { id } = params
             const user = await service.getUserById(id)
 
             if (!user) {
-              return responseTools.generateErrorResponse('User not found', '404', 'User not found')
+              return responseTools.generateErrorResponse('Admin not found', '404', 'Admin not found')
             }
 
             return responseTools.generateResponse({
@@ -81,28 +81,28 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                   description: user.role.description,
                 }
               }
-            }, '200', 'User retrieved successfully')
+            }, '200', 'Admin retrieved successfully')
           },
           {
             params: dto.IdParamDto,
             response: dto.AdminUserResponseDto,
-            hasPermission: 'users.read',
+            hasPermission: 'admins.read',
             detail: {
               tags: ['Admin'],
-              summary: 'Get User by ID',
-              description: 'Retrieve a specific user by their ID',
+              summary: 'Get Admin by ID',
+              description: 'Retrieve a specific admin by their ID',
               security: [{ jwt: [] }]
             }
           }
         )
         .put(
-          '/users/:id',
+          '/admins/:id',
           async ({ params, body, responseTools }) => {
             const { id } = params
             const user = await service.updateUser(id, body)
 
             if (!user) {
-              return responseTools.generateErrorResponse('Failed to update user', '400', 'Failed to update user')
+              return responseTools.generateErrorResponse('Failed to update admin', '400', 'Failed to update admin')
             }
 
             return responseTools.generateResponse({
@@ -117,28 +117,28 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                   description: user.role.description,
                 }
               }
-            }, '200', 'User updated successfully')
+            }, '200', 'Admin updated successfully')
           },
           {
             params: dto.IdParamDto,
             body: dto.UpdateUserRequestDto,
             response: dto.AdminUserResponseDto,
-            hasPermission: 'users.update',
+            hasPermission: 'admins.update',
             detail: {
               tags: ['Admin'],
-              summary: 'Update User',
-              description: 'Update a user by their ID',
+              summary: 'Update Admin',
+              description: 'Update an admin by their ID',
               security: [{ jwt: [] }]
             }
           }
         )
         .post(
-          '/users',
+          '/admins',
           async ({ body, responseTools }) => {
             const user = await service.createUser(body)
 
             if (!user) {
-              return responseTools.generateErrorResponse('Failed to create user', '400', 'Failed to create user')
+              return responseTools.generateErrorResponse('Failed to create admin', '400', 'Failed to create admin')
             }
 
             return responseTools.generateResponse({
@@ -153,40 +153,40 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                   description: user.role.description,
                 }
               }
-            }, '200', 'User created successfully')
+            }, '200', 'Admin created successfully')
           },
           {
             body: dto.CreateUserRequestDto,
             response: dto.AdminUserResponseDto,
-            hasPermission: 'users.create',
+            hasPermission: 'admins.create',
             detail: {
               tags: ['Admin'],
-              summary: 'Create User',
-              description: 'Create a new user',
+              summary: 'Create Admin',
+              description: 'Create a new admin',
               security: [{ jwt: [] }]
             }
           }
         )
         .delete(
-          '/users/:id',
+          '/admins/:id',
           async ({ params, responseTools }) => {
             const { id } = params
             const success = await service.deleteUser(id)
 
             if (!success) {
-              return responseTools.generateErrorResponse('Failed to delete user', '400', 'Failed to delete user')
+              return responseTools.generateErrorResponse('Failed to delete admin', '400', 'Failed to delete admin')
             }
 
-            return responseTools.generateResponse({}, '200', 'User deleted successfully')
+            return responseTools.generateResponse({}, '200', 'Admin deleted successfully')
           },
           {
             params: dto.IdParamDto,
             response: dto.AdminSuccessResponseDto,
-            hasPermission: 'users.delete',
+            hasPermission: 'admins.delete',
             detail: {
               tags: ['Admin'],
-              summary: 'Delete User',
-              description: 'Delete a user by their ID',
+              summary: 'Delete Admin',
+              description: 'Delete an admin by their ID',
               security: [{ jwt: [] }]
             }
           }

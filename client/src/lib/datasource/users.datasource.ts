@@ -2,7 +2,7 @@ import { superFetch } from '../utils/fetch';
 
 const API_BASE_URL = '/api/admin';
 
-export interface User {
+export interface Admin {
   id: string;
   email: string;
   name: string;
@@ -14,57 +14,57 @@ export interface User {
   };
 }
 
-export interface CreateUserRequest {
+export interface CreateAdminRequest {
   name: string;
   email: string;
   role_id: string;
 }
 
-export interface UpdateUserRequest {
+export interface UpdateAdminRequest {
   name?: string;
   email?: string;
   role_id?: string;
 }
 
-export interface PaginatedUsers {
+export interface PaginatedAdmins {
   page: number;
   limit: number;
   total: number;
   pages: number;
-  data: User[];
+  data: Admin[];
 }
 
-// Get all users with pagination
-export async function getUsers(page: number = 1, limit: number = 10): Promise<PaginatedUsers> {
-  return superFetch(`${API_BASE_URL}/users?page=${page}&limit=${limit}`);
+// Get all admins with pagination
+export async function getAdmins(page: number = 1, limit: number = 10): Promise<PaginatedAdmins> {
+  return superFetch(`${API_BASE_URL}/admins?page=${page}&limit=${limit}`);
 }
 
-// Get user by ID
-export async function getUserById(id: string): Promise<{ user: User }> {
-  return superFetch(`${API_BASE_URL}/users/${id}`);
+// Get admin by ID
+export async function getAdminById(id: string): Promise<{ admin: Admin }> {
+  return superFetch(`${API_BASE_URL}/admins/${id}`);
 }
 
-// Create a new user
-export async function createUser(user: CreateUserRequest): Promise<{ user: User }> {
-  return superFetch(`${API_BASE_URL}/users`, {
+// Create a new admin
+export async function createAdmin(admin: CreateAdminRequest): Promise<{ admin: Admin }> {
+  return superFetch(`${API_BASE_URL}/admins`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(user),
+    body: JSON.stringify(admin),
   });
 }
 
-// Update a user
-export async function updateUser(id: string, user: UpdateUserRequest): Promise<{ user: User }> {
-  return superFetch(`${API_BASE_URL}/users/${id}`, {
+// Update an admin
+export async function updateAdmin(id: string, admin: UpdateAdminRequest): Promise<{ admin: Admin }> {
+  return superFetch(`${API_BASE_URL}/admins/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(user),
+    body: JSON.stringify(admin),
   });
 }
 
-// Delete a user
-export async function deleteUser(id: string): Promise<void> {
-  return superFetch(`${API_BASE_URL}/users/${id}`, {
+// Delete an admin
+export async function deleteAdmin(id: string): Promise<void> {
+  return superFetch(`${API_BASE_URL}/admins/${id}`, {
     method: 'DELETE',
   });
 }

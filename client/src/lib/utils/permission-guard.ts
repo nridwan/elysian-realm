@@ -2,11 +2,11 @@ import { hasPermission, hasRole } from '../state/auth.state.svelte';
 
 // Common permissions
 export const PERMISSIONS = {
-  USERS: {
-    READ: 'users.read',
-    CREATE: 'users.create',
-    UPDATE: 'users.update',
-    DELETE: 'users.delete',
+  ADMINS: {
+    READ: 'admins.read',
+    CREATE: 'admins.create',
+    UPDATE: 'admins.update',
+    DELETE: 'admins.delete',
   },
   ROLES: {
     READ: 'roles.read',
@@ -52,10 +52,10 @@ export function canAccessRouteByRole(allowedRoles: string[]): boolean {
 export const routeGuards = {
   admin: () => hasRole('Super Admin') || hasRole('Administrator'),
   users: {
-    read: () => canAccessRoute([PERMISSIONS.USERS.READ]),
-    create: () => canAccessRoute([PERMISSIONS.USERS.CREATE]),
-    update: () => canAccessRoute([PERMISSIONS.USERS.UPDATE]),
-    delete: () => canAccessRoute([PERMISSIONS.USERS.DELETE]),
+    read: () => canAccessRoute([PERMISSIONS.ADMINS.READ]),
+    create: () => canAccessRoute([PERMISSIONS.ADMINS.CREATE]),
+    update: () => canAccessRoute([PERMISSIONS.ADMINS.UPDATE]),
+    delete: () => canAccessRoute([PERMISSIONS.ADMINS.DELETE]),
   },
   roles: {
     read: () => canAccessRoute([PERMISSIONS.ROLES.READ]),

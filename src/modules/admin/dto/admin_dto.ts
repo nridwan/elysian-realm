@@ -85,7 +85,7 @@ export const RoleDto = t.Object({
   }), t.Null()]),
   permissions: t.Optional(t.Array(t.String({
     description: 'Array of permissions assigned to the role',
-    examples: ['users.read', 'users.create'],
+    examples: ['admins.read', 'admins.create'],
     minLength: 1,
   }), {
     description: 'Optional array of permissions'
@@ -236,7 +236,7 @@ export const CreateRoleRequestDto = t.Object({
   })),
   permissions: t.Optional(t.Array(t.String({
     description: 'Array of permissions for this role',
-    examples: ['users.read', 'users.create'],
+    examples: ['admins.read', 'admins.create'],
     minLength: 1,
   }), {
     description: 'Optional array of permissions'
@@ -257,7 +257,7 @@ export const UpdateRoleRequestDto = t.Partial(
     })),
     permissions: t.Optional(t.Array(t.String({
       description: 'Array of permissions for this role',
-      examples: ['users.read', 'users.create'],
+      examples: ['admins.read', 'admins.create'],
       minLength: 1,
     }), {
       description: 'Optional array of permissions'

@@ -1,6 +1,6 @@
 // Shared permissions definition
 export const PERMISSIONS = {
-  users: ["read", "create", "update", "delete"],
+  admins: ["read", "create", "update", "delete"],
   roles: ["read", "create", "update", "delete"]
 }
 
@@ -23,7 +23,7 @@ export const getSuperAdminPermissions = (): string[] => {
 // Generate admin permissions (limited permissions)
 export const getAdminPermissions = (): string[] => {
   return [
-    "users.read",
-    "users.create"
+    "admins.read",
+    "admins.create"
   ]
 }
