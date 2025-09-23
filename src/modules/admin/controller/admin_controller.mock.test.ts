@@ -106,7 +106,7 @@ describe('AdminController - Mocked Service Tests', () => {
       }))
 
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users', { 
+      new Request('http://localhost/api/admin/admins', { 
         method: 'GET'
       })
     )
@@ -147,7 +147,7 @@ describe('AdminController - Mocked Service Tests', () => {
       }))
 
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users/1', { 
+      new Request('http://localhost/api/admin/admins/1', { 
         method: 'GET'
       })
     )
@@ -172,7 +172,7 @@ describe('AdminController - Mocked Service Tests', () => {
       }))
 
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users/999', { 
+      new Request('http://localhost/api/admin/admins/999', { 
         method: 'GET'
       })
     )
@@ -211,7 +211,7 @@ describe('AdminController - Mocked Service Tests', () => {
       }))
 
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users/1', {
+      new Request('http://localhost/api/admin/admins/1', {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json'
@@ -265,7 +265,7 @@ describe('AdminController - Mocked Service Tests', () => {
       }))
 
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users/1', { 
+      new Request('http://localhost/api/admin/admins/1', { 
         method: 'DELETE'
       })
     )
@@ -297,7 +297,7 @@ describe('AdminController - Mocked Service Tests', () => {
       }))
 
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users/1', { 
+      new Request('http://localhost/api/admin/admins/1', { 
         method: 'DELETE'
       })
     )

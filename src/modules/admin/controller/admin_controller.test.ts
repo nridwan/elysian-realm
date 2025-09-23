@@ -17,7 +17,7 @@ describe('AdminController - Endpoint Tests', () => {
     
     // Test that the users endpoint exists and accepts GET
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users', { method: 'GET' })
+      new Request('http://localhost/api/admin/admins', { method: 'GET' })
     )
     // Should return 401 for unauthorized access, not 404
     expect(response.status).toBe(401)
@@ -66,7 +66,7 @@ describe('AdminController - Endpoint Tests', () => {
     
     // Test that the user detail endpoint exists
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users/1', { method: 'GET' })
+      new Request('http://localhost/api/admin/admins/1', { method: 'GET' })
     )
     // Should return 401 for unauthorized access, not 404
     expect(response.status).toBe(401)
@@ -77,7 +77,7 @@ describe('AdminController - Endpoint Tests', () => {
     
     // Test PUT to user endpoint
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users/1', {
+      new Request('http://localhost/api/admin/admins/1', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'Updated Name' })
@@ -92,7 +92,7 @@ describe('AdminController - Endpoint Tests', () => {
     
     // Test DELETE to user endpoint
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users/1', { method: 'DELETE' })
+      new Request('http://localhost/api/admin/admins/1', { method: 'DELETE' })
     )
     // Should return 401 for unauthorized access, not 404
     expect(response.status).toBe(401)

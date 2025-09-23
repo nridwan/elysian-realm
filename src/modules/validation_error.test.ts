@@ -186,7 +186,7 @@ describe('Validation Error Responses', () => {
       }))
 
     const response = await app.handle(
-      new Request('http://localhost/api/admin/users', {
+      new Request('http://localhost/api/admin/admins', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
