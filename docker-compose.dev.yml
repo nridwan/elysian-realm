@@ -18,6 +18,22 @@ services:
       timeout: 5s
       retries: 5
 
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: elysian-realm-redis-dev
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Jaeger for distributed tracing
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -49,6 +65,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       jaeger:
         condition: service_started
     environment:
@@ -62,6 +80,8 @@ services:
       - OTEL_EXPORTER_TYPE=otlp
       - OTEL_OTLP_ENDPOINT=http://jaeger:4318/v1/traces
       - SWAGGER_ENABLED=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     ports:
       - '3000:3000'
       - '3001:3001'  # Health check port
@@ -104,3 +124,4 @@ services:
 
 volumes:
   db_data:
+  redis_data:

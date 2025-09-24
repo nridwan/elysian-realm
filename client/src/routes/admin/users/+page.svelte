@@ -110,7 +110,7 @@
 </script>
 
 <svelte:head>
-  <title>Admin Management - Elysian Realm</title>
+  <title>Admin Management - {import.meta.env.VITE_APP_NAME || 'Elysian Realm'}</title>
 </svelte:head>
 
 <PermissionGuard permissions={['admins.read']} showDenied>

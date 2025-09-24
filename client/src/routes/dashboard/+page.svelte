@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>Dashboard - Elysian Realm</title>
+  <title>Dashboard - {import.meta.env.VITE_APP_NAME || 'Elysian Realm'}</title>
 </svelte:head>
 
 <div class="container mx-auto p-4">

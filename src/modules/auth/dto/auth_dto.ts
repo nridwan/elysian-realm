@@ -24,6 +24,10 @@ export const TokenResponseDataDto = t.Object({
     description: 'Refresh token for obtaining new access tokens',
     examples: ['dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gdGV4dA==']
   }),
+  hasPasskeys: t.Optional(t.Boolean({
+    description: 'Whether the user has registered passkeys',
+    examples: [true]
+  })),
 })
 
 export const RefreshTokenDto = t.Object({

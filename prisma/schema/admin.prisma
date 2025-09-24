@@ -5,10 +5,27 @@ model Admin {
   name       String
   role_id    String
   role       Role     @relation(fields: [role_id], references: [id])
+  passkeys   Passkey[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   @@map("admins")
+}
+
+model Passkey {
+  id         String   @id
+  userId     String
+  user       Admin    @relation(fields: [userId], references: [id])
+  name       String?  // Optional name for the passkey
+  publicKey  Bytes
+  counter    Int
+  deviceType String?
+  backedUp   Boolean
+  transports String[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("passkeys")
 }
 
 model Role {

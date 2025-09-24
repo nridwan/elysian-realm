@@ -7,6 +7,7 @@ import { PersistentStore } from "$lib/utils/persistent-store";
 interface AuthTokens {
   accessToken: string | null;
   refreshToken: string | null;
+  hasPasskeys?: boolean;
 }
 
 interface AuthState {
@@ -57,10 +58,20 @@ function unpackUserFromToken(accessToken: string): Admin | null {
   return {
     id: tokenPayload.id,
     email: tokenPayload.email,
-    name: tokenPayload.email.split("@")[0], // Fallback name
+    name: tokenPayload.name || tokenPayload.email.split("@")[0], // Use name from token or fallback
     role_id: tokenPayload.role.id,
     role: tokenPayload.role,
   };
+}
+
+// Get hasPasskeys from token
+function getHasPasskeysFromToken(accessToken: string): boolean | undefined {
+  const tokenPayload = parseJwt(accessToken);
+  if (!tokenPayload) {
+    return undefined;
+  }
+  
+  return tokenPayload.hasPasskeys;
 }
 
 // Update auth state
@@ -160,6 +171,9 @@ export async function login(email: string, password: string) {
       throw new Error("Invalid token received");
     }
     
+    // Get hasPasskeys from token
+    const hasPasskeys = getHasPasskeysFromToken(response.access_token);
+    
     // Set flag to prevent handling this update as a storage change
     isUpdatingFromStorage = true;
     await setAuthState({
@@ -168,6 +182,7 @@ export async function login(email: string, password: string) {
       tokens: {
         accessToken: response.access_token,
         refreshToken: response.refresh_token,
+        hasPasskeys
       },
     });
     isUpdatingFromStorage = false;
@@ -211,6 +226,9 @@ export async function refreshToken(): Promise<boolean> {
       throw new Error("Invalid token received");
     }
     
+    // Get hasPasskeys from token
+    const hasPasskeys = getHasPasskeysFromToken(response.access_token);
+    
     // Set flag to prevent handling this update as a storage change
     isUpdatingFromStorage = true;
     await setAuthState({
@@ -219,6 +237,7 @@ export async function refreshToken(): Promise<boolean> {
       tokens: {
         accessToken: response.access_token,
         refreshToken: response.refresh_token,
+        hasPasskeys
       },
     });
     isUpdatingFromStorage = false;
@@ -265,6 +284,37 @@ export async function initializeAuth() {
       // Invalid token, logout
       await logout();
     }
+  }
+}
+
+// Direct token-based authentication (for passkeys, OAuth, etc.)
+export async function authenticateWithTokens(accessToken: string, refreshToken: string) {
+  try {
+    // Parse the access token to get user info
+    const user = unpackUserFromToken(accessToken);
+    if (!user) {
+      throw new Error("Invalid token received");
+    }
+    
+    // Get hasPasskeys from token
+    const hasPasskeys = getHasPasskeysFromToken(accessToken);
+    
+    // Set flag to prevent handling this update as a storage change
+    isUpdatingFromStorage = true;
+    await setAuthState({
+      isAuthenticated: true,
+      user,
+      tokens: {
+        accessToken,
+        refreshToken,
+        hasPasskeys
+      },
+    });
+    isUpdatingFromStorage = false;
+    
+    return { success: true, user };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : "Token authentication failed" };
   }
 }
 

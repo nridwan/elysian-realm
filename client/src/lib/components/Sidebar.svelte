@@ -21,7 +21,7 @@
 <div class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
   <div class="flex items-center justify-between mt-8 px-2">
     <div class="flex items-center">
-      <span class="text-base-content text-2xl font-semibold ml-2">Elysian Realm</span>
+      <span class="text-base-content text-2xl font-semibold ml-2">{import.meta.env.VITE_APP_NAME || 'Elysian Realm'}</span>
     </div>
     <ThemeToggle />
   </div>

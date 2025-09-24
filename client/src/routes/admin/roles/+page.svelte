@@ -151,7 +151,7 @@
 </script>
 
 <svelte:head>
-  <title>Role Management - Elysian Realm</title>
+  <title>Role Management - {import.meta.env.VITE_APP_NAME || 'Elysian Realm'}</title>
 </svelte:head>
 
 <PermissionGuard permissions={['roles.read']} showDenied>

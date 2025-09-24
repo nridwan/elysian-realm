@@ -76,3 +76,30 @@ export const PaginationDto = createPaginationDto(t.Unknown())
 // Common response DTOs
 export const SuccessResponseDto = createBaseResponseDto(t.Object({}))
 export const ErrorResponseDto = createBaseResponseDto(t.Null())
+
+// Specific response DTOs for passkey operations
+export const PasskeyOptionsResponseDto = createBaseResponseDto(t.Object({
+  options: t.Unknown()
+}))
+
+export const PasskeyRegistrationResponseDto = createBaseResponseDto(t.Object({
+  success: t.Boolean()
+}))
+
+export const PasskeyAuthenticationResponseDto = createBaseResponseDto(t.Object({
+  access_token: t.String(),
+  refresh_token: t.String()
+}))
+
+export const PasskeyListResponseDto = createBaseResponseDto(t.Array(t.Object({
+  id: t.String(),
+  deviceType: t.String(),
+  backedUp: t.Boolean(),
+  transports: t.Array(t.String()),
+  created_at: t.String(), // ISO date string
+  updated_at: t.String()  // ISO date string
+})))
+
+export const PasskeyDeleteResponseDto = createBaseResponseDto(t.Object({
+  success: t.Boolean()
+}))

@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>Access Denied - Elysian Realm</title>
+  <title>Access Denied - {import.meta.env.VITE_APP_NAME || 'Elysian Realm'}</title>
 </svelte:head>
 
 <div class="min-h-screen flex items-center justify-center bg-base-200">

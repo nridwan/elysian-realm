@@ -3,6 +3,13 @@ export const config = {
   // Server configuration
   server: {
     port: parseInt(process.env.PORT || '3000', 10),
+    host: process.env.HOST || 'localhost',
+  },
+
+  // Application configuration
+  app: {
+    name: process.env.APP_NAME || 'Elysian Realm',
+    url: process.env.APP_URL || 'http://localhost:5173',
   },
 
   // JWT configuration
@@ -43,5 +50,20 @@ export const config = {
   cors: {
     origin: process.env.CORS_ORIGIN || '*',
     credentials: process.env.CORS_CREDENTIALS === 'true',
+  },
+
+  // Passkey/WebAuthn configuration
+  passkey: {
+    rpID: process.env.PASSKEY_RP_ID || 'localhost',
+    rpName: process.env.PASSKEY_RP_NAME || process.env.APP_NAME || 'Elysian Realm',
+    origin: process.env.PASSKEY_ORIGIN || process.env.APP_URL || 'http://localhost:5173',
+  },
+
+  // Redis configuration
+  redis: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379', 10),
+    password: process.env.REDIS_PASSWORD || '',
+    tls: process.env.REDIS_TLS === 'true',
   },
 }

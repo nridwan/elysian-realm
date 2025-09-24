@@ -1,16 +1,16 @@
 import { getTokens, refreshToken, logout } from '$lib/state/auth.state.svelte';
 import { clientConfig } from '$lib/config/client.config';
 
-interface SuperFetchOptions extends RequestInit {
-  // No more decrypt option as we're not using that anymore
-}
 
 let isRefreshing = false;
 let failedQueue: Array<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resolve: (value?: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reject: (reason?: any) => void;
 }> = [];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function processQueue(error: any, token: string | null = null) {
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) {
@@ -23,7 +23,8 @@ function processQueue(error: any, token: string | null = null) {
   failedQueue = [];
 }
 
-export async function superFetch<T = any>(url: string, options: SuperFetchOptions = {}): Promise<T> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function superFetch<T = any>(url: string, options: RequestInit = {}): Promise<T> {
   // Construct full URL with base URL
   const fullUrl = url.startsWith('http') ? url : `${clientConfig.API_BASE_URL}${url}`;
   

@@ -4,6 +4,7 @@ import { LoginDto, RefreshTokenDto, AuthTokenResponseDto } from '../dto/auth_dto
 import { adminAccessTokenPlugin, adminRefreshTokenPlugin, type RefreshTokenPayload } from '../../../plugins/jwt'
 import { responsePlugin } from '../../../plugins/response_plugin'
 import { authService } from '../services/auth_service_factory'
+import { passkeyService } from '../services/passkey_service_factory'
 
 interface AuthControllerOptions {
   service?: AuthService
@@ -33,6 +34,10 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
               return responseTools.generateErrorResponse(result.error, '401', result.error)
             }
 
+            // Check if user has passkeys
+            const passkeyCheck = await passkeyService.getUserPasskeys(result.user!.id)
+            const hasPasskeys = passkeyCheck.success && passkeyCheck.passkeys && passkeyCheck.passkeys.length > 0
+
             // Generate access token with user profile and permissions
             const user = result.user!
             const accessTokenValue = await adminAccessToken.sign({
@@ -42,7 +47,8 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
               role: {
                 name: user.role.name,
                 permissions: (user.role.permissions ?? []) as string[]
-              }
+              },
+              hasPasskeys // Add passkey information to token
             })
 
             // Generate refresh token with user id and email
@@ -53,7 +59,8 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
 
             return responseTools.generateResponse({
               access_token: accessTokenValue,
-              refresh_token: refreshTokenValue
+              refresh_token: refreshTokenValue,
+              hasPasskeys
             }, '200', 'Login successful')
           },
           {

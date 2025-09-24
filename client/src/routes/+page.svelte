@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-  <title>Dashboard - Elysian Realm</title>
+  <title>Dashboard - {import.meta.env.VITE_APP_NAME || 'Elysian Realm'}</title>
 </svelte:head>
 
 <div class="p-4">

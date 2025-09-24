@@ -11,14 +11,31 @@ export const JWTPayload = t.Object({
   role: t.Object({
     name: t.String(),
     permissions: t.Array(t.String())
-  })
+  }),
+  hasPasskeys: t.Optional(t.Boolean())
 })
+
+export type TokenPayload = {
+  id: string
+  email: string
+  name: string
+  role: {
+    name: string
+    permissions: string[]
+  }
+  hasPasskeys?: boolean
+}
 
 // Define the refresh token payload type
 export const RefreshTokenPayload = t.Object({
     id: t.String(),
     email: t.String(),
   })
+
+export type RefreshTokenPayloadType = {
+  id: string
+  email: string
+}
 
 // Create JWT plugins for admin access and refresh tokens
 export const adminAccessTokenPlugin = jwt({

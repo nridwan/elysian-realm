@@ -10,11 +10,13 @@ export interface LoginRequest {
 export interface AuthResponse {
   access_token: string;
   refresh_token: string;
+  hasPasskeys?: boolean;
 }
 
 export interface TokenPayload {
   id: string;
   email: string;
+  name: string;
   exp: number;
   role: {
     id: string;
@@ -22,6 +24,7 @@ export interface TokenPayload {
     description: string | null;
     permissions: string[];
   };
+  hasPasskeys?: boolean;
 }
 
 export async function login(credentials: LoginRequest): Promise<AuthResponse> {

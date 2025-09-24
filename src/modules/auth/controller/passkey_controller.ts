@@ -1,0 +1,312 @@
+import Elysia from 'elysia'
+import { PasskeyService } from '../services/passkey_service'
+import { 
+  PasskeyRegistrationStartDto, 
+  PasskeyRegistrationFinishDto,
+  PasskeyAuthenticationStartDto,
+  PasskeyAuthenticationFinishDto,
+  PasskeyOptionsResponseDto,
+  PasskeyRegistrationResponseDto,
+  PasskeyAuthenticationResponseDto,
+  PasskeyListResponseDto,
+  PasskeyDeleteResponseDto,
+  PasswordlessAuthenticationStartDto
+} from '../dto/passkey_dto'
+import { adminAccessTokenPlugin, adminRefreshTokenPlugin, type TokenPayload } from '../../../plugins/jwt'
+import { responsePlugin } from '../../../plugins/response_plugin'
+import { passkeyService } from '../services/passkey_service_factory'
+import { PrismaClient } from '@prisma/client'
+import { adminMiddleware } from '../../admin/middleware/admin_middleware'
+import { ErrorResponseDto } from '../../../dto/base.dto'
+
+interface PasskeyControllerOptions {
+  service?: PasskeyService
+  adminAccessTokenPlugin?: typeof adminAccessTokenPlugin
+  adminRefreshTokenPlugin?: typeof adminRefreshTokenPlugin
+}
+
+export const createPasskeyController = (options: PasskeyControllerOptions = {}) => {
+  const service = options.service || passkeyService
+  const adminAccessTokenJwt = options.adminAccessTokenPlugin || adminAccessTokenPlugin
+  const adminRefreshTokenJwt = options.adminRefreshTokenPlugin || adminRefreshTokenPlugin
+  const admin = adminMiddleware()
+
+  return new Elysia({ name: 'passkey-controller' })
+    .use(responsePlugin({ defaultServiceName: 'PASSKEY' }))
+    .use(adminAccessTokenJwt)
+    .use(adminRefreshTokenJwt)
+    .use(admin)
+    .group('/api/auth/passkeys', (app) => 
+      app
+        .get(
+          '/',
+          async ({ user, set, responseTools }) => {
+            user = user!
+            const result = await service.getUserPasskeys(user.id)
+            
+            if (!result.success) {
+              set.status = 400
+              return responseTools.generateErrorResponse(result.error!, '400', result.error!)
+            }
+            
+            return responseTools.generateResponse(
+              result.passkeys,
+              '200',
+              'Passkeys retrieved successfully'
+            )
+          },
+          {
+            response: {
+              200: PasskeyListResponseDto,
+              400: ErrorResponseDto,
+            },
+            needAuth: true,
+            detail: {
+              tags: ['Passkey'],
+              summary: 'Get User Passkeys',
+              description: 'Retrieve all passkeys associated with the authenticated user'
+            }
+          }
+        )
+        // Delete a passkey (requires auth)
+        .delete(
+          '/:id',
+          async ({ user, params, set, responseTools }) => {
+            user = user!
+            const { id } = params
+            const result = await service.deletePasskey(user.id, id)
+            
+            if (!result.success) {
+              set.status = 400
+              return responseTools.generateErrorResponse(result.error!, '400', result.error!)
+            }
+            
+            return responseTools.generateResponse(
+              { success: true },
+              '200',
+              'Passkey deleted successfully'
+            )
+          },
+          {
+            response: {
+              200: PasskeyDeleteResponseDto,
+              400: ErrorResponseDto,
+            },
+            needAuth: true,
+            detail: {
+              tags: ['Passkey'],
+              summary: 'Delete Passkey',
+              description: 'Delete a passkey associated with the authenticated user'
+            }
+          }
+        )
+    )
+    .group('/api/auth/passkey', (app) =>
+      app
+        // Start passkey authentication with email (no auth required)
+        .post(
+          '/login',
+          async ({ body, set, responseTools }) => {
+            const { email, uuid } = body
+            
+            const authenticationOptions = await service.generateAuthenticationOptions({ email, uuid })
+            
+            if (!authenticationOptions.success) {
+              set.status = 400
+              return responseTools.generateErrorResponse(authenticationOptions.error!, '400', authenticationOptions.error!)
+            }
+            
+            return responseTools.generateResponse(
+              { options: authenticationOptions.options! },
+              '200',
+              'Authentication options generated successfully'
+            )
+          },
+          {
+            body: PasskeyAuthenticationStartDto,
+            response: {
+              200: PasskeyOptionsResponseDto,
+              400: ErrorResponseDto,
+            },
+            detail: {
+              tags: ['Passkey'],
+              summary: 'Start Passkey Authentication',
+              description: 'Generate options for authenticating with a passkey'
+            }
+          }
+        )
+        // Start passwordless passkey authentication (no auth required, no email)
+        .post(
+          '/login/passwordless',
+          async ({ body, set, responseTools }) => {
+            const { uuid } = body
+            const authenticationOptions = await service.generatePasswordlessAuthenticationOptions(uuid)
+            
+            if (!authenticationOptions.success) {
+              set.status = 400
+              return responseTools.generateErrorResponse(authenticationOptions.error!, '400', authenticationOptions.error!)
+            }
+            
+            return responseTools.generateResponse(
+              { options: authenticationOptions.options! },
+              '200',
+              'Passwordless authentication options generated successfully'
+            )
+          },
+          {
+            body: PasswordlessAuthenticationStartDto,
+            response: {
+              200: PasskeyOptionsResponseDto,
+              400: ErrorResponseDto,
+            },
+            detail: {
+              tags: ['Passkey'],
+              summary: 'Start Passwordless Passkey Authentication',
+              description: 'Generate options for passwordless passkey authentication (no email required)'
+            }
+          }
+        )
+        // Finish passkey authentication (no auth required)
+        .post(
+          '/login/finish',
+          async ({ body, adminAccessToken, adminRefreshToken, set, responseTools }) => {
+            const { response, uuid } = body
+            // Pass empty user ID for passwordless authentication, as the passkey ID will identify the user
+            const verification = await service.verifyAuthenticationResponse('', response, uuid)
+            
+            if (!verification.success) {
+              set.status = 401
+              return responseTools.generateErrorResponse(verification.error!, '401', verification.error!)
+            }
+            
+            // Get user data for token generation using the userId returned from verification
+            const prisma = new PrismaClient()
+            const user = await prisma.admin.findUnique({
+              where: { id: verification.userId! },
+              include: { role: true },
+            })
+            
+            if (!user) {
+              set.status = 401
+              return responseTools.generateErrorResponse('User not found', '401', 'User not found')
+            }
+            
+            // Generate access token with user profile and permissions
+            const accessTokenValue = await adminAccessToken.sign({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: {
+                name: user.role.name,
+                permissions: (user.role.permissions ?? []) as string[]
+              }
+            })
+            
+            // Generate refresh token with user id and email
+            const refreshTokenValue = await adminRefreshToken.sign({
+              id: user.id,
+              email: user.email
+            })
+            
+            return responseTools.generateResponse({
+              access_token: accessTokenValue,
+              refresh_token: refreshTokenValue
+            }, '200', 'Login successful')
+          },
+          {
+            body: PasskeyAuthenticationFinishDto,
+            response: {
+              200: PasskeyAuthenticationResponseDto,
+              401: ErrorResponseDto,
+            },
+            detail: {
+              tags: ['Passkey'],
+              summary: 'Finish Passkey Authentication',
+              description: 'Verify authentication response and generate tokens'
+            }
+          }
+        )
+        // Start passkey registration (requires auth)
+        .post(
+          '/register',
+          async ({ user, body, set, responseTools }) => {
+            const { email, name, uuid } = body
+            user = user!
+            
+            // Verify the email matches the authenticated user
+            if (user.email !== email) {
+              set.status = 403
+              return responseTools.generateErrorResponse('Email does not match authenticated user', '403', 'Email does not match authenticated user')
+            }
+            
+            const registrationOptions = await service.generateRegistrationOptions({
+              userId: user.id,
+              email: user.email,
+              name: user.name,
+              passKeyName: name,
+              uuid
+            })
+            
+            if (!registrationOptions.success) {
+              set.status = 400
+              return responseTools.generateErrorResponse(registrationOptions.error!, '400', registrationOptions.error!)
+            }
+            
+            return responseTools.generateResponse(
+              { options: registrationOptions.options! },
+              '200',
+              'Registration options generated successfully'
+            )
+          },
+          {
+            body: PasskeyRegistrationStartDto,
+            response: {
+              200: PasskeyOptionsResponseDto,
+              400: ErrorResponseDto,
+              403: ErrorResponseDto,
+            },
+            needAuth: true,
+            detail: {
+              tags: ['Passkey'],
+              summary: 'Start Passkey Registration',
+              description: 'Generate options for registering a new passkey (requires authentication)'
+            }
+          }
+        )
+        // Finish passkey registration (requires auth)
+        .post(
+          '/register/finish',
+          async ({ user, body, set, responseTools, adminAccessToken }) => {
+            user = user!
+            const { response, uuid } = body
+            const verification = await service.verifyRegistrationResponse(user.id, response, uuid)
+            
+            if (!verification.success) {
+              set.status = 400
+              return responseTools.generateErrorResponse(verification.error!, '400', verification.error!)
+            }
+            
+            return responseTools.generateResponse(
+              { success: true },
+              '200',
+              'Passkey registered successfully'
+            )
+          },
+          {
+            body: PasskeyRegistrationFinishDto,
+            response: {
+              200: PasskeyRegistrationResponseDto,
+              400: ErrorResponseDto,
+            },
+            needAuth: true,
+            detail: {
+              tags: ['Passkey'],
+              summary: 'Finish Passkey Registration',
+              description: 'Verify and store a new passkey (requires authentication)'
+            }
+          }
+        )
+    )
+}
+
+export const passkeyController = createPasskeyController()
