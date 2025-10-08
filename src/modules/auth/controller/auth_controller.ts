@@ -48,7 +48,7 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
                 name: user.role.name,
                 permissions: (user.role.permissions ?? []) as string[]
               },
-              hasPasskeys // Add passkey information to token
+              has_passkeys: hasPasskeys // Add passkey information to token
             })
 
             // Generate refresh token with user id and email
@@ -60,7 +60,7 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
             return responseTools.generateResponse({
               access_token: accessTokenValue,
               refresh_token: refreshTokenValue,
-              hasPasskeys
+              has_passkeys: hasPasskeys
             }, '200', 'Login successful')
           },
           {

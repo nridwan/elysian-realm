@@ -12,7 +12,7 @@ export const JWTPayload = t.Object({
     name: t.String(),
     permissions: t.Array(t.String())
   }),
-  hasPasskeys: t.Optional(t.Boolean())
+  has_passkeys: t.Optional(t.Boolean())
 })
 
 export type TokenPayload = {
@@ -23,7 +23,7 @@ export type TokenPayload = {
     name: string
     permissions: string[]
   }
-  hasPasskeys?: boolean
+  has_passkeys?: boolean
 }
 
 // Define the refresh token payload type

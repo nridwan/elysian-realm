@@ -71,7 +71,7 @@ function getHasPasskeysFromToken(accessToken: string): boolean | undefined {
     return undefined;
   }
   
-  return tokenPayload.hasPasskeys;
+  return tokenPayload.has_passkeys;
 }
 
 // Update auth state
