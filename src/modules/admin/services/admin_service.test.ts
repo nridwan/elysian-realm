@@ -1,31 +1,31 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, mock } from 'bun:test'
 import { PrismaClient } from '@prisma/client'
 import { AdminService } from './admin_service'
 
-// Mock Prisma client
+// Mock Prisma client with Bun.mock
 const mockPrisma = {
   user: {
-    findMany: vi.fn(),
-    findUnique: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-    count: vi.fn(),
-    create: vi.fn(),
+    findMany: mock(() => Promise.resolve([])),
+    findUnique: mock(() => Promise.resolve(null)),
+    update: mock(() => Promise.resolve({})),
+    delete: mock(() => Promise.resolve({})),
+    count: mock(() => Promise.resolve(0)),
+    create: mock(() => Promise.resolve({})),
   },
   role: {
-    findMany: vi.fn(),
-    findUnique: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-    create: vi.fn(),
+    findMany: mock(() => Promise.resolve([])),
+    findUnique: mock(() => Promise.resolve(null)),
+    update: mock(() => Promise.resolve({})),
+    delete: mock(() => Promise.resolve({})),
+    create: mock(() => Promise.resolve({})),
   },
-  $on: vi.fn(),
-  $connect: vi.fn(),
-  $disconnect: vi.fn(),
-  $executeRaw: vi.fn(),
-  $queryRaw: vi.fn(),
-  $transaction: vi.fn(),
-  $use: vi.fn(),
+  $on: mock(() => Promise.resolve({})),
+  $connect: mock(() => Promise.resolve({})),
+  $disconnect: mock(() => Promise.resolve({})),
+  $executeRaw: mock(() => Promise.resolve({})),
+  $queryRaw: mock(() => Promise.resolve({})),
+  $transaction: mock(() => Promise.resolve({})),
+  $use: mock(() => Promise.resolve({})),
 } as unknown as PrismaClient
 
 describe('AdminService - Logic Tests', () => {

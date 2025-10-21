@@ -1,23 +1,23 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, mock } from 'bun:test'
 import { PrismaClient } from '@prisma/client'
 import { AuthService } from './auth_service'
 
-// Mock Prisma client
+// Mock Prisma client with Bun.mock
 const mockPrisma = {
   admin: {
-    findUnique: vi.fn(),
-    create: vi.fn(),
+    findUnique: mock(() => Promise.resolve(null)),
+    create: mock(() => Promise.resolve({})),
   },
   role: {
-    findUnique: vi.fn(),
+    findUnique: mock(() => Promise.resolve(null)),
   },
-  $on: vi.fn(),
-  $connect: vi.fn(),
-  $disconnect: vi.fn(),
-  $executeRaw: vi.fn(),
-  $queryRaw: vi.fn(),
-  $transaction: vi.fn(),
-  $use: vi.fn(),
+  $on: mock(() => Promise.resolve({})),
+  $connect: mock(() => Promise.resolve({})),
+  $disconnect: mock(() => Promise.resolve({})),
+  $executeRaw: mock(() => Promise.resolve({})),
+  $queryRaw: mock(() => Promise.resolve({})),
+  $transaction: mock(() => Promise.resolve({})),
+  $use: mock(() => Promise.resolve({})),
 } as unknown as PrismaClient
 
 describe('AuthService - Logic Tests', () => {
@@ -59,7 +59,7 @@ describe('AuthService - Logic Tests', () => {
         updated_at: new Date(),
       }
 
-      mockPrisma.admin.findUnique = vi.fn().mockResolvedValue(mockUser)
+      mockPrisma.admin.findUnique = mock(() => Promise.resolve(mockUser)) as any;
 
       const service = new AuthService(mockPrisma)
       const result = await service.refreshAccessToken('test-user-id')
@@ -74,7 +74,7 @@ describe('AuthService - Logic Tests', () => {
 
     it('should return error when user does not exist', async () => {
       // Mock the Prisma client to return null (user not found)
-      mockPrisma.admin.findUnique = vi.fn().mockResolvedValue(null)
+      mockPrisma.admin.findUnique = mock(() => Promise.resolve(null)) as any;
 
       const service = new AuthService(mockPrisma)
       const result = await service.refreshAccessToken('non-existent-user-id')

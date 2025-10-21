@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, mock } from 'bun:test'
 import { PrismaClient } from '@prisma/client'
 import { AuthService } from './modules/auth/services/auth_service'
 import { AdminService } from './modules/admin/services/admin_service'
@@ -8,19 +8,19 @@ describe('Module Structure', () => {
     // Create a mock PrismaClient
     const prisma = {
       admin: {
-        findUnique: vi.fn(),
-        create: vi.fn(),
+        findUnique: mock(() => Promise.resolve(null)),
+        create: mock(() => Promise.resolve({})),
       },
       role: {
-        findUnique: vi.fn(),
+        findUnique: mock(() => Promise.resolve(null)),
       },
-      $on: vi.fn(),
-      $connect: vi.fn(),
-      $disconnect: vi.fn(),
-      $executeRaw: vi.fn(),
-      $queryRaw: vi.fn(),
-      $transaction: vi.fn(),
-      $use: vi.fn(),
+      $on: mock(() => Promise.resolve({})),
+      $connect: mock(() => Promise.resolve({})),
+      $disconnect: mock(() => Promise.resolve({})),
+      $executeRaw: mock(() => Promise.resolve({})),
+      $queryRaw: mock(() => Promise.resolve({})),
+      $transaction: mock(() => Promise.resolve({})),
+      $use: mock(() => Promise.resolve({})),
     } as unknown as PrismaClient
     
     // This test verifies that we can instantiate the auth service
@@ -32,27 +32,27 @@ describe('Module Structure', () => {
     // Create a mock PrismaClient
     const prisma = {
       admin: {
-        findMany: vi.fn(),
-        findUnique: vi.fn(),
-        update: vi.fn(),
-        delete: vi.fn(),
-        count: vi.fn(),
-        create: vi.fn(),
+        findMany: mock(() => Promise.resolve([])),
+        findUnique: mock(() => Promise.resolve(null)),
+        update: mock(() => Promise.resolve({})),
+        delete: mock(() => Promise.resolve({})),
+        count: mock(() => Promise.resolve(0)),
+        create: mock(() => Promise.resolve({})),
       },
       role: {
-        findMany: vi.fn(),
-        findUnique: vi.fn(),
-        update: vi.fn(),
-        delete: vi.fn(),
-        create: vi.fn(),
+        findMany: mock(() => Promise.resolve([])),
+        findUnique: mock(() => Promise.resolve(null)),
+        update: mock(() => Promise.resolve({})),
+        delete: mock(() => Promise.resolve({})),
+        create: mock(() => Promise.resolve({})),
       },
-      $on: vi.fn(),
-      $connect: vi.fn(),
-      $disconnect: vi.fn(),
-      $executeRaw: vi.fn(),
-      $queryRaw: vi.fn(),
-      $transaction: vi.fn(),
-      $use: vi.fn(),
+      $on: mock(() => Promise.resolve({})),
+      $connect: mock(() => Promise.resolve({})),
+      $disconnect: mock(() => Promise.resolve({})),
+      $executeRaw: mock(() => Promise.resolve({})),
+      $queryRaw: mock(() => Promise.resolve({})),
+      $transaction: mock(() => Promise.resolve({})),
+      $use: mock(() => Promise.resolve({})),
     } as unknown as PrismaClient
     
     // This test verifies that we can instantiate the admin service
@@ -61,37 +61,31 @@ describe('Module Structure', () => {
   })
 
   it('should be able to mock auth service methods', async () => {
-    // Mock Bun.password.verify
-    global.Bun = {
-      password: {
-        verify: vi.fn().mockResolvedValue(true),
-      },
-    } as any;
-    
     // Create a mock PrismaClient
     const prisma = {
       admin: {
-        findUnique: vi.fn(),
+        findUnique: mock(() => Promise.resolve(null)),
       },
       role: {
-        findUnique: vi.fn(),
+        findUnique: mock(() => Promise.resolve(null)),
       },
-      $on: vi.fn(),
-      $connect: vi.fn(),
-      $disconnect: vi.fn(),
-      $executeRaw: vi.fn(),
-      $queryRaw: vi.fn(),
-      $transaction: vi.fn(),
-      $use: vi.fn(),
+      $on: mock(() => Promise.resolve({})),
+      $connect: mock(() => Promise.resolve({})),
+      $disconnect: mock(() => Promise.resolve({})),
+      $executeRaw: mock(() => Promise.resolve({})),
+      $queryRaw: mock(() => Promise.resolve({})),
+      $transaction: mock(() => Promise.resolve({})),
+      $use: mock(() => Promise.resolve({})),
     } as unknown as PrismaClient
     
     const authService = new AuthService(prisma)
     
     // Mock the login method
-    prisma.admin.findUnique = vi.fn().mockResolvedValue({
+    prisma.admin.findUnique = mock(() => Promise.resolve({
       id: '1',
       email: 'test@example.com',
-      password: '$2b$10$hashedPassword', // Properly hashed password
+      // Use a properly formatted bcrypt hash for "password"
+      password: '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // bcrypt hash of "password"
       name: 'Test User',
       role_id: '1',
       created_at: new Date(),
@@ -104,7 +98,7 @@ describe('Module Structure', () => {
         created_at: new Date(),
         updated_at: new Date()
       }
-    }) as any
+    })) as any;
     
     await authService.login({ email: 'test@example.com', password: 'password' })
     expect(prisma.admin.findUnique).toHaveBeenCalledWith({
@@ -117,25 +111,25 @@ describe('Module Structure', () => {
     // Create a mock PrismaClient
     const prisma = {
       admin: {
-        findMany: vi.fn(),
-        count: vi.fn(),
+        findMany: mock(() => Promise.resolve([])),
+        count: mock(() => Promise.resolve(0)),
       },
       role: {
-        findMany: vi.fn(),
+        findMany: mock(() => Promise.resolve([])),
       },
-      $on: vi.fn(),
-      $connect: vi.fn(),
-      $disconnect: vi.fn(),
-      $executeRaw: vi.fn(),
-      $queryRaw: vi.fn(),
-      $transaction: vi.fn(),
-      $use: vi.fn(),
+      $on: mock(() => Promise.resolve({})),
+      $connect: mock(() => Promise.resolve({})),
+      $disconnect: mock(() => Promise.resolve({})),
+      $executeRaw: mock(() => Promise.resolve({})),
+      $queryRaw: mock(() => Promise.resolve({})),
+      $transaction: mock(() => Promise.resolve({})),
+      $use: mock(() => Promise.resolve({})),
     } as unknown as PrismaClient
     
     const adminService = new AdminService(prisma)
     
     // Mock the getUsers method
-    prisma.admin.findMany = vi.fn().mockResolvedValue([
+    prisma.admin.findMany = mock(() => Promise.resolve([
       { 
         id: '1', 
         email: 'test@example.com', 
@@ -153,9 +147,9 @@ describe('Module Structure', () => {
           updated_at: new Date()
         }
       }
-    ]) as any
+    ])) as any;
     
-    prisma.admin.count = vi.fn().mockResolvedValue(1) as any
+    prisma.admin.count = mock(() => Promise.resolve(1)) as any;
     
     const result = await adminService.getUsers(1, 10)
     expect(result.users).toHaveLength(1)

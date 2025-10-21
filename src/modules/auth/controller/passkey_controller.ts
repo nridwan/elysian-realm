@@ -23,13 +23,14 @@ interface PasskeyControllerOptions {
   service?: PasskeyService
   adminAccessTokenPlugin?: typeof adminAccessTokenPlugin
   adminRefreshTokenPlugin?: typeof adminRefreshTokenPlugin
+  adminMiddleware?: ReturnType<typeof adminMiddleware>
 }
 
 export const createPasskeyController = (options: PasskeyControllerOptions = {}) => {
   const service = options.service || passkeyService
   const adminAccessTokenJwt = options.adminAccessTokenPlugin || adminAccessTokenPlugin
   const adminRefreshTokenJwt = options.adminRefreshTokenPlugin || adminRefreshTokenPlugin
-  const admin = adminMiddleware()
+  const admin = options.adminMiddleware || adminMiddleware()
 
   return new Elysia({ name: 'passkey-controller' })
     .use(responsePlugin({ defaultServiceName: 'PASSKEY' }))

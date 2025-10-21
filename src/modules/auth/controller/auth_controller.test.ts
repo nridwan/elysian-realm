@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { Elysia } from 'elysia'
 import { adminAccessTokenPlugin, adminRefreshTokenPlugin } from '../../../plugins/jwt'
 import { authController } from './auth_controller'

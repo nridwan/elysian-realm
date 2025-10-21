@@ -9,16 +9,15 @@
     "dev:frontend": "cd client && bun run dev",
     "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server ./src/index.ts",
     "start": "./server",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
     "reseed": "bun run prisma/reseed.ts"
   },
   "devDependencies": {
     "@simplewebauthn/types": "^12.0.0",
     "@types/bun": "latest",
     "concurrently": "^9.2.1",
-    "prisma": "^6.15.0",
-    "vitest": "^3.2.4"
+    "prisma": "^6.15.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -32,7 +31,7 @@
     "@opentelemetry/exporter-logs-otlp-http": "^0.203.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.203.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.203.0",
-    "@opentelemetry/instrumentation-express": "^0.52.0",
+    "@opentelemetry/instrumentation-express": "^0.20.0",
     "@opentelemetry/instrumentation-fastify": "^0.48.0",
     "@opentelemetry/instrumentation-http": "^0.203.0",
     "@opentelemetry/resources": "^2.0.1",
