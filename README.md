@@ -168,7 +168,7 @@ docker-compose -f docker-compose.dev.yml up --build
 
 ## Testing
 
-This project uses Vitest for testing with the `vi` test utilities. To run tests:
+This project uses Bun for testing. To run tests:
 
 ```bash
 bun run test        # Run all tests once
