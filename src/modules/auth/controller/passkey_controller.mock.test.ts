@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import { createPasskeyController } from './passkey_controller'
 import { PasskeyService } from '../services/passkey_service'
 import { adminMiddleware } from '../../admin/middleware/admin_middleware'
+import { AuditContext, auditMiddleware } from '../../audit/middleware/audit_middleware'
 
 // Mock functions using Bun's native mocking
 const mockFn = () => {
@@ -98,6 +99,53 @@ const mockAuthMiddleware = (app: Elysia) => {
   }))
 }
 
+// Mock auditMiddleware to bypass actual audit functionality
+const mockAuditMiddleware = (app: Elysia) => {
+  return app
+    .derive(() => {
+      // Mock audit context
+      const auditContext: AuditContext = {
+        actionRecorded: false,
+        initialAction: null,
+        changes: [],
+        rollbackPending: false,
+      };
+
+      // Mock audit tools with new enhanced API
+      const auditTools = {
+        recordStartAction: (action: string) => {
+          if (!auditContext.actionRecorded) {
+            auditContext.initialAction = action;
+            auditContext.actionRecorded = true;
+          }
+        },
+        recordChange: (table_name: string, old_value?: any, new_value?: any) => {
+          const change = {
+            table_name,
+            old_value,
+            new_value
+          };
+          auditContext.changes.push(change);
+        },
+        markForRollback: () => {
+          auditContext.rollbackPending = true;
+        },
+        flushAudit: async () => {
+          // Mock implementation - no-op
+          return Promise.resolve();
+        },
+        getAuditChanges: () => {
+          return auditContext.changes.length > 0 ? [...auditContext.changes] : null;
+        },
+      };
+
+      return {
+        auditContext,
+        auditTools,
+      };
+    });
+}
+
 describe('PasskeyController - Mocked Service Tests', () => {
   beforeEach(() => {
     // Reset mock functions if needed
@@ -129,7 +177,8 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any })
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(
@@ -170,7 +219,8 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any })
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(
@@ -199,7 +249,8 @@ describe('PasskeyController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createPasskeyController({ 
         service: mockPasskeyService,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any })
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(
@@ -231,7 +282,8 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any })
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(
@@ -272,7 +324,8 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any })
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(
@@ -317,7 +370,8 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any })
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(
@@ -363,7 +417,8 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddlewareWithoutUser as any })
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddlewareWithoutUser as any }),
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(
@@ -411,7 +466,8 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddlewareNoUser as any })
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddlewareNoUser as any }),
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(

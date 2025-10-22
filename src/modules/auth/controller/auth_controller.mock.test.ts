@@ -3,6 +3,7 @@ import { Elysia } from 'elysia'
 import { PrismaClient } from '@prisma/client'
 import { createAuthController } from './auth_controller'
 import { AuthService } from '../services/auth_service'
+import { AuditContext } from '../../audit/middleware/audit_middleware'
 
 // Mock Prisma client with Bun.mock
 const mockPrisma = {
@@ -53,6 +54,53 @@ const createMockAdminRefreshTokenPlugin = () => {
   return (app: Elysia) => app.derive(() => ({ adminRefreshToken: mockAdminRefreshToken }))
 }
 
+// Mock auditMiddleware to bypass actual audit functionality
+const mockAuditMiddleware = (app: Elysia) => {
+  return app
+    .derive(() => {
+      // Mock audit context
+      const auditContext: AuditContext = {
+        actionRecorded: false,
+        initialAction: null,
+        changes: [],
+        rollbackPending: false,
+      };
+
+      // Mock audit tools with new enhanced API
+      const auditTools = {
+        recordStartAction: (action: string) => {
+          if (!auditContext.actionRecorded) {
+            auditContext.initialAction = action;
+            auditContext.actionRecorded = true;
+          }
+        },
+        recordChange: (table_name: string, old_value?: any, new_value?: any) => {
+          const change = {
+            table_name,
+            old_value,
+            new_value
+          };
+          auditContext.changes.push(change);
+        },
+        markForRollback: () => {
+          auditContext.rollbackPending = true;
+        },
+        flushAudit: async () => {
+          // Mock implementation - no-op
+          return Promise.resolve();
+        },
+        getAuditChanges: () => {
+          return auditContext.changes.length > 0 ? [...auditContext.changes] : null;
+        },
+      };
+
+      return {
+        auditContext,
+        auditTools,
+      };
+    });
+}
+
 describe('AuthController - Mocked Service Tests', () => {
   beforeEach(() => {
     // Since Bun doesn't have a direct equivalent of vi.clearAllMocks(),
@@ -88,7 +136,8 @@ describe('AuthController - Mocked Service Tests', () => {
       .use(createAuthController({ 
         service: mockAuthService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
-        adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any
+        adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(
@@ -122,7 +171,8 @@ describe('AuthController - Mocked Service Tests', () => {
       .use(createAuthController({ 
         service: mockAuthService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
-        adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any
+        adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(
@@ -180,7 +230,8 @@ describe('AuthController - Mocked Service Tests', () => {
       .use(createAuthController({ 
         service: mockAuthService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
-        adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any
+        adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(
@@ -214,7 +265,8 @@ describe('AuthController - Mocked Service Tests', () => {
       .use(createAuthController({ 
         service: mockAuthService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
-        adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any
+        adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
+        auditMiddleware: mockAuditMiddleware as any
       }))
 
     const response = await app.handle(

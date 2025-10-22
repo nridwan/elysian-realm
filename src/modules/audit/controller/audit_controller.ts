@@ -32,6 +32,7 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
 
             const filters: any = {}
             if (action) filters.action = action
+            // Note: entity_type filter now searches within changes array (handled in service)
             if (entity_type) filters.entity_type = entity_type
             if (user_id) filters.user_id = user_id
             if (start_date) filters.start_date = new Date(start_date)
@@ -48,13 +49,11 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
                 id: auditTrail.id,
                 user_id: auditTrail.user_id,
                 action: auditTrail.action,
-                entity_type: auditTrail.entity_type,
-                entity_id: auditTrail.entity_id,
-                old_data: auditTrail.old_data,
-                new_data: auditTrail.new_data,
+                changes: auditTrail.changes,
                 ip_address: auditTrail.ip_address,
                 user_agent: auditTrail.user_agent,
                 created_at: auditTrail.created_at,
+                is_rolled_back: auditTrail.is_rolled_back,
               }))
             }, '200', 'Audit trails retrieved successfully')
           },
@@ -85,13 +84,11 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
                 id: auditTrail.id,
                 user_id: auditTrail.user_id,
                 action: auditTrail.action,
-                entity_type: auditTrail.entity_type,
-                entity_id: auditTrail.entity_id,
-                old_data: auditTrail.old_data,
-                new_data: auditTrail.new_data,
+                changes: auditTrail.changes,
                 ip_address: auditTrail.ip_address,
                 user_agent: auditTrail.user_agent,
                 created_at: auditTrail.created_at,
+                is_rolled_back: auditTrail.is_rolled_back,
               }
             }, '200', 'Audit trail retrieved successfully')
           },
@@ -131,13 +128,11 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
                 id: auditTrail.id,
                 user_id: auditTrail.user_id,
                 action: auditTrail.action,
-                entity_type: auditTrail.entity_type,
-                entity_id: auditTrail.entity_id,
-                old_data: auditTrail.old_data,
-                new_data: auditTrail.new_data,
+                changes: auditTrail.changes,
                 ip_address: auditTrail.ip_address,
                 user_agent: auditTrail.user_agent,
                 created_at: auditTrail.created_at,
+                is_rolled_back: auditTrail.is_rolled_back,
               }))
             }, '200', 'User audit trails retrieved successfully')
           },
@@ -178,13 +173,11 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
                 id: auditTrail.id,
                 user_id: auditTrail.user_id,
                 action: auditTrail.action,
-                entity_type: auditTrail.entity_type,
-                entity_id: auditTrail.entity_id,
-                old_data: auditTrail.old_data,
-                new_data: auditTrail.new_data,
+                changes: auditTrail.changes,
                 ip_address: auditTrail.ip_address,
                 user_agent: auditTrail.user_agent,
                 created_at: auditTrail.created_at,
+                is_rolled_back: auditTrail.is_rolled_back,
               }))
             }, '200', 'Entity audit trails retrieved successfully')
           },

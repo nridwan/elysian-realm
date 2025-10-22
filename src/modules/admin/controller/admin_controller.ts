@@ -112,24 +112,21 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
               return responseTools.generateErrorResponse('Failed to update admin', '400', 'Failed to update admin')
             }
 
-            // Log the update action in audit trail
+            // Log the update action in audit trail using new enhanced API
             if (auditTools) {
-              auditTools.addAction({
-                user_id: user?.id,
-                action: 'admin.update',
-                entity_type: 'admin',
-                entity_id: id,
-                old_data: existingUser ? {
+              auditTools.recordStartAction('admin.update')
+              auditTools.recordChange('admins', 
+                existingUser ? {
                   email: existingUser.email,
                   name: existingUser.name,
                   role_id: existingUser.role_id
                 } : null,
-                new_data: {
+                {
                   email: updatedUser.email,
                   name: updatedUser.name,
                   role_id: updatedUser.role_id
                 }
-              })
+              )
             }
 
             return responseTools.generateResponse({
@@ -168,19 +165,13 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
               return responseTools.generateErrorResponse('Failed to create admin', '400', 'Failed to create admin')
             }
 
-            // Log the create action in audit trail
+            // Log the create action in audit trail using new enhanced API
             if (auditTools) {
-              auditTools.addAction({
-                user_id: user?.id,
-                action: 'admin.create',
-                entity_type: 'admin',
-                entity_id: createdUser.id,
-                old_data: null,
-                new_data: {
-                  email: createdUser.email,
-                  name: createdUser.name,
-                  role_id: createdUser.role_id
-                }
+              auditTools.recordStartAction('admin.create')
+              auditTools.recordChange('admins', null, {
+                email: createdUser.email,
+                name: createdUser.name,
+                role_id: createdUser.role_id
               })
             }
 
@@ -223,20 +214,17 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
               return responseTools.generateErrorResponse('Failed to delete admin', '400', 'Failed to delete admin')
             }
 
-            // Log the delete action in audit trail
+            // Log the delete action in audit trail using new enhanced API
             if (auditTools) {
-              auditTools.addAction({
-                user_id: user?.id,
-                action: 'admin.delete',
-                entity_type: 'admin',
-                entity_id: id,
-                old_data: existingUser ? {
+              auditTools.recordStartAction('admin.delete')
+              auditTools.recordChange('admins', 
+                existingUser ? {
                   email: existingUser.email,
                   name: existingUser.name,
                   role_id: existingUser.role_id
                 } : null,
-                new_data: null
-              })
+                null
+              )
             }
 
             return responseTools.generateResponse({}, '200', 'Admin deleted successfully')
@@ -288,19 +276,13 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
               return responseTools.generateErrorResponse('Failed to create role', '400', 'Failed to create role')
             }
 
-            // Log the create action in audit trail
+            // Log the create action in audit trail using new enhanced API
             if (auditTools) {
-              auditTools.addAction({
-                user_id: user?.id,
-                action: 'role.create',
-                entity_type: 'role',
-                entity_id: createdRole.id,
-                old_data: null,
-                new_data: {
-                  name: createdRole.name,
-                  description: createdRole.description,
-                  permissions: createdRole.permissions
-                }
+              auditTools.recordStartAction('role.create')
+              auditTools.recordChange('roles', null, {
+                name: createdRole.name,
+                description: createdRole.description,
+                permissions: createdRole.permissions
               })
             }
 
@@ -338,24 +320,21 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
               return responseTools.generateErrorResponse('Failed to update role', '400', 'Failed to update role')
             }
 
-            // Log the update action in audit trail
+            // Log the update action in audit trail using new enhanced API
             if (auditTools) {
-              auditTools.addAction({
-                user_id: user?.id,
-                action: 'role.update',
-                entity_type: 'role',
-                entity_id: id,
-                old_data: existingRole ? {
+              auditTools.recordStartAction('role.update')
+              auditTools.recordChange('roles',
+                existingRole ? {
                   name: existingRole.name,
                   description: existingRole.description,
                   permissions: existingRole.permissions
                 } : null,
-                new_data: {
+                {
                   name: updatedRole.name,
                   description: updatedRole.description,
                   permissions: updatedRole.permissions
                 }
-              })
+              )
             }
 
             return responseTools.generateResponse({
@@ -393,20 +372,17 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
               return responseTools.generateErrorResponse('Failed to delete role', '400', 'Failed to delete role')
             }
 
-            // Log the delete action in audit trail
+            // Log the delete action in audit trail using new enhanced API
             if (auditTools) {
-              auditTools.addAction({
-                user_id: user?.id,
-                action: 'role.delete',
-                entity_type: 'role',
-                entity_id: id,
-                old_data: existingRole ? {
+              auditTools.recordStartAction('role.delete')
+              auditTools.recordChange('roles',
+                existingRole ? {
                   name: existingRole.name,
                   description: existingRole.description,
                   permissions: existingRole.permissions
                 } : null,
-                new_data: null
-              })
+                null
+              )
             }
 
             return responseTools.generateResponse({}, '200', 'Role deleted successfully')

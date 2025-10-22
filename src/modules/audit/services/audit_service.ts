@@ -14,10 +14,11 @@ export interface Pagination {
 export interface AuditTrailData {
   user_id?: string
   action: string
-  entity_type: string
-  entity_id?: string
-  old_data?: any
-  new_data?: any
+  changes?: Array<{
+    table_name: string
+    old_value?: any
+    new_value?: any
+  }>
   ip_address?: string
   user_agent?: string
 }
@@ -31,10 +32,7 @@ export class AuditService {
         data: {
           user_id: data.user_id,
           action: data.action,
-          entity_type: data.entity_type,
-          entity_id: data.entity_id,
-          old_data: data.old_data,
-          new_data: data.new_data,
+          changes: data.changes,
           ip_address: data.ip_address,
           user_agent: data.user_agent,
         },
@@ -52,7 +50,6 @@ export class AuditService {
     limit: number = 10,
     filters?: {
       action?: string
-      entity_type?: string
       user_id?: string
       start_date?: Date
       end_date?: Date
@@ -63,9 +60,6 @@ export class AuditService {
     if (filters) {
       if (filters.action) {
         whereClause.action = filters.action
-      }
-      if (filters.entity_type) {
-        whereClause.entity_type = filters.entity_type
       }
       if (filters.user_id) {
         whereClause.user_id = filters.user_id
@@ -175,15 +169,27 @@ export class AuditService {
     limit: number = 10
   ): Promise<{ audit_trails: AuditTrail[]; pagination: Pagination }> {
     try {
+      // Search for audits that contain changes for the specified entity type
+      // This is done by searching within the changes array for matching table_name
       const auditTrails = await this.prisma.auditTrail.findMany({
-        where: { entity_type },
+        where: {
+          changes: { 
+            path: ['$[*].table_name'],  // Search within the changes array for table_name
+            equals: entity_type
+          }
+        },
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { created_at: 'desc' },
       })
 
       const total = await this.prisma.auditTrail.count({
-        where: { entity_type },
+        where: {
+          changes: { 
+            path: ['$[*].table_name'],  // Search within the changes array for table_name
+            equals: entity_type
+          }
+        },
       })
 
       return {
@@ -206,6 +212,20 @@ export class AuditService {
           pages: 1,
         },
       }
+    }
+  }
+
+  async markAuditAsRolledBack(id: string): Promise<AuditTrail | null> {
+    try {
+      const auditTrail = await this.prisma.auditTrail.update({
+        where: { id },
+        data: { is_rolled_back: true },
+      })
+
+      return auditTrail
+    } catch (error) {
+      console.error('Error marking audit as rolled back:', error)
+      return null
     }
   }
 }

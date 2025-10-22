@@ -15,19 +15,19 @@ export const AuditTrailDto = t.Object({
     description: 'Action performed by the user',
     examples: ['user.create', 'user.update', 'user.delete']
   }),
-  entity_type: t.String({
-    description: 'Type of entity affected by the action',
-    examples: ['user', 'role', 'permission']
-  }),
-  entity_id: t.Union([t.String({
-    description: 'ID of the entity affected',
-    examples: ['entity_123456']
-  }), t.Null()]),
-  old_data: t.Union([t.Any(), t.Null()], {
-    description: 'Previous state of the entity before the action'
-  }),
-  new_data: t.Union([t.Any(), t.Null()], {
-    description: 'New state of the entity after the action'
+  changes: t.Union([t.Array(t.Object({
+    table_name: t.String({
+      description: 'Name of the table that was changed',
+      examples: ['user', 'role', 'permission']
+    }),
+    old_value: t.Union([t.Any(), t.Null()], {
+      description: 'Previous state of the record before the action'
+    }),
+    new_value: t.Union([t.Any(), t.Null()], {
+      description: 'New state of the record after the action'
+    }),
+  })), t.Null()], {
+    description: 'Array of changes made during the action'
   }),
   ip_address: t.Union([t.String({
     description: 'IP address of the user who performed the action',
@@ -40,6 +40,10 @@ export const AuditTrailDto = t.Object({
   created_at: t.Date({
     description: 'Timestamp when the audit trail entry was created',
     examples: ['2023-01-01T00:00:00.000Z']
+  }),
+  is_rolled_back: t.Boolean({
+    description: 'Whether this audit has been marked as rolled back',
+    examples: [false, true]
   }),
 }, {
   description: 'Audit trail data structure'
@@ -111,7 +115,7 @@ export const AuditPaginationQueryDto = t.Composite([
       examples: ['user.create', 'user.update']
     })),
     entity_type: t.Optional(t.String({
-      description: 'Filter by entity type',
+      description: 'Filter by entity type (searches within changes array)',
       examples: ['user', 'role']
     })),
     user_id: t.Optional(t.String({

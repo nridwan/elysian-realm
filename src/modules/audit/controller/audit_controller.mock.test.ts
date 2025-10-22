@@ -68,13 +68,11 @@ describe('AuditController - Mocked Service Tests', () => {
           id: '1',
           user_id: 'user1',
           action: 'user.create',
-          entity_type: 'user',
-          entity_id: 'entity1',
-          old_data: null,
-          new_data: { name: 'Test User', email: 'test@example.com' },
+          changes: [{ table_name: 'user', old_value: null, new_value: { name: 'Test User', email: 'test@example.com' } }],
           ip_address: '127.0.0.1',
           user_agent: 'test-agent',
           created_at: new Date(),
+          is_rolled_back: false,
         }
       ],
       pagination: {
@@ -116,13 +114,11 @@ describe('AuditController - Mocked Service Tests', () => {
       id: '1',
       user_id: 'user1',
       action: 'user.create',
-      entity_type: 'user',
-      entity_id: 'entity1',
-      old_data: null,
-      new_data: { name: 'Test User', email: 'test@example.com' },
+      changes: [{ table_name: 'user', old_value: null, new_value: { name: 'Test User', email: 'test@example.com' } }],
       ip_address: '127.0.0.1',
       user_agent: 'test-agent',
       created_at: new Date(),
+      is_rolled_back: false,
     };
     mockAuditService.getAuditTrailById = mock(() => Promise.resolve(mockResult)) as any;
 

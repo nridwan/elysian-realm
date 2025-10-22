@@ -17,13 +17,16 @@ import { responsePlugin } from '../../../plugins/response_plugin'
 import { passkeyService } from '../services/passkey_service_factory'
 import { PrismaClient } from '@prisma/client'
 import { adminMiddleware } from '../../admin/middleware/admin_middleware'
+import { auditMiddleware } from '../../audit/middleware/audit_middleware'
 import { ErrorResponseDto } from '../../../dto/base.dto'
+import { redactSensitiveData } from '../../../utils/redaction_util'
 
 interface PasskeyControllerOptions {
   service?: PasskeyService
   adminAccessTokenPlugin?: typeof adminAccessTokenPlugin
   adminRefreshTokenPlugin?: typeof adminRefreshTokenPlugin
   adminMiddleware?: ReturnType<typeof adminMiddleware>
+  auditMiddleware?: ReturnType<typeof auditMiddleware>
 }
 
 export const createPasskeyController = (options: PasskeyControllerOptions = {}) => {
@@ -31,17 +34,19 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
   const adminAccessTokenJwt = options.adminAccessTokenPlugin || adminAccessTokenPlugin
   const adminRefreshTokenJwt = options.adminRefreshTokenPlugin || adminRefreshTokenPlugin
   const admin = options.adminMiddleware || adminMiddleware()
+  const audit = options.auditMiddleware || auditMiddleware()
 
   return new Elysia({ name: 'passkey-controller' })
     .use(responsePlugin({ defaultServiceName: 'PASSKEY' }))
     .use(adminAccessTokenJwt)
     .use(adminRefreshTokenJwt)
     .use(admin)
+    .use(audit)
     .group('/api/auth/passkeys', (app) => 
       app
         .get(
           '/',
-          async ({ user, set, responseTools }) => {
+          async ({ user, set, responseTools, auditTools }) => {
             user = user!
             const result = await service.getUserPasskeys(user.id)
             
@@ -72,15 +77,33 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
         // Delete a passkey (requires auth)
         .delete(
           '/:id',
-          async ({ user, params, set, responseTools }) => {
+          async ({ user, params, set, responseTools, auditTools }) => {
             user = user!
             const { id } = params
+            
+            // Get the existing passkey to log the old data
+            const existingPasskeysResult = await service.getUserPasskeys(user.id)
+            const existingPasskey = existingPasskeysResult.passkeys?.find(p => p.id === id) || null
+            
             const result = await service.deletePasskey(user.id, id)
             
             if (!result.success) {
               set.status = 400
+              // Log failed deletion - this is a crucial action worth tracking
+              auditTools.recordStartAction('passkey.delete.failed')
+              auditTools.recordChange('passkeys', 
+                null,
+                { user_id: user.id, passkey_id: id, success: false, reason: result.error }
+              )
               return responseTools.generateErrorResponse(result.error!, '400', result.error!)
             }
+            
+            // Log successful deletion - this is a crucial action worth tracking
+            auditTools.recordStartAction('passkey.delete.success')
+            auditTools.recordChange('passkeys', 
+              existingPasskey,
+              { user_id: user.id, passkey_id: id, success: true }
+            )
             
             return responseTools.generateResponse(
               { success: true },
@@ -104,10 +127,12 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
     )
     .group('/api/auth/passkey', (app) =>
       app
+        // Add audit middleware to the second group too
+        .use(audit)
         // Start passkey authentication with email (no auth required)
         .post(
           '/login',
-          async ({ body, set, responseTools }) => {
+          async ({ body, set, responseTools, auditTools }) => {
             const { email, uuid } = body
             
             const authenticationOptions = await service.generateAuthenticationOptions({ email, uuid })
@@ -139,7 +164,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
         // Start passwordless passkey authentication (no auth required, no email)
         .post(
           '/login/passwordless',
-          async ({ body, set, responseTools }) => {
+          async ({ body, set, responseTools, auditTools }) => {
             const { uuid } = body
             const authenticationOptions = await service.generatePasswordlessAuthenticationOptions(uuid)
             
@@ -170,13 +195,19 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
         // Finish passkey authentication (no auth required)
         .post(
           '/login/finish',
-          async ({ body, adminAccessToken, adminRefreshToken, set, responseTools }) => {
+          async ({ body, adminAccessToken, adminRefreshToken, set, responseTools, auditTools }) => {
             const { response, uuid } = body
             // Pass empty user ID for passwordless authentication, as the passkey ID will identify the user
             const verification = await service.verifyAuthenticationResponse('', response, uuid)
             
             if (!verification.success) {
               set.status = 401
+              // Log failed authentication finish - this is a crucial auth event worth tracking
+              auditTools.recordStartAction('passkey.auth.finish.failed')
+              auditTools.recordChange('', 
+                null,
+                { uuid: uuid, success: false, reason: verification.error }
+              )
               return responseTools.generateErrorResponse(verification.error!, '401', verification.error!)
             }
             
@@ -189,6 +220,12 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             
             if (!user) {
               set.status = 401
+              // Log failed authentication due to user not found - this is a crucial auth event worth tracking
+              auditTools.recordStartAction('passkey.auth.finish.failed')
+              auditTools.recordChange('', 
+                null,
+                { uuid: uuid, user_id: verification.userId, success: false, reason: 'User not found' }
+              )
               return responseTools.generateErrorResponse('User not found', '401', 'User not found')
             }
             
@@ -208,6 +245,18 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
               id: user.id,
               email: user.email
             })
+            
+            // Log successful authentication finish with token generation - this is a crucial auth event worth tracking
+            auditTools.recordStartAction('passkey.auth.finish.success')
+            auditTools.recordChange('', 
+              null,
+              { 
+                uuid: uuid, 
+                user_id: user.id, 
+                email: user.email, 
+                success: true 
+              }
+            )
             
             return responseTools.generateResponse({
               access_token: accessTokenValue,
@@ -230,7 +279,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
         // Start passkey registration (requires auth)
         .post(
           '/register',
-          async ({ user, body, set, responseTools }) => {
+          async ({ user, body, set, responseTools, auditTools }) => {
             const { email, name, uuid } = body
             user = user!
             
@@ -277,15 +326,28 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
         // Finish passkey registration (requires auth)
         .post(
           '/register/finish',
-          async ({ user, body, set, responseTools, adminAccessToken }) => {
+          async ({ user, body, set, responseTools, adminAccessToken, auditTools }) => {
             user = user!
             const { response, uuid } = body
             const verification = await service.verifyRegistrationResponse(user.id, response, uuid)
             
             if (!verification.success) {
               set.status = 400
+              // Log failed registration finish - this is a crucial create operation worth tracking
+              auditTools.recordStartAction('passkey.register.finish.failed')
+              auditTools.recordChange('', 
+                null,
+                { user_id: user.id, uuid: uuid, success: false, reason: verification.error }
+              )
               return responseTools.generateErrorResponse(verification.error!, '400', verification.error!)
             }
+            
+            // Log successful registration finish (this is a create operation) - this is a crucial action worth tracking
+            auditTools.recordStartAction('passkey.register.finish.success')
+            auditTools.recordChange('passkeys', 
+              null,
+              { user_id: user.id, uuid: uuid, success: true }
+            )
             
             return responseTools.generateResponse(
               { success: true },

@@ -1,15 +1,15 @@
 model AuditTrail {
-  id          String   @id @default(uuid())
-  user_id     String?
-  action      String
-  entity_type String
-  entity_id   String?
-  old_data    Json?
-  new_data    Json?
-  ip_address  String?
-  user_agent  String?
-  created_at  DateTime @default(now())
+  id            String   @id @default(uuid())
+  user_id       String?
+  action        String   // Action name recorded at controller start
+  changes       Json?    // Array of changes: [{ table_name, old_value, new_value }]
+  ip_address    String?
+  user_agent    String?
+  created_at    DateTime @default(now())
+  is_rolled_back Boolean @default(false) // Flag to mark if this audit was rolled back
 
   // Optional relation to the user who performed the action
   user Admin? @relation(fields: [user_id], references: [id])
+
+  @@map("audit_trails")
 }

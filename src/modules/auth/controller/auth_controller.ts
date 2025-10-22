@@ -5,32 +5,43 @@ import { adminAccessTokenPlugin, adminRefreshTokenPlugin, type RefreshTokenPaylo
 import { responsePlugin } from '../../../plugins/response_plugin'
 import { authService } from '../services/auth_service_factory'
 import { passkeyService } from '../services/passkey_service_factory'
+import { auditMiddleware } from '../../audit/middleware/audit_middleware'
+import { redactSensitiveData } from '../../../utils/redaction_util'
 
 interface AuthControllerOptions {
   service?: AuthService
   adminAccessTokenPlugin?: typeof adminAccessTokenPlugin
   adminRefreshTokenPlugin?: typeof adminRefreshTokenPlugin
+  auditMiddleware?: ReturnType<typeof auditMiddleware>
 }
 
 export const createAuthController = (options: AuthControllerOptions = {}) => {
   const service = options.service || authService
   const adminAccessTokenJwt = options.adminAccessTokenPlugin || adminAccessTokenPlugin
   const adminRefreshTokenJwt = options.adminRefreshTokenPlugin || adminRefreshTokenPlugin
+  const audit = options.auditMiddleware || auditMiddleware()
 
   return new Elysia({ name: 'auth-controller' })
     .use(responsePlugin({ defaultServiceName: 'AUTH' }))
     .use(adminAccessTokenJwt)
     .use(adminRefreshTokenJwt)
+    .use(audit)
     .group('/api/auth', (app) =>
       app
         .post(
           '/login',
-          async ({ body, adminAccessToken, adminRefreshToken, set, responseTools }) => {
+          async ({ body, adminAccessToken, adminRefreshToken, set, responseTools, auditTools }) => {
             const { email, password } = body
             const result = await service.login({ email, password })
 
             if (result.error) {
               set.status = 401
+              // Log failed login attempt - this is a crucial auth event worth tracking
+              auditTools.recordStartAction('auth.login.failed')
+              auditTools.recordChange('', 
+                null,
+                { email: email, success: false, reason: result.error }
+              )
               return responseTools.generateErrorResponse(result.error, '401', result.error)
             }
 
@@ -57,6 +68,18 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
               email: user.email
             })
 
+            // Log successful login - this is a crucial auth event worth tracking
+            auditTools.recordStartAction('auth.login.success')
+            auditTools.recordChange('', 
+              null,
+              { 
+                email: email, 
+                success: true,
+                user_id: user.id,
+                has_passkeys: hasPasskeys
+              }
+            )
+
             return responseTools.generateResponse({
               access_token: accessTokenValue,
               refresh_token: refreshTokenValue,
@@ -78,7 +101,7 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
         )
         .post(
           '/refresh',
-          async ({ body, adminAccessToken, adminRefreshToken, set, responseTools }) => {
+          async ({ body, adminAccessToken, adminRefreshToken, set, responseTools, auditTools }) => {
             const { refresh_token: refreshTokenValue } = body
             
             // Verify the refresh token
