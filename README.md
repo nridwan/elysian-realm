@@ -175,7 +175,7 @@ bun run test        # Run all tests once
 bun run test:watch  # Run tests in watch mode
 ```
 
-Note: Use `bun run test` rather than `bun test` to ensure compatibility with the Vitest test suite and `vi` utilities used in the test files.
+Note: This project uses Bun's built-in test runner. Both `bun test` and `bun run test` will work, but `bun test` is the direct way to run tests using Bun's native testing capabilities.
 
 ## Environment Variables
 
@@ -299,3 +299,275 @@ Pagination can be controlled via query parameters:
 
 - `page`: Page number to retrieve (default: 1)
 - `limit`: Number of items per page (default: 10)
+
+## Unit Testing Guidelines
+
+This project follows a comprehensive testing strategy with a focus on testability, dependency injection, and proper isolation. Below are the guidelines and best practices for writing unit tests in this codebase.
+
+### Test Structure and Patterns
+
+#### Component Builder Pattern
+Components (controllers, services, middleware) should be designed using the Builder pattern to enable easy dependency injection and replacement:
+
+```typescript
+// Example controller with dependency injection
+interface AdminControllerOptions {
+  service?: AdminService
+  adminMiddleware?: ReturnType<typeof adminMiddleware>
+  auditMiddleware?: ReturnType<typeof auditMiddleware>
+}
+
+export const createAdminController = (options: AdminControllerOptions = {}) => {
+  const service = options.service || adminService
+  const admin = options.adminMiddleware || adminMiddleware()
+  const audit = options.auditMiddleware || auditMiddleware()
+
+  return new Elysia({ name: 'admin-controller' })
+    .use(responsePlugin({ defaultServiceName: 'ADMIN' }))
+    .group('/api/admin', (app) =>
+      app
+        .use(admin)
+        .use(audit)
+        // Controller routes here...
+    )
+}
+```
+
+This pattern enables:
+- Easy mocking of dependencies in tests
+- Flexible component composition
+- Better testability and isolation
+
+#### Test File Organization
+Each module should have corresponding test files:
+- `<component>.test.ts` - Endpoint/integration tests
+- `<component>.mock.test.ts` - Unit tests with mocked dependencies
+
+### Mocking Strategies
+
+#### 1. Service Mocking
+Use factory functions or direct object mocking for services:
+
+```typescript
+// Create mock service
+const mockAdminService = new AdminService(mockPrisma)
+
+// Override specific methods
+const originalMethod = mockAdminService.getUsers
+mockAdminService.getUsers = mock(() => Promise.resolve(mockResult)) as any
+
+// Remember to restore after test
+mockAdminService.getUsers = originalMethod
+```
+
+#### 2. Middleware Mocking
+Create lightweight mock middleware that bypasses actual authentication but provides test contexts:
+
+```typescript
+const mockAuthMiddleware = (app: Elysia) => {
+  return app.derive(() => ({
+    user: {
+      id: '1',
+      email: 'test@example.com',
+      name: 'Test User',
+      role_id: '1',
+      role: {
+        id: '1',
+        name: 'admin',
+        permissions: ['admins.read', 'admins.create']
+      }
+    }
+  }))
+}
+```
+
+#### 3. Plugin Mocking
+Create mock plugins that return properly structured Elysia plugins:
+
+```typescript
+const createMockAdminAccessTokenPlugin = () => {
+  return (app: Elysia) => app.derive(() => ({ 
+    adminAccessToken: mockAdminAccessToken 
+  }))
+}
+```
+
+### Writing Effective Tests
+
+#### 1. Test Structure
+Follow the AAA pattern (Arrange, Act, Assert):
+
+```typescript
+it('should get admins list successfully', async () => {
+  // Arrange - Setup test data and mocks
+  const originalGetUsers = mockAdminService.getUsers
+  const mockResult = { /* mock data */ }
+  mockAdminService.getUsers = mock(() => Promise.resolve(mockResult)) as any
+
+  // Act - Execute the test
+  const app = new Elysia()
+    .use(createAdminController({ 
+      service: mockAdminService,
+      adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any}),
+      auditMiddleware: mockAuditMiddleware as any,
+    }))
+
+  const response = await app.handle(
+    new Request('http://localhost/api/admin/admins', { 
+      method: 'GET'
+    })
+  )
+
+  // Assert - Verify results
+  expect(response.status).toBe(200)
+  const body = await response.json()
+  expect(body.meta.code).toBe('ADMIN-200')
+  
+  // Restore original method
+  mockAdminService.getUsers = originalGetUsers
+})
+```
+
+#### 2. Dependency Injection in Tests
+Always inject dependencies to enable mocking:
+
+```typescript
+const app = new Elysia()
+  .use(createAdminController({ 
+    service: mockAdminService,        // Inject mock service
+    adminMiddleware: mockAuthMiddleware as any,  // Inject mock auth
+    auditMiddleware: mockAuditMiddleware as any, // Inject mock audit
+  }))
+```
+
+#### 3. Test Isolation
+Ensure tests don't interfere with each other by:
+- Using fresh mock instances for each test
+- Restoring original methods after mocking
+- Avoiding shared state between tests
+
+### Testing Different Component Types
+
+#### Controllers
+Controllers should be tested for:
+- Route registration
+- HTTP method acceptance
+- Request validation
+- Response formatting
+- Permission checking
+- Authentication requirements
+
+#### Services
+Services should be tested for:
+- Business logic correctness
+- Data transformation
+- Error handling
+- Integration with data sources
+
+#### Middleware
+Middleware should be tested for:
+- Context enhancement
+- Authentication/authorization logic
+- Request/response modification
+
+### Best Practices
+
+1. **Mock at the Right Level**
+   - Mock external dependencies (database, APIs)
+   - Mock complex services but not simple utilities
+   - Avoid over-mocking which can hide real issues
+
+2. **Test Realistic Scenarios**
+   - Test both success and failure cases
+   - Test edge cases and error conditions
+   - Test permission boundaries
+   - Test validation scenarios
+
+3. **Keep Tests Independent**
+   - Each test should be able to run independently
+   - Avoid shared state between tests
+   - Clean up mocks after each test
+
+4. **Use Descriptive Test Names**
+   ```typescript
+   // Good
+   it('should return 401 for invalid credentials', async () => { ... })
+   
+   // Bad
+   it('should fail', async () => { ... })
+   ```
+
+5. **Focus on Behavior, Not Implementation**
+   - Test what the code does, not how it does it
+   - Avoid testing internal implementation details
+   - Focus on inputs and outputs
+
+6. **Proper Test Data Management**
+   - Use realistic but minimal test data
+   - Create helper functions for common test data
+   - Avoid hardcoded magic values in tests
+
+### Common Testing Patterns
+
+#### Testing Successful Operations
+```typescript
+it('should perform operation successfully', async () => {
+  // Mock service to return success
+  mockService.method = mock(() => Promise.resolve(successResult))
+  
+  // Execute request
+  const response = await app.handle(request)
+  
+  // Verify success response
+  expect(response.status).toBe(200)
+  // ... additional assertions
+})
+```
+
+#### Testing Error Conditions
+```typescript
+it('should handle error conditions gracefully', async () => {
+  // Mock service to return error
+  mockService.method = mock(() => Promise.resolve({ error: 'Error message' }))
+  
+  // Execute request
+  const response = await app.handle(request)
+  
+  // Verify error response
+  expect(response.status).toBe(400) // or appropriate error status
+  // ... additional assertions
+})
+```
+
+#### Testing Permission Boundaries
+```typescript
+it('should deny access when user lacks required permission', async () => {
+  // Create mock auth middleware with limited permissions
+  const mockAuthWithLimitedPermissions = (app: Elysia) => {
+    return app.derive(() => ({
+      user: { /* user with limited permissions */ }
+    }))
+  }
+  
+  // Execute request with limited permissions
+  const response = await app.handle(request)
+  
+  // Verify access denied
+  expect(response.status).toBe(403)
+})
+```
+
+### Running Tests
+
+```bash
+# Run all tests once
+bun test
+
+# Run tests in watch mode
+bun test --watch
+
+# Run specific test files
+bun test src/modules/admin/controller/admin_controller.mock.test.ts
+```
+
+Note: This project uses Bun's built-in test runner. You can use `bun test` directly to run tests using Bun's native testing capabilities.
