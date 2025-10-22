@@ -64,7 +64,7 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
             detail: {
               tags: ['Audit'],
               summary: 'Get Audit Trails',
-              description: 'Retrieve a paginated list of audit trails',
+              description: 'Retrieve a paginated list of audit trails with optional filtering by action, entity type, user, and date range',
               security: [{ jwt: [] }]
             }
           }

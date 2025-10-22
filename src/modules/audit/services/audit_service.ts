@@ -50,6 +50,7 @@ export class AuditService {
     limit: number = 10,
     filters?: {
       action?: string
+      entity_type?: string
       user_id?: string
       start_date?: Date
       end_date?: Date
@@ -64,13 +65,22 @@ export class AuditService {
       if (filters.user_id) {
         whereClause.user_id = filters.user_id
       }
+      // Handle entity_type filter by searching within the changes array
+      if (filters.entity_type) {
+        whereClause.changes = {
+          path: ['$[*].table_name'],
+          equals: filters.entity_type
+        }
+      }
       if (filters.start_date || filters.end_date) {
         whereClause.created_at = {}
         if (filters.start_date) {
-          whereClause.created_at.gte = filters.start_date
+          // Parse start_date as ISO string
+          whereClause.created_at.gte = new Date(filters.start_date)
         }
         if (filters.end_date) {
-          whereClause.created_at.lte = filters.end_date
+          // Parse end_date as ISO string
+          whereClause.created_at.lte = new Date(filters.end_date)
         }
       }
     }
