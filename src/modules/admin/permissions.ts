@@ -1,7 +1,8 @@
 // Shared permissions definition
 export const PERMISSIONS = {
   admins: ["read", "create", "update", "delete"],
-  roles: ["read", "create", "update", "delete"]
+  roles: ["read", "create", "update", "delete"],
+  audit: ["read", "create", "update", "delete"]
 }
 
 // Generate all permission strings from the PERMISSIONS object

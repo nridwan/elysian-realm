@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import { createAdminController } from './admin_controller'
 import { AdminService } from '../services/admin_service'
 import { adminMiddleware } from '../middleware/admin_middleware'
+import { auditMiddleware } from '../../audit/middleware/audit_middleware'
 
 // Mock Prisma client with Bun.mock
 const mockPrisma = {
@@ -105,7 +106,8 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any})
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any}),
+        auditMiddleware: auditMiddleware({auth: mockAuthMiddleware as any}),
       }))
 
     const response = await app.handle(
@@ -150,7 +152,8 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any})
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any}),
+        auditMiddleware: auditMiddleware({auth: mockAuthMiddleware as any}),
       }))
 
     const response = await app.handle(
@@ -178,7 +181,8 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any})
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any}),
+        auditMiddleware: auditMiddleware({auth: mockAuthMiddleware as any}),
       }))
 
     const response = await app.handle(
@@ -221,7 +225,8 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any})
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any}),
+        auditMiddleware: auditMiddleware({auth: mockAuthMiddleware as any}),
       }))
 
     const response = await app.handle(
@@ -275,7 +280,8 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: adminMiddleware({auth: mockAuthMiddlewareWithoutPermission as any})
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddlewareWithoutPermission as any}),
+        auditMiddleware: auditMiddleware({auth: mockAuthMiddlewareWithoutPermission as any}),
       }))
 
     const response = await app.handle(
@@ -310,7 +316,8 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: adminMiddleware({auth: mockAuthMiddlewareNoUser as any})
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddlewareNoUser as any}),
+        auditMiddleware: auditMiddleware({auth: mockAuthMiddlewareNoUser as any}),
       }))
 
     const response = await app.handle(

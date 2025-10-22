@@ -1,0 +1,15 @@
+model AuditTrail {
+  id          String   @id @default(uuid())
+  user_id     String?
+  action      String
+  entity_type String
+  entity_id   String?
+  old_data    Json?
+  new_data    Json?
+  ip_address  String?
+  user_agent  String?
+  created_at  DateTime @default(now())
+
+  // Optional relation to the user who performed the action
+  user Admin? @relation(fields: [user_id], references: [id])
+}
