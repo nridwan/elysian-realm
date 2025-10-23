@@ -1,8 +1,13 @@
-import { PrismaClient, AuditTrail as PrismaAuditTrail } from '@prisma/client'
+import { PrismaClient, AuditTrail as PrismaAuditTrail, Admin as PrismaAdmin } from '@prisma/client'
 import { AuditTrailDto } from '../dto/audit_dto'
 
 // Define the AuditTrail type to match the Prisma model
 export type AuditTrail = PrismaAuditTrail
+
+// Define the AuditTrailWithUser type to include user information
+export type AuditTrailWithUser = PrismaAuditTrail & {
+  user?: Pick<PrismaAdmin, 'id' | 'email' | 'name'> | null
+}
 
 export interface Pagination {
   page: number
@@ -55,7 +60,7 @@ export class AuditService {
       start_date?: Date
       end_date?: Date
     }
-  ): Promise<{ audit_trails: AuditTrail[]; pagination: Pagination }> {
+  ): Promise<{ audit_trails: AuditTrailWithUser[]; pagination: Pagination }> {
     const whereClause: any = {}
     
     if (filters) {
@@ -91,6 +96,16 @@ export class AuditService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { created_at: 'desc' },
+        // Include user information when available
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            }
+          }
+        }
       })
 
       const total = await this.prisma.auditTrail.count({
@@ -98,7 +113,7 @@ export class AuditService {
       })
 
       return {
-        audit_trails: auditTrails,
+        audit_trails: auditTrails as AuditTrailWithUser[],
         pagination: {
           page,
           limit,
@@ -109,7 +124,7 @@ export class AuditService {
     } catch (error) {
       console.error('Error getting audit trails:', error)
       return {
-        audit_trails: [],
+        audit_trails: [] as AuditTrailWithUser[],
         pagination: {
           page: 1,
           limit,
@@ -120,13 +135,23 @@ export class AuditService {
     }
   }
 
-  async getAuditTrailById(id: string): Promise<AuditTrail | null> {
+  async getAuditTrailById(id: string): Promise<AuditTrailWithUser | null> {
     try {
       const auditTrail = await this.prisma.auditTrail.findUnique({
         where: { id },
+        // Include user information when available
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            }
+          }
+        }
       })
 
-      return auditTrail
+      return auditTrail as AuditTrailWithUser | null
     } catch (error) {
       console.error('Error getting audit trail by ID:', error)
       return null
@@ -137,13 +162,23 @@ export class AuditService {
     user_id: string,
     page: number = 1,
     limit: number = 10
-  ): Promise<{ audit_trails: AuditTrail[]; pagination: Pagination }> {
+  ): Promise<{ audit_trails: AuditTrailWithUser[]; pagination: Pagination }> {
     try {
       const auditTrails = await this.prisma.auditTrail.findMany({
         where: { user_id },
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { created_at: 'desc' },
+        // Include user information when available
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            }
+          }
+        }
       })
 
       const total = await this.prisma.auditTrail.count({
@@ -177,7 +212,7 @@ export class AuditService {
     entity_type: string,
     page: number = 1,
     limit: number = 10
-  ): Promise<{ audit_trails: AuditTrail[]; pagination: Pagination }> {
+  ): Promise<{ audit_trails: AuditTrailWithUser[]; pagination: Pagination }> {
     try {
       // Search for audits that contain changes for the specified entity type
       // This is done by searching within the changes array for matching table_name
@@ -191,6 +226,16 @@ export class AuditService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { created_at: 'desc' },
+        // Include user information when available
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            }
+          }
+        }
       })
 
       const total = await this.prisma.auditTrail.count({

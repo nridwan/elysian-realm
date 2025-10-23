@@ -235,7 +235,14 @@
                   </div>
                 </td>
                 <td>
-                  {#if audit.user_id}
+                  {#if audit.user}
+                    <div class="flex flex-col">
+                      <span class="font-medium">{audit.user.name}</span>
+                      <span class="text-sm text-base-content/70 tooltip" data-tip={audit.user.email}>
+                        {audit.user.email}
+                      </span>
+                    </div>
+                  {:else if audit.user_id}
                     <span class="tooltip" data-tip={audit.user_id}>
                       User {audit.user_id.substring(0, 8)}...
                     </span>
@@ -413,8 +420,16 @@
               <span class="label-text font-semibold">User</span>
             </label>
             <div class="p-2 bg-base-200 rounded">
-              {#if selectedAudit.user_id}
-                {selectedAudit.user_id}
+              {#if selectedAudit.user}
+                <div class="flex flex-col">
+                  <span class="font-medium">{selectedAudit.user.name}</span>
+                  <span class="text-sm text-base-content/70">{selectedAudit.user.email}</span>
+                  <span class="text-xs text-base-content/50">ID: {selectedAudit.user.id}</span>
+                </div>
+              {:else if selectedAudit.user_id}
+                <span class="tooltip" data-tip={selectedAudit.user_id}>
+                  User {selectedAudit.user_id.substring(0, 8)}...
+                </span>
               {:else}
                 <span class="text-base-content/50">System</span>
               {/if}

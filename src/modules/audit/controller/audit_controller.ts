@@ -48,8 +48,13 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
               data: result.audit_trails.map(auditTrail => ({
                 id: auditTrail.id,
                 user_id: auditTrail.user_id,
+                user: auditTrail.user ? {
+                  id: auditTrail.user.id,
+                  email: auditTrail.user.email,
+                  name: auditTrail.user.name,
+                } : null,
                 action: auditTrail.action,
-                changes: auditTrail.changes,
+                changes: auditTrail.changes as (typeof dto.AuditTrailChangesDto.static),
                 ip_address: auditTrail.ip_address,
                 user_agent: auditTrail.user_agent,
                 created_at: auditTrail.created_at,
@@ -83,8 +88,13 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
               audit_trail: {
                 id: auditTrail.id,
                 user_id: auditTrail.user_id,
+                user: auditTrail.user ? {
+                  id: auditTrail.user.id,
+                  email: auditTrail.user.email,
+                  name: auditTrail.user.name,
+                } : null,
                 action: auditTrail.action,
-                changes: auditTrail.changes,
+                changes: auditTrail.changes as (typeof dto.AuditTrailChangesDto.static),
                 ip_address: auditTrail.ip_address,
                 user_agent: auditTrail.user_agent,
                 created_at: auditTrail.created_at,
@@ -127,8 +137,13 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
               data: result.audit_trails.map(auditTrail => ({
                 id: auditTrail.id,
                 user_id: auditTrail.user_id,
+                user: auditTrail.user ? {
+                  id: auditTrail.user.id,
+                  email: auditTrail.user.email,
+                  name: auditTrail.user.name,
+                } : null,
                 action: auditTrail.action,
-                changes: auditTrail.changes,
+                changes: auditTrail.changes as (typeof dto.AuditTrailChangesDto.static),
                 ip_address: auditTrail.ip_address,
                 user_agent: auditTrail.user_agent,
                 created_at: auditTrail.created_at,
@@ -172,8 +187,13 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
               data: result.audit_trails.map(auditTrail => ({
                 id: auditTrail.id,
                 user_id: auditTrail.user_id,
+                user: auditTrail.user ? {
+                  id: auditTrail.user.id,
+                  email: auditTrail.user.email,
+                  name: auditTrail.user.name,
+                } : null,
                 action: auditTrail.action,
-                changes: auditTrail.changes,
+                changes: auditTrail.changes as (typeof dto.AuditTrailChangesDto.static),
                 ip_address: auditTrail.ip_address,
                 user_agent: auditTrail.user_agent,
                 created_at: auditTrail.created_at,

@@ -2,9 +2,16 @@ import { superFetch } from '../utils/fetch';
 
 const API_BASE_URL = '/api/audit';
 
+export interface AuditUser {
+  id: string;
+  email: string;
+  name: string;
+}
+
 export interface AuditTrail {
   id: string;
   user_id: string | null;
+  user: AuditUser | null;
   action: string;
   changes: Array<{
     table_name: string;

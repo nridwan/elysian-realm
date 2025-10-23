@@ -1,21 +1,7 @@
 import { t } from 'elysia'
 import { BaseMetaDto, PaginationQueryDto } from '../../../dto/base.dto'
 
-// AuditTrail DTOs
-export const AuditTrailDto = t.Object({
-  id: t.String({
-    description: 'Unique identifier for the audit trail entry',
-    examples: ['audit_123456']
-  }),
-  user_id: t.Union([t.String({
-    description: 'ID of the user who performed the action',
-    examples: ['user_123456']
-  }), t.Null()]),
-  action: t.String({
-    description: 'Action performed by the user',
-    examples: ['user.create', 'user.update', 'user.delete']
-  }),
-  changes: t.Union([t.Array(t.Object({
+export const AuditTrailChangesDto = t.Union([t.Array(t.Object({
     table_name: t.String({
       description: 'Name of the table that was changed',
       examples: ['user', 'role', 'permission']
@@ -28,7 +14,39 @@ export const AuditTrailDto = t.Object({
     }),
   })), t.Null()], {
     description: 'Array of changes made during the action'
+  })
+
+// AuditTrail DTOs
+export const AuditTrailDto = t.Object({
+  id: t.String({
+    description: 'Unique identifier for the audit trail entry',
+    examples: ['audit_123456']
   }),
+  user_id: t.Union([t.String({
+    description: 'ID of the user who performed the action',
+    examples: ['user_123456']
+  }), t.Null()]),
+  user: t.Union([t.Object({
+    id: t.String({
+      description: 'ID of the user who performed the action',
+      examples: ['user_123456']
+    }),
+    email: t.String({
+      description: 'Email of the user who performed the action',
+      examples: ['user@example.com']
+    }),
+    name: t.String({
+      description: 'Name of the user who performed the action',
+      examples: ['John Doe']
+    }),
+  }), t.Null()], {
+    description: 'User information of the user who performed the action'
+  }),
+  action: t.String({
+    description: 'Action performed by the user',
+    examples: ['user.create', 'user.update', 'user.delete']
+  }),
+  changes: AuditTrailChangesDto,
   ip_address: t.Union([t.String({
     description: 'IP address of the user who performed the action',
     examples: ['192.168.1.1']
