@@ -16,10 +16,7 @@ COPY prisma ./prisma/
 COPY prisma.config.ts ./prisma.config.ts
 
 # Install dependencies
-RUN bun install --frozen-lockfile
-
-# Generate Prisma client
-RUN bunx prisma generate
+RUN bun install --frozen-lockfile && bunx prisma generate
 
 # Copy source code
 COPY src ./src

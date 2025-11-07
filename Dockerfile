@@ -48,7 +48,7 @@ RUN bun run build
 FROM alpine:3.22 AS production
 
 # Install system dependencies
-RUN apk add --no-cache openssl libstdc++ libgcc
+RUN apk add --no-cache libgcc libstdc++ openssl
 
 # Set the working directory
 WORKDIR /app
