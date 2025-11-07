@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import { createAdminController } from './admin_controller'
 import { AdminService } from '../services/admin_service'
 import { adminMiddleware } from '../middleware/admin_middleware'
-import { auditMiddleware } from '../../audit/middleware/audit_middleware'
+import { AuditContext } from '../../audit/middleware/audit_middleware'
 
 // Mock Prisma client with Bun.mock
 const mockPrisma = {
@@ -96,8 +96,7 @@ const mockAuditMiddleware = (app: Elysia) => {
           auditContext.rollbackPending = true;
         },
         flushAudit: async () => {
-          // Mock implementation - no-op
-          return Promise.resolve();
+          return null;
         },
         getAuditChanges: () => {
           return auditContext.changes.length > 0 ? [...auditContext.changes] : null;

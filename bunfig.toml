@@ -1,0 +1,4 @@
+[test]
+coveragePathIgnorePatterns = [
+    "client/**/*.spec.ts"
+]

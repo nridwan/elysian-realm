@@ -1,5 +1,5 @@
 # Use the official Bun image as the base image
-FROM oven/bun:1.2.21-alpine AS base
+FROM oven/bun:1.3.1-alpine AS base
 
 # Set the working directory
 WORKDIR /app
@@ -13,6 +13,7 @@ COPY bun.lockb ./bun.lockb
 
 # Copy Prisma files
 COPY prisma ./prisma/
+COPY prisma.config.ts ./prisma.config.ts
 
 # Install dependencies
 RUN bun install --frozen-lockfile

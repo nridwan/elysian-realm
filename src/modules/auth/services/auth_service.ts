@@ -21,7 +21,7 @@ export interface RefreshTokenResponse {
 }
 
 export class AuthService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
   async login({ email, password }: LoginInput): Promise<LoginResponse> {
     // Find user

@@ -1,5 +1,5 @@
 import { t } from 'elysia'
-import { BaseMetaDto, PaginationQueryDto } from '../../../dto/base.dto'
+import { BaseMetaDto } from '../../../dto/base.dto'
 
 // User DTOs
 export const UserDto = t.Object({
@@ -266,7 +266,7 @@ export const UpdateRoleRequestDto = t.Partial(
 )
 
 // Query and param DTOs
-export const AdminPaginationQueryDto = PaginationQueryDto
+export {PaginationQueryDto as AdminPaginationQueryDto} from '../../../dto/base.dto'
 
 export const IdParamDto = t.Object({
   id: t.String({

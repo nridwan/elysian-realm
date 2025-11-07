@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import { createPasskeyController } from './passkey_controller'
 import { PasskeyService } from '../services/passkey_service'
 import { adminMiddleware } from '../../admin/middleware/admin_middleware'
-import { AuditContext, auditMiddleware } from '../../audit/middleware/audit_middleware'
+import { AuditContext } from '../../audit/middleware/audit_middleware'
 
 // Mock functions using Bun's native mocking
 const mockFn = () => {
@@ -99,6 +99,13 @@ const mockAuthMiddleware = (app: Elysia) => {
   }))
 }
 
+// Create mock middleware that bypasses authentication and provides no user (null)
+const mockAuthMiddlewareNoUser = (app: Elysia) => {
+  return app.derive(() => ({
+    user: null
+  }))
+}
+
 // Mock auditMiddleware to bypass actual audit functionality
 const mockAuditMiddleware = (app: Elysia) => {
   return app
@@ -131,8 +138,7 @@ const mockAuditMiddleware = (app: Elysia) => {
           auditContext.rollbackPending = true;
         },
         flushAudit: async () => {
-          // Mock implementation - no-op
-          return Promise.resolve();
+          return null;
         },
         getAuditChanges: () => {
           return auditContext.changes.length > 0 ? [...auditContext.changes] : null;
@@ -398,13 +404,6 @@ describe('PasskeyController - Mocked Service Tests', () => {
   })
 
   it('should deny access when user lacks required permission', async () => {
-    // Create a mock middleware that provides a user without proper authentication
-    const mockAuthMiddlewareWithoutUser = (app: Elysia) => {
-      return app.derive(() => ({
-        user: null
-      }))
-    }
-
     // Mock the deletePasskey method (but it shouldn't be called due to access denial)
     const originalDeletePasskey = mockPasskeyService.deletePasskey;
     mockPasskeyService.deletePasskey = mockFn().mockResolvedValue({
@@ -417,7 +416,7 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddlewareWithoutUser as any }),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddlewareNoUser as any }),
         auditMiddleware: mockAuditMiddleware as any
       }))
 
@@ -439,13 +438,6 @@ describe('PasskeyController - Mocked Service Tests', () => {
   })
   
   it('should deny access when user is not authenticated for authenticated endpoints', async () => {
-    // Create a mock middleware that provides a user without proper authentication
-    const mockAuthMiddlewareNoUser = (app: Elysia) => {
-      return app.derive(() => ({
-        user: null
-      }))
-    }
-
     // Mock the generateRegistrationOptions method (but it shouldn't be called due to access denial)
     const originalGenerateRegistrationOptions = mockPasskeyService.generateRegistrationOptions;
     mockPasskeyService.generateRegistrationOptions = mockFn().mockResolvedValue({

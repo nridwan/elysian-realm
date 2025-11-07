@@ -7,12 +7,6 @@ import { swaggerPlugin } from './plugins/swagger'
 import { errorHandlerPlugin } from './plugins/error_handler_plugin'
 import { corsPlugin } from './plugins/cors'
 import {
-  trace,
-  context as otelContext,
-  propagation,
-  SpanStatusCode,
-  ProxyTracer,
-  SpanKind,
   Span
 } from "@opentelemetry/api";
 
@@ -22,7 +16,7 @@ let rootContext: Span | undefined
 
 const app = new Elysia()
   .use(corsPlugin)
-  .use(otel({ enabled: true }))
+  .use(otel({ enabled: false }))
   .on('mapResponse', () => {}) // hack otel bun 1.2
   .use(swaggerPlugin)
   .use(adminAccessTokenPlugin)

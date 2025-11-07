@@ -3,8 +3,7 @@ import { Elysia } from 'elysia'
 import { createAuditController } from '../controller/audit_controller'
 import { AuditService } from '../services/audit_service'
 import { PrismaClient } from '@prisma/client'
-import { auditMiddleware } from '../middleware/audit_middleware'
-import { adminMiddleware } from '../../admin/middleware/admin_middleware'
+import { AuditContext } from '../middleware/audit_middleware'
 
 // Mock Prisma client for testing
 const mockPrisma = {
@@ -52,7 +51,7 @@ const mockAdminMiddleware = (app: Elysia) => {
 const mockAuditMiddleware = (app: Elysia) => {
   return app.derive(() => {
     // Mock audit context
-    const auditContext = {
+    const auditContext: AuditContext = {
       actionRecorded: false,
       initialAction: null,
       changes: [],
@@ -79,8 +78,7 @@ const mockAuditMiddleware = (app: Elysia) => {
         auditContext.rollbackPending = true;
       },
       flushAudit: async () => {
-        // Mock implementation - no-op
-        return Promise.resolve();
+        return null;
       },
       getAuditChanges: () => {
         return auditContext.changes.length > 0 ? [...auditContext.changes] : null;
@@ -102,8 +100,8 @@ describe('Audit Integration Tests', () => {
     app = new Elysia()
       .use(createAuditController({
         service: mockAuditService,
-        auditMiddleware: mockAuditMiddleware,
-        adminMiddleware: mockAdminMiddleware
+        auditMiddleware: mockAuditMiddleware as any,
+        adminMiddleware: mockAdminMiddleware as any
       }))
   })
 

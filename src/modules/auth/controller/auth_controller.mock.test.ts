@@ -86,8 +86,7 @@ const mockAuditMiddleware = (app: Elysia) => {
           auditContext.rollbackPending = true;
         },
         flushAudit: async () => {
-          // Mock implementation - no-op
-          return Promise.resolve();
+          return null;
         },
         getAuditChanges: () => {
           return auditContext.changes.length > 0 ? [...auditContext.changes] : null;

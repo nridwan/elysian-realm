@@ -27,8 +27,8 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
           '/trails',
           async ({ query, responseTools }) => {
             const { page = '1', limit = '10', action, entity_type, user_id, start_date, end_date } = query
-            const pageNum = parseInt(page)
-            const limitNum = parseInt(limit)
+            const pageNum = Number.parseInt(page)
+            const limitNum = Number.parseInt(limit)
 
             const filters: any = {}
             if (action) filters.action = action
@@ -124,8 +124,8 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
           async ({ params, query, responseTools }) => {
             const { userId } = params
             const { page = '1', limit = '10' } = query
-            const pageNum = parseInt(page)
-            const limitNum = parseInt(limit)
+            const pageNum = Number.parseInt(page)
+            const limitNum = Number.parseInt(limit)
 
             const result = await service.getAuditTrailsByUserId(userId, pageNum, limitNum)
             
@@ -174,8 +174,8 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
           async ({ params, query, responseTools }) => {
             const { entityType } = params
             const { page = '1', limit = '10' } = query
-            const pageNum = parseInt(page)
-            const limitNum = parseInt(limit)
+            const pageNum = Number.parseInt(page)
+            const limitNum = Number.parseInt(limit)
 
             const result = await service.getAuditTrailsByEntityType(entityType, pageNum, limitNum)
             

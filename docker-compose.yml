@@ -55,6 +55,19 @@ services:
       timeout: 5s
       retries: 5
 
+  # Database initialization
+  init:
+    build:
+      context: .
+      dockerfile: init.Dockerfile
+    container_name: elysian-realm-init
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/elysian-realm?schema=public
+    restart: "no"
+
   # Backend API
   backend:
     build:
@@ -82,6 +95,9 @@ services:
       - SWAGGER_ENABLED=true
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - PASSKEY_RP_ID=localhost
+      - PASSKEY_RP_NAME=Elysian Realm
+      - PASSKEY_ORIGIN=http://localhost
     ports:
       - '3000:3000'
     healthcheck:

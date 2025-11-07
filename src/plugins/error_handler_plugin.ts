@@ -38,10 +38,7 @@ export const ErrorKeys = {
  */
 
 export function errorHandlerPlugin() {
-    SetErrorFunction((err) => {
-        // Format the property path to be more readable
-        const formattedPath = err.path.replace(/^\//, '').replace(/\//g, '.')
-        
+    SetErrorFunction((err) => {        
         switch (err.errorType) {
             case ValueErrorType.StringFormat:
                 // Handle different string formats with specific messages

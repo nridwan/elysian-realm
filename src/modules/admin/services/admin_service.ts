@@ -1,6 +1,7 @@
 import { PrismaClient, Admin as PrismaAdmin, Role as PrismaRole } from '@prisma/client'
 import { PERMISSIONS, getAllPermissionStrings, getAdminPermissions, getSuperAdminPermissions } from '../permissions'
 import { hashPassword } from '../../../utils/password'
+import { getCurrentSpan } from '@elysiajs/opentelemetry'
 
 // Only create custom types where we need to transform data
 type RoleWithPermissions = Omit<PrismaRole, 'permissions'> & {
@@ -19,7 +20,7 @@ export interface Pagination {
 }
 
 export class AdminService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
   async getUsers(page: number = 1, limit: number = 10): Promise<{ users: AdminWithRole[]; pagination: Pagination }> {
     const users = await this.prisma.admin.findMany({
@@ -60,6 +61,7 @@ export class AdminService {
 
       return user as AdminWithRole
     } catch (error) {
+      getCurrentSpan()?.recordException(error as Error)
       return null
     }
   }
@@ -100,6 +102,7 @@ export class AdminService {
 
       return user as AdminWithRole
     } catch (error) {
+      getCurrentSpan()?.recordException(error as Error)
       return null
     }
   }
@@ -111,8 +114,24 @@ export class AdminService {
       })
       return true
     } catch (error) {
+      getCurrentSpan()?.recordException(error as Error)
       return false
     }
+  }
+
+  async getRole(id: string): Promise<RoleWithPermissions | null> {
+    const role = await this.prisma.role.findUnique({
+      where: { id }
+    })
+
+    if (!role) {
+      return null
+    }
+
+    return {
+      ...role,
+      permissions: role.permissions ? role.permissions : []
+    } as RoleWithPermissions
   }
 
   async getRoles(): Promise<RoleWithPermissions[]> {
@@ -129,7 +148,7 @@ export class AdminService {
     try {
       const roleData = {
         ...data,
-        permissions: data.permissions ? data.permissions : undefined
+        permissions: data.permissions ?? undefined
       }
       
       const role = await this.prisma.role.create({
@@ -141,6 +160,7 @@ export class AdminService {
         permissions: role.permissions ? role.permissions : []
       } as RoleWithPermissions
     } catch (error) {
+      getCurrentSpan()?.recordException(error as Error)
       return null
     }
   }
@@ -149,7 +169,7 @@ export class AdminService {
     try {
       const roleData = {
         ...data,
-        permissions: data.permissions !== undefined ? data.permissions : undefined
+        permissions: data.permissions ?? undefined
       }
       
       const role = await this.prisma.role.update({
@@ -162,6 +182,7 @@ export class AdminService {
         permissions: role.permissions ? role.permissions : []
       } as RoleWithPermissions
     } catch (error) {
+      getCurrentSpan()?.recordException(error as Error)
       return null
     }
   }
@@ -173,6 +194,7 @@ export class AdminService {
       })
       return true
     } catch (error) {
+      getCurrentSpan()?.recordException(error as Error)
       return false
     }
   }

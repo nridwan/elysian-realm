@@ -67,4 +67,4 @@ async function main() {
 // Export the seeding function for use in custom scripts
 export { seedRolesAndUsers }
 
-main()
+await main()

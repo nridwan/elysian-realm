@@ -1,5 +1,5 @@
 import { t } from 'elysia'
-import { BaseMetaDto, PaginationQueryDto } from '../../../dto/base.dto'
+import { BaseMetaDto } from '../../../dto/base.dto'
 
 export const LoginDto = t.Object({
   email: t.String({
@@ -45,4 +45,4 @@ export const AuthTokenResponseDto = t.Object({
   }),
 })
 
-export const AuthPaginationQueryDto = PaginationQueryDto
+export {PaginationQueryDto as AuthPaginationQueryDto} from '../../../dto/base.dto'

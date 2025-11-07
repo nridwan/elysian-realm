@@ -1,4 +1,4 @@
-import Elysia, { t } from 'elysia'
+import { t } from 'elysia'
 import { jwt } from '@elysiajs/jwt'
 import { tokenConfig } from '../config/token.config'
 import { config } from '../config/config'

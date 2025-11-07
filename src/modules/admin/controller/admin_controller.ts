@@ -1,4 +1,4 @@
-import Elysia, { t } from 'elysia'
+import Elysia from 'elysia'
 import * as dto from '../dto/admin_dto'
 import { adminMiddleware } from '../middleware/admin_middleware'
 import { adminService } from '../services/admin_service_factory'
@@ -28,8 +28,8 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           '/admins',
           async ({ query, responseTools }) => {
             const { page = '1', limit = '10' } = query
-            const pageNum = parseInt(page)
-            const limitNum = parseInt(limit)
+            const pageNum = Number.parseInt(page)
+            const limitNum = Number.parseInt(limit)
 
             const result = await service.getUsers(pageNum, limitNum)
             
@@ -312,7 +312,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           async ({ params, body, responseTools, user, auditTools }) => {
             const { id } = params
             // Get the current role data to capture old data for audit trail
-            const existingRole = await service.getRoles().then(roles => roles.find(r => r.id === id))
+            const existingRole = await service.getRole(id)
             
             const updatedRole = await service.updateRole(id, body)
 
@@ -364,7 +364,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           async ({ params, responseTools, user, auditTools }) => {
             const { id } = params
             // Get the current role data to capture old data for audit trail
-            const existingRole = await service.getRoles().then(roles => roles.find(r => r.id === id))
+            const existingRole = await service.getRole(id)
             
             const success = await service.deleteRole(id)
 

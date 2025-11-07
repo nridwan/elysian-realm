@@ -1,12 +1,11 @@
 import Elysia from 'elysia'
 import { AuthService } from '../services/auth_service'
 import { LoginDto, RefreshTokenDto, AuthTokenResponseDto } from '../dto/auth_dto'
-import { adminAccessTokenPlugin, adminRefreshTokenPlugin, type RefreshTokenPayload } from '../../../plugins/jwt'
+import { adminAccessTokenPlugin, adminRefreshTokenPlugin } from '../../../plugins/jwt'
 import { responsePlugin } from '../../../plugins/response_plugin'
 import { authService } from '../services/auth_service_factory'
 import { passkeyService } from '../services/passkey_service_factory'
 import { auditMiddleware } from '../../audit/middleware/audit_middleware'
-import { redactSensitiveData } from '../../../utils/redaction_util'
 
 interface AuthControllerOptions {
   service?: AuthService

@@ -7,7 +7,7 @@ describe('ResponsePlugin', () => {
     const app = new Elysia()
       .use(responsePlugin())
       .get('/test', ({ responseTools }) => {
-        responseTools.setServiceName('TEST')
+        responseTools.setServiceName('ADMIN')
         return responseTools.generateResponse({ message: 'Hello World' })
       })
 
@@ -31,7 +31,7 @@ describe('ResponsePlugin', () => {
     
     expect(body).toHaveProperty('meta')
     expect(body).toHaveProperty('data')
-    expect(body.meta.code).toBe('TEST-200')
+    expect(body.meta.code).toBe('ADMIN-200')
     expect(body.meta.message).toBe('Success')
     expect(body.data).toEqual({ message: 'Hello World' })
   })

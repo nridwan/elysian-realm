@@ -7,7 +7,7 @@ const redactedKeys = {
 };
 
 class RedactingSpanExporter implements SpanExporter {
-  private exporter: SpanExporter;
+  private readonly exporter: SpanExporter;
 
   constructor(exporter: SpanExporter) {
     this.exporter = exporter;
@@ -51,11 +51,11 @@ class RedactingSpanExporter implements SpanExporter {
       try {
         const parsedValue = JSON.parse(attributeValue);
 
-        keysToRedact.forEach((key) => {
+        for(const key of keysToRedact) {
           if (parsedValue[key]) {
             parsedValue[key] = '[REDACTED]';
           }
-        });
+        };
 
         attributes[attributeKey] = JSON.stringify(parsedValue);
       } catch (error) {

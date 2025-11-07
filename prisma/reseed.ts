@@ -46,4 +46,4 @@ async function reseedRoles() {
 }
 
 // Run the re-seeding function
-reseedRoles()
+await reseedRoles()

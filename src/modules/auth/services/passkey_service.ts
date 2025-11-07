@@ -28,12 +28,12 @@ export interface PasskeyAuthenticationOptions {
 }
 
 export class PasskeyService {
-  private rpName = config.passkey.rpName;
-  private rpID = config.passkey.rpID;
-  private origin = config.passkey.origin;
-  private redis: RedisClient;
+  private readonly rpName = config.passkey.rpName;
+  private readonly rpID = config.passkey.rpID;
+  private readonly origin = config.passkey.origin;
+  private readonly redis: RedisClient;
 
-  constructor(private prisma: PrismaClient) {
+  constructor(private readonly prisma: PrismaClient) {
     // Initialize Bun's built-in Redis client using config values
     const passwordPart = config.redis.password ? `${config.redis.password}@` : '';
     this.redis = new RedisClient(`redis://${passwordPart}${config.redis.host}:${config.redis.port}`);

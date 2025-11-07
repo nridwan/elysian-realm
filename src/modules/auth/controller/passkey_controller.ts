@@ -12,14 +12,13 @@ import {
   PasskeyDeleteResponseDto,
   PasswordlessAuthenticationStartDto
 } from '../dto/passkey_dto'
-import { adminAccessTokenPlugin, adminRefreshTokenPlugin, type TokenPayload } from '../../../plugins/jwt'
+import { adminAccessTokenPlugin, adminRefreshTokenPlugin } from '../../../plugins/jwt'
 import { responsePlugin } from '../../../plugins/response_plugin'
 import { passkeyService } from '../services/passkey_service_factory'
 import { PrismaClient } from '@prisma/client'
 import { adminMiddleware } from '../../admin/middleware/admin_middleware'
 import { auditMiddleware } from '../../audit/middleware/audit_middleware'
 import { ErrorResponseDto } from '../../../dto/base.dto'
-import { redactSensitiveData } from '../../../utils/redaction_util'
 
 interface PasskeyControllerOptions {
   service?: PasskeyService
@@ -52,7 +51,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             
             if (!result.success) {
               set.status = 400
-              return responseTools.generateErrorResponse(result.error!, '400', result.error!)
+              return responseTools.generateErrorResponse(result.error!, '400', result.error)
             }
             
             return responseTools.generateResponse(
@@ -95,7 +94,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
                 null,
                 { user_id: user.id, passkey_id: id, success: false, reason: result.error }
               )
-              return responseTools.generateErrorResponse(result.error!, '400', result.error!)
+              return responseTools.generateErrorResponse(result.error!, '400', result.error)
             }
             
             // Log successful deletion - this is a crucial action worth tracking
@@ -139,7 +138,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             
             if (!authenticationOptions.success) {
               set.status = 400
-              return responseTools.generateErrorResponse(authenticationOptions.error!, '400', authenticationOptions.error!)
+              return responseTools.generateErrorResponse(authenticationOptions.error!, '400', authenticationOptions.error)
             }
             
             return responseTools.generateResponse(
@@ -170,7 +169,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             
             if (!authenticationOptions.success) {
               set.status = 400
-              return responseTools.generateErrorResponse(authenticationOptions.error!, '400', authenticationOptions.error!)
+              return responseTools.generateErrorResponse(authenticationOptions.error!, '400', authenticationOptions.error)
             }
             
             return responseTools.generateResponse(
@@ -208,7 +207,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
                 null,
                 { uuid: uuid, success: false, reason: verification.error }
               )
-              return responseTools.generateErrorResponse(verification.error!, '401', verification.error!)
+              return responseTools.generateErrorResponse(verification.error!, '401', verification.error)
             }
             
             // Get user data for token generation using the userId returned from verification
@@ -299,7 +298,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             
             if (!registrationOptions.success) {
               set.status = 400
-              return responseTools.generateErrorResponse(registrationOptions.error!, '400', registrationOptions.error!)
+              return responseTools.generateErrorResponse(registrationOptions.error!, '400', registrationOptions.error)
             }
             
             return responseTools.generateResponse(
@@ -339,7 +338,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
                 null,
                 { user_id: user.id, uuid: uuid, success: false, reason: verification.error }
               )
-              return responseTools.generateErrorResponse(verification.error!, '400', verification.error!)
+              return responseTools.generateErrorResponse(verification.error!, '400', verification.error)
             }
             
             // Log successful registration finish (this is a create operation) - this is a crucial action worth tracking

@@ -1,15 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `AuditTrail` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "public"."AuditTrail" DROP CONSTRAINT "AuditTrail_user_id_fkey";
-
--- DropTable
-DROP TABLE "public"."AuditTrail";
-
 -- CreateTable
 CREATE TABLE "public"."audit_trails" (
     "id" TEXT NOT NULL,

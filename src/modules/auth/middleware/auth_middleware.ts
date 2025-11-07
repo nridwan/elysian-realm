@@ -20,7 +20,7 @@ export interface UserContext {
 export const authMiddleware = (app: Elysia) =>
   app.use(adminAccessTokenPlugin).derive(async ({ adminAccessToken, headers }) => {
     const authHeader = headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return { user: null }
     }
 
