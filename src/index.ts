@@ -16,7 +16,7 @@ let rootContext: Span | undefined
 
 const app = new Elysia()
   .use(corsPlugin)
-  .use(otel({ enabled: false }))
+  .use(otel())
   .on('mapResponse', () => {}) // hack otel bun 1.2
   .use(swaggerPlugin)
   .use(adminAccessTokenPlugin)

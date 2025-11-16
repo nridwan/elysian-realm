@@ -31,6 +31,7 @@ export const config = {
 
   // OpenTelemetry configuration
   openTelemetry: {
+    enabled: process.env.OTEL_ENABLED === 'true',
     serviceName: process.env.OTEL_SERVICE_NAME || 'elysian-realm',
     exporterType: process.env.OTEL_EXPORTER_TYPE || 'console',
     otlpEndpoint: process.env.OTEL_OTLP_ENDPOINT || '',
