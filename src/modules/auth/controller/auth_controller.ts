@@ -1,6 +1,6 @@
 import Elysia from 'elysia'
 import { AuthService } from '../services/auth_service'
-import { LoginDto, RefreshTokenDto, AuthTokenResponseDto } from '../dto/auth_dto'
+import { LoginDto, RefreshTokenDto, AuthTokenSuccessResponseDto, AuthTokenErrorResponseDto } from '../dto/auth_dto'
 import { adminAccessTokenPlugin, adminRefreshTokenPlugin } from '../../../plugins/jwt'
 import { responsePlugin } from '../../../plugins/response_plugin'
 import { authService } from '../services/auth_service_factory'
@@ -88,8 +88,8 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
           {
             body: LoginDto,
             response: {
-              200: AuthTokenResponseDto,
-              401: AuthTokenResponseDto,
+              200: AuthTokenSuccessResponseDto,
+              401: AuthTokenErrorResponseDto,
             },
             detail: {
               tags: ['Auth'],
@@ -145,8 +145,8 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
           {
             body: RefreshTokenDto,
             response: {
-              200: AuthTokenResponseDto,
-              401: AuthTokenResponseDto,
+              200: AuthTokenSuccessResponseDto,
+              401: AuthTokenErrorResponseDto,
             },
             detail: {
               tags: ['Auth'],

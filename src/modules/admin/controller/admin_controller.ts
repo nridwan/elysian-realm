@@ -53,7 +53,10 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           },
           {
             query: dto.AdminPaginationQueryDto,
-            response: dto.AdminUsersResponseDto,
+            response: {
+              200: dto.AdminUsersSuccessResponseDto,
+              404: dto.AdminUsersErrorResponseDto
+            },
             hasPermission: 'admins.read',
             detail: {
               tags: ['Admin'],
@@ -89,7 +92,10 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           },
           {
             params: dto.IdParamDto,
-            response: dto.AdminUserResponseDto,
+            response: {
+              200: dto.AdminUserSuccessResponseDto,
+              404: dto.AdminUserErrorResponseDto
+            },
             hasPermission: 'admins.read',
             detail: {
               tags: ['Admin'],
@@ -146,7 +152,11 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           {
             params: dto.IdParamDto,
             body: dto.UpdateUserRequestDto,
-            response: dto.AdminUserResponseDto,
+            response: {
+              200: dto.AdminUserSuccessResponseDto,
+              400: dto.AdminUpdateUserErrorResponseDto,
+              404: dto.AdminUpdateUserErrorResponseDto
+            },
             hasPermission: 'admins.update',
             detail: {
               tags: ['Admin'],
@@ -191,7 +201,10 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           },
           {
             body: dto.CreateUserRequestDto,
-            response: dto.AdminUserResponseDto,
+            response: {
+              200: dto.AdminUserSuccessResponseDto,
+              400: dto.AdminCreateUserErrorResponseDto
+            },
             hasPermission: 'admins.create',
             detail: {
               tags: ['Admin'],
@@ -231,7 +244,11 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           },
           {
             params: dto.IdParamDto,
-            response: dto.AdminSuccessResponseDto,
+            response: {
+              200: dto.AdminSuccessResponseDto,
+              400: dto.AdminDeleteUserErrorResponseDto,
+              404: dto.AdminDeleteUserErrorResponseDto
+            },
             hasPermission: 'admins.delete',
             detail: {
               tags: ['Admin'],
@@ -257,7 +274,10 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             }, '200', 'Roles retrieved successfully')
           },
           {
-            response: dto.AdminRolesResponseDto,
+            response: {
+              200: dto.AdminRolesSuccessResponseDto,
+              404: dto.AdminRolesErrorResponseDto
+            },
             hasPermission: 'roles.read',
             detail: {
               tags: ['Admin'],
@@ -297,7 +317,10 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           },
           {
             body: dto.CreateRoleRequestDto,
-            response: dto.AdminRoleResponseDto,
+            response: {
+              200: dto.AdminRoleSuccessResponseDto,
+              400: dto.AdminCreateRoleErrorResponseDto
+            },
             hasPermission: 'roles.create',
             detail: {
               tags: ['Admin'],
@@ -349,7 +372,11 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           {
             params: dto.IdParamDto,
             body: dto.UpdateRoleRequestDto,
-            response: dto.AdminRoleResponseDto,
+            response: {
+              200: dto.AdminRoleSuccessResponseDto,
+              400: dto.AdminUpdateRoleErrorResponseDto,
+              404: dto.AdminUpdateRoleErrorResponseDto
+            },
             hasPermission: 'roles.update',
             detail: {
               tags: ['Admin'],
@@ -389,7 +416,11 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
           },
           {
             params: dto.IdParamDto,
-            response: dto.AdminSuccessResponseDto,
+            response: {
+              200: dto.AdminSuccessResponseDto,
+              400: dto.AdminErrorResponseDto,
+              404: dto.AdminErrorResponseDto
+            },
             hasPermission: 'roles.delete',
             detail: {
               tags: ['Admin'],
@@ -408,7 +439,10 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             return responseTools.generateResponse({ permissions }, '200', 'Permissions retrieved successfully')
           },
           {
-            response: dto.AdminAvailablePermissionsResponseDto,
+            response: {
+              200: dto.AdminAvailablePermissionsSuccessResponseDto,
+              404: dto.AdminAvailablePermissionsErrorResponseDto
+            },
             detail: {
               tags: ['Admin'],
               summary: 'Get Available Permissions',

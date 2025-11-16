@@ -4,9 +4,6 @@ FROM oven/bun:1.3.1-alpine AS base
 # Set the working directory
 WORKDIR /app
 
-# Install system dependencies for Prisma
-RUN apk add --no-cache openssl
-
 # Copy package files
 COPY package.json ./package.json
 COPY bun.lockb ./bun.lockb
@@ -27,9 +24,6 @@ FROM oven/bun:1.2.21-alpine AS build
 # Set the working directory
 WORKDIR /app
 
-# Install system dependencies for Prisma
-RUN apk add --no-cache openssl
-
 # Copy package files from base stage
 COPY --from=base /app/node_modules ./node_modules
 COPY package.json bun.lockb ./
@@ -48,7 +42,7 @@ RUN bun run build
 FROM alpine:3.22 AS production
 
 # Install system dependencies
-RUN apk add --no-cache libgcc libstdc++ openssl
+RUN apk add --no-cache libgcc libstdc++
 
 # Set the working directory
 WORKDIR /app

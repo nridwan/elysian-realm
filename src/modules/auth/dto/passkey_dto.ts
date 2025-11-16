@@ -1,5 +1,5 @@
 import { t } from 'elysia'
-import { BaseMetaDto } from '../../../dto/base.dto'
+import { createBaseMetaDto } from '../../../dto/base.dto'
 
 // Passkey Registration DTOs
 export const PasskeyRegistrationStartDto = t.Object({
@@ -119,12 +119,16 @@ export const PasskeyDto = t.Object({
   }),
 })
 
-export const PasskeyListDto = t.Array(PasskeyDto, {
+export const PasskeyListDto = t.Optional(t.Array(PasskeyDto, {
   description: 'List of user passkeys',
-})
+}))
 
-export const PasskeyOptionsResponseDto = t.Object({
-  meta: BaseMetaDto,
+// Passkey Options DTOs
+export const PasskeyOptionsSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['PASSKEY-200'],
+    messageExamples: ['Passkey options retrieved successfully']
+  }),
   data: t.Object({
     options: t.Any({
       description: 'WebAuthn options for registration or authentication',
@@ -132,8 +136,20 @@ export const PasskeyOptionsResponseDto = t.Object({
   }),
 })
 
-export const PasskeyRegistrationResponseDto = t.Object({
-  meta: BaseMetaDto,
+export const PasskeyOptionsErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['PASSKEY-404'],
+    messageExamples: ['User not found']
+  }),
+  data: t.Null(),
+})
+
+// Passkey Registration DTOs
+export const PasskeyRegistrationSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['PASSKEY-200'],
+    messageExamples: ['Passkey registered successfully']
+  }),
   data: t.Object({
     success: t.Boolean({
       description: 'Whether the registration was successful',
@@ -141,35 +157,77 @@ export const PasskeyRegistrationResponseDto = t.Object({
   }),
 })
 
-export const PasskeyAuthenticationResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([
-    t.Object({
-      access_token: t.String({
-        description: 'JWT access token for API authentication',
-        examples: ['eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...']
-      }),
-      refresh_token: t.String({
-        description: 'Refresh token for obtaining new access tokens',
-        examples: ['dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gdGV4dA==']
-      }),
+export const PasskeyRegistrationErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['PASSKEY-400'],
+    messageExamples: ['Invalid registration data']
+  }),
+  data: t.Null(),
+})
+
+// Passkey Authentication DTOs
+export const PasskeyAuthenticationSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['PASSKEY-200'],
+    messageExamples: ['Passkey authentication successful']
+  }),
+  data: t.Object({
+    access_token: t.String({
+      description: 'JWT access token for API authentication',
+      examples: ['eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...']
     }),
-    t.Null()
-  ], {
-    description: 'Authentication token data or null if authentication failed'
+    refresh_token: t.String({
+      description: 'Refresh token for obtaining new access tokens',
+      examples: ['dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gdGV4dA==']
+    }),
   }),
 })
 
-export const PasskeyListResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Optional(PasskeyListDto),
+export const PasskeyAuthenticationErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['PASSKEY-401'],
+    messageExamples: ['Invalid authentication data'],
+    errorExamples: [
+      { field: 'email', messages: ['Email is required', 'Email must be valid'] }
+    ]
+  }),
+  data: t.Null(),
 })
 
-export const PasskeyDeleteResponseDto = t.Object({
-  meta: BaseMetaDto,
+// Passkey List DTOs
+export const PasskeyListSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['PASSKEY-200'],
+    messageExamples: ['Passkeys retrieved successfully']
+  }),
+  data: PasskeyListDto,
+})
+
+export const PasskeyListErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['PASSKEY-404'],
+    messageExamples: ['No passkeys found']
+  }),
+  data: t.Null(),
+})
+
+// Passkey Delete DTOs
+export const PasskeyDeleteSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['PASSKEY-200'],
+    messageExamples: ['Passkey deleted successfully']
+  }),
   data: t.Object({
     success: t.Boolean({
       description: 'Whether the deletion was successful',
     }),
   }),
+})
+
+export const PasskeyDeleteErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['PASSKEY-404'],
+    messageExamples: ['Passkey not found']
+  }),
+  data: t.Null(),
 })

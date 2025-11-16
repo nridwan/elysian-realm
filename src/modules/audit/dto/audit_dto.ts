@@ -1,5 +1,5 @@
 import { t } from 'elysia'
-import { BaseMetaDto, PaginationQueryDto } from '../../../dto/base.dto'
+import { createBaseMetaDto, PaginationQueryDto } from '../../../dto/base.dto'
 
 export const AuditTrailChangesDto = t.Union([t.Array(t.Object({
     table_name: t.String({
@@ -97,30 +97,57 @@ export const AuditTrailResponseDataDto = t.Object({
   description: 'Single audit trail response data'
 })
 
-// Audit Response DTOs
-export const AuditTrailsResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([AuditTrailsResponseDataDto, t.Null()], {
-    description: 'Paginated audit trail data or null if request failed'
+// Audit Success Response DTOs
+export const AuditTrailsSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['AUDIT-200'],
+    messageExamples: ['Audit trails retrieved successfully']
   }),
+  data: AuditTrailsResponseDataDto,
 })
 
-export const AuditTrailResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([AuditTrailResponseDataDto, t.Null()], {
-    description: 'Audit trail data or null if request failed'
+export const AuditTrailSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['AUDIT-200'],
+    messageExamples: ['Audit trail retrieved successfully']
   }),
+  data: AuditTrailResponseDataDto,
 })
 
 export const AuditSuccessResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([t.Object({}), t.Null()], {
-    description: 'Empty object for successful operations or null if failed'
+  meta: createBaseMetaDto({
+    codeExamples: ['AUDIT-200', 'AUDIT-201'],
+    messageExamples: ['Audit operation successful', 'Audit rollback completed']
   }),
+  data: t.Object({}),
+})
+
+// Audit Error Response DTOs
+export const AuditTrailsErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['AUDIT-404'],
+    messageExamples: ['Audit trails not found']
+  }),
+  data: t.Null(),
+})
+
+export const AuditTrailErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['AUDIT-404'],
+    messageExamples: ['Audit trail not found']
+  }),
+  data: t.Null(),
 })
 
 export const AuditErrorResponseDto = t.Object({
-  meta: BaseMetaDto,
+  meta: createBaseMetaDto({
+    codeExamples: ['AUDIT-400', 'AUDIT-403', 'AUDIT-500'],
+    messageExamples: ['Invalid audit data', 'Access denied to audit data', 'Audit retrieval failed'],
+    errorExamples: [
+      { field: 'user_id', messages: ['User ID must be valid'] },
+      { field: 'action', messages: ['Action type is required'] }
+    ]
+  }),
   data: t.Null(),
 })
 

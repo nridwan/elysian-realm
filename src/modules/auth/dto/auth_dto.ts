@@ -1,5 +1,5 @@
 import { t } from 'elysia'
-import { BaseMetaDto } from '../../../dto/base.dto'
+import { createBaseMetaDto } from '../../../dto/base.dto'
 
 export const LoginDto = t.Object({
   email: t.String({
@@ -38,11 +38,24 @@ export const RefreshTokenDto = t.Object({
   }),
 })
 
-export const AuthTokenResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([TokenResponseDataDto, t.Null()], {
-    description: 'Authentication token data or null if authentication failed'
+export const AuthTokenSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['AUTH-200'],
+    messageExamples: ['Login successful']
   }),
+  data: TokenResponseDataDto,
+})
+
+export const AuthTokenErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['AUTH-401', 'AUTH-422'],
+    messageExamples: ['Invalid credentials', 'Validation error'],
+    errorExamples: [
+      { field: 'email', messages: ['Email is required', 'Email must be valid'] },
+      { field: 'password', messages: ['Password is required', 'Password must be at least 8 characters'] }
+    ]
+  }),
+  data: t.Null(),
 })
 
 export {PaginationQueryDto as AuthPaginationQueryDto} from '../../../dto/base.dto'

@@ -1,105 +1,167 @@
-import { t, TSchema } from 'elysia'
+import { t, TSchema } from "elysia";
 
 // Base response meta structure
 export const BaseMetaDto = t.Object({
   code: t.String({
-    description: 'Response status code',
-    examples: ['AUTH-200', 'ADMIN-404']
+    description: "Response status code",
+    examples: ["AUTH-200", "ADMIN-404"],
   }),
   message: t.String({
-    description: 'Human-readable response message',
-    examples: ['Login successful', 'User not found']
+    description: "Human-readable response message",
+    examples: ["Login successful", "User not found"],
   }),
-  errors: t.Optional(t.Array(t.Object({
-    field: t.String({
-      description: 'Field that caused the error',
-      examples: ['email', 'password']
+  errors: t.Optional(
+    t.Array(
+      t.Object({
+        field: t.String({
+          description: "Field that caused the error",
+          examples: ["email", "password"],
+        }),
+        messages: t.Array(t.String(), {
+          description: "Error messages for the field",
+          examples: [["Email is required", "Email must be valid"]],
+        }),
+      }),
+      {
+        description: "List of validation errors",
+      }
+    )
+  ),
+});
+
+// Function to create BaseMetaDto with specific examples
+export const createBaseMetaDto = ({
+  codeExamples = ["AUTH-200", "ADMIN-404"],
+  messageExamples = ["Operation successful", "Operation failed"],
+  errorExamples = [],
+}: {
+  codeExamples?: string[];
+  messageExamples?: string[];
+  errorExamples?: { field: string; messages: string[] }[];
+} = {}) => {
+  return t.Object({
+    code: t.String({
+      description: "Response status code",
+      examples: codeExamples,
     }),
-    messages: t.Array(t.String(), {
-      description: 'Error messages for the field',
-      examples: [['Email is required', 'Email must be valid']]
-    })
-  }), {
-    description: 'List of validation errors'
-  }))
-})
+    message: t.String({
+      description: "Human-readable response message",
+      examples: messageExamples,
+    }),
+    errors: t.Optional(
+      errorExamples.length > 0
+        ? t.Array(
+            t.Object({
+              field: t.String({
+                description: "Field that caused the error",
+                examples: errorExamples.map((e) => e.field),
+              }),
+              messages: t.Array(t.String(), {
+                description: "Error messages for the field",
+                examples: [errorExamples.flatMap((e) => e.messages)],
+              }),
+            }),
+            {
+              description: "List of validation errors",
+            }
+          )
+        : t.Any({ examples: null })
+    ),
+  });
+};
 
 // Generic base response structure
 export const createBaseResponseDto = <T extends TSchema>(dataSchema: T) => {
   return t.Object({
     meta: BaseMetaDto,
-    data: dataSchema
-  })
-}
+    data: dataSchema,
+  });
+};
 
 // Generic pagination structure
 export const createPaginationDto = <T extends TSchema>(itemSchema: T) => {
   return t.Object({
     page: t.Number({
-      description: 'Current page number',
-      examples: [1]
+      description: "Current page number",
+      examples: [1],
     }),
     limit: t.Number({
-      description: 'Number of items per page',
-      examples: [10]
+      description: "Number of items per page",
+      examples: [10],
     }),
     total: t.Number({
-      description: 'Total number of items',
-      examples: [100]
+      description: "Total number of items",
+      examples: [100],
     }),
     pages: t.Number({
-      description: 'Total number of pages',
-      examples: [10]
+      description: "Total number of pages",
+      examples: [10],
     }),
     data: t.Array(itemSchema, {
-      description: 'Array of items for the current page'
-    })
-  })
-}
+      description: "Array of items for the current page",
+    }),
+  });
+};
 
 // Pagination query parameters
 export const PaginationQueryDto = t.Object({
-  page: t.Optional(t.String({
-    description: 'Page number to retrieve (default: 1)',
-    examples: ['1']
-  })),
-  limit: t.Optional(t.String({
-    description: 'Number of items per page (default: 10)',
-    examples: ['10']
-  }))
-})
+  page: t.Optional(
+    t.String({
+      description: "Page number to retrieve (default: 1)",
+      examples: ["1"],
+    })
+  ),
+  limit: t.Optional(
+    t.String({
+      description: "Number of items per page (default: 10)",
+      examples: ["10"],
+    })
+  ),
+});
 
 // Re-export the base response and pagination DTOs for convenience
-export const BaseResponseDto = createBaseResponseDto(t.Unknown())
-export const PaginationDto = createPaginationDto(t.Unknown())
+export const BaseResponseDto = createBaseResponseDto(t.Unknown());
+export const PaginationDto = createPaginationDto(t.Unknown());
 
 // Common response DTOs
-export const SuccessResponseDto = createBaseResponseDto(t.Object({}))
-export const ErrorResponseDto = createBaseResponseDto(t.Null())
+export const SuccessResponseDto = createBaseResponseDto(t.Object({}));
+export const ErrorResponseDto = createBaseResponseDto(t.Null());
 
 // Specific response DTOs for passkey operations
-export const PasskeyOptionsResponseDto = createBaseResponseDto(t.Object({
-  options: t.Unknown()
-}))
+export const PasskeyOptionsResponseDto = createBaseResponseDto(
+  t.Object({
+    options: t.Unknown(),
+  })
+);
 
-export const PasskeyRegistrationResponseDto = createBaseResponseDto(t.Object({
-  success: t.Boolean()
-}))
+export const PasskeyRegistrationResponseDto = createBaseResponseDto(
+  t.Object({
+    success: t.Boolean(),
+  })
+);
 
-export const PasskeyAuthenticationResponseDto = createBaseResponseDto(t.Object({
-  access_token: t.String(),
-  refresh_token: t.String()
-}))
+export const PasskeyAuthenticationResponseDto = createBaseResponseDto(
+  t.Object({
+    access_token: t.String(),
+    refresh_token: t.String(),
+  })
+);
 
-export const PasskeyListResponseDto = createBaseResponseDto(t.Array(t.Object({
-  id: t.String(),
-  deviceType: t.String(),
-  backedUp: t.Boolean(),
-  transports: t.Array(t.String()),
-  created_at: t.String(), // ISO date string
-  updated_at: t.String()  // ISO date string
-})))
+export const PasskeyListResponseDto = createBaseResponseDto(
+  t.Array(
+    t.Object({
+      id: t.String(),
+      deviceType: t.String(),
+      backedUp: t.Boolean(),
+      transports: t.Array(t.String()),
+      created_at: t.String(), // ISO date string
+      updated_at: t.String(), // ISO date string
+    })
+  )
+);
 
-export const PasskeyDeleteResponseDto = createBaseResponseDto(t.Object({
-  success: t.Boolean()
-}))
+export const PasskeyDeleteResponseDto = createBaseResponseDto(
+  t.Object({
+    success: t.Boolean(),
+  })
+);

@@ -1,5 +1,5 @@
 import { t } from 'elysia'
-import { BaseMetaDto } from '../../../dto/base.dto'
+import { createBaseMetaDto } from '../../../dto/base.dto'
 
 // User DTOs
 export const UserDto = t.Object({
@@ -129,51 +129,180 @@ export const AvailablePermissionsResponseDataDto = t.Object({
   description: 'Available permissions response data'
 })
 
-// Admin Response DTOs - using union types to handle both success and error cases
-export const AdminUsersResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([UsersResponseDataDto, t.Null()], {
-    description: 'Paginated user data or null if request failed'
+// Admin Success Response DTOs
+export const AdminUsersSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-200'],
+    messageExamples: ['Admins retrieved successfully']
   }),
+  data: UsersResponseDataDto,
 })
 
-export const AdminUserResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([UserResponseDataDto, t.Null()], {
-    description: 'User data or null if request failed'
+export const AdminUserSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-200'],
+    messageExamples: ['Admin retrieved successfully']
   }),
+  data: UserResponseDataDto,
 })
 
-export const AdminRolesResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([RolesResponseDataDto, t.Null()], {
-    description: 'Roles data or null if request failed'
+export const AdminRolesSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-200'],
+    messageExamples: ['Roles retrieved successfully']
   }),
+  data: RolesResponseDataDto,
 })
 
-export const AdminRoleResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([RoleResponseDataDto, t.Null()], {
-    description: 'Role data or null if request failed'
+export const AdminRoleSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-200'],
+    messageExamples: ['Role retrieved successfully']
   }),
+  data: RoleResponseDataDto,
 })
 
-export const AdminAvailablePermissionsResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([AvailablePermissionsResponseDataDto, t.Null()], {
-    description: 'Available permissions data or null if request failed'
+export const AdminAvailablePermissionsSuccessResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-200'],
+    messageExamples: ['Available permissions retrieved successfully']
   }),
+  data: AvailablePermissionsResponseDataDto,
 })
 
 export const AdminSuccessResponseDto = t.Object({
-  meta: BaseMetaDto,
-  data: t.Union([t.Object({}), t.Null()], {
-    description: 'Empty object for successful operations or null if failed'
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-200', 'ADMIN-201'],
+    messageExamples: ['Admin created successfully', 'Admin updated successfully', 'Admin deleted successfully', 'Role created successfully', 'Role updated successfully', 'Role deleted successfully']
   }),
+  data: t.Object({}),
+})
+
+// Admin Error Response DTOs
+export const AdminUsersErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-404'],
+    messageExamples: ['Admins not found'],
+    errorExamples: [
+      { field: 'page', messages: ['Page must be a positive integer'] },
+      { field: 'limit', messages: ['Limit must be between 1 and 100'] }
+    ]
+  }),
+  data: t.Null(),
+})
+
+export const AdminUserErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-404'],
+    messageExamples: ['Admin not found'],
+    errorExamples: [
+      { field: 'id', messages: ['Admin ID not found'] }
+    ]
+  }),
+  data: t.Null(),
+})
+
+export const AdminRolesErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-404'],
+    messageExamples: ['Roles not found']
+  }),
+  data: t.Null(),
+})
+
+export const AdminRoleErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-404'],
+    messageExamples: ['Role not found'],
+    errorExamples: [
+      { field: 'id', messages: ['Role ID not found'] }
+    ]
+  }),
+  data: t.Null(),
+})
+
+export const AdminAvailablePermissionsErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-404'],
+    messageExamples: ['Available permissions not found']
+  }),
+  data: t.Null(),
+})
+
+export const AdminCreateUserErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-400', 'ADMIN-500'],
+    messageExamples: ['Failed to create admin', 'Admin creation failed'],
+    errorExamples: [
+      { field: 'email', messages: ['Email is required', 'Email must be valid', 'Email already exists'] },
+      { field: 'name', messages: ['Name is required', 'Name must be at least 2 characters'] },
+      { field: 'password', messages: ['Password is required', 'Password must be at least 8 characters'] },
+      { field: 'role_id', messages: ['Role ID is required'] }
+    ]
+  }),
+  data: t.Null(),
+})
+
+export const AdminUpdateUserErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-400', 'ADMIN-404'],
+    messageExamples: ['Failed to update admin', 'Admin not found'],
+    errorExamples: [
+      { field: 'email', messages: ['Email must be valid', 'Email already exists'] },
+      { field: 'name', messages: ['Name must be at least 2 characters'] },
+      { field: 'role_id', messages: ['Role ID is required'] },
+      { field: 'id', messages: ['Admin ID not found'] }
+    ]
+  }),
+  data: t.Null(),
+})
+
+export const AdminDeleteUserErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-400', 'ADMIN-404'],
+    messageExamples: ['Failed to delete admin', 'Admin not found'],
+    errorExamples: [
+      { field: 'id', messages: ['Admin ID not found'] }
+    ]
+  }),
+  data: t.Null(),
+})
+
+export const AdminCreateRoleErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-400', 'ADMIN-500'],
+    messageExamples: ['Failed to create role', 'Role creation failed'],
+    errorExamples: [
+      { field: 'name', messages: ['Role name is required', 'Role name must be at least 2 characters'] },
+      { field: 'permissions', messages: ['Invalid permission format'] }
+    ]
+  }),
+  data: t.Null(),
+})
+
+export const AdminUpdateRoleErrorResponseDto = t.Object({
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-400', 'ADMIN-404'],
+    messageExamples: ['Failed to update role', 'Role not found'],
+    errorExamples: [
+      { field: 'name', messages: ['Role name must be at least 2 characters'] },
+      { field: 'permissions', messages: ['Invalid permission format'] },
+      { field: 'id', messages: ['Role ID not found'] }
+    ]
+  }),
+  data: t.Null(),
 })
 
 export const AdminErrorResponseDto = t.Object({
-  meta: BaseMetaDto,
+  meta: createBaseMetaDto({
+    codeExamples: ['ADMIN-400', 'ADMIN-404', 'ADMIN-500'],
+    messageExamples: ['Invalid input data', 'Admin not found', 'Failed to delete admin', 'Failed to update admin'],
+    errorExamples: [
+      { field: 'email', messages: ['Email is required', 'Email must be valid'] },
+      { field: 'name', messages: ['Name is required', 'Name must be at least 2 characters'] },
+      { field: 'role_id', messages: ['Role ID is required'] }
+    ]
+  }),
   data: t.Null(),
 })
 

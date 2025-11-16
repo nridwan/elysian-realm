@@ -5,12 +5,17 @@ import {
   PasskeyRegistrationFinishDto,
   PasskeyAuthenticationStartDto,
   PasskeyAuthenticationFinishDto,
-  PasskeyOptionsResponseDto,
-  PasskeyRegistrationResponseDto,
-  PasskeyAuthenticationResponseDto,
-  PasskeyListResponseDto,
-  PasskeyDeleteResponseDto,
-  PasswordlessAuthenticationStartDto
+  PasskeyOptionsSuccessResponseDto,
+  PasskeyOptionsErrorResponseDto,
+  PasskeyRegistrationSuccessResponseDto,
+  PasskeyRegistrationErrorResponseDto,
+  PasskeyAuthenticationSuccessResponseDto,
+  PasskeyAuthenticationErrorResponseDto,
+  PasskeyListSuccessResponseDto,
+  PasskeyListErrorResponseDto,
+  PasskeyDeleteSuccessResponseDto,
+  PasskeyDeleteErrorResponseDto,
+  PasswordlessAuthenticationStartDto,
 } from '../dto/passkey_dto'
 import { adminAccessTokenPlugin, adminRefreshTokenPlugin } from '../../../plugins/jwt'
 import { responsePlugin } from '../../../plugins/response_plugin'
@@ -62,8 +67,8 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
           },
           {
             response: {
-              200: PasskeyListResponseDto,
-              400: ErrorResponseDto,
+              200: PasskeyListSuccessResponseDto,
+              400: PasskeyListErrorResponseDto,
             },
             needAuth: true,
             detail: {
@@ -112,8 +117,8 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
           },
           {
             response: {
-              200: PasskeyDeleteResponseDto,
-              400: ErrorResponseDto,
+              200: PasskeyDeleteSuccessResponseDto,
+              400: PasskeyDeleteErrorResponseDto,
             },
             needAuth: true,
             detail: {
@@ -150,8 +155,8 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
           {
             body: PasskeyAuthenticationStartDto,
             response: {
-              200: PasskeyOptionsResponseDto,
-              400: ErrorResponseDto,
+              200: PasskeyOptionsSuccessResponseDto,
+              400: PasskeyOptionsErrorResponseDto,
             },
             detail: {
               tags: ['Passkey'],
@@ -181,8 +186,8 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
           {
             body: PasswordlessAuthenticationStartDto,
             response: {
-              200: PasskeyOptionsResponseDto,
-              400: ErrorResponseDto,
+              200: PasskeyOptionsSuccessResponseDto,
+              400: PasskeyOptionsErrorResponseDto,
             },
             detail: {
               tags: ['Passkey'],
@@ -265,8 +270,8 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
           {
             body: PasskeyAuthenticationFinishDto,
             response: {
-              200: PasskeyAuthenticationResponseDto,
-              401: ErrorResponseDto,
+              200: PasskeyAuthenticationSuccessResponseDto,
+              401: PasskeyAuthenticationErrorResponseDto,
             },
             detail: {
               tags: ['Passkey'],
@@ -310,9 +315,9 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
           {
             body: PasskeyRegistrationStartDto,
             response: {
-              200: PasskeyOptionsResponseDto,
-              400: ErrorResponseDto,
-              403: ErrorResponseDto,
+              200: PasskeyOptionsSuccessResponseDto,
+              400: PasskeyOptionsErrorResponseDto,
+              403: PasskeyOptionsErrorResponseDto,
             },
             needAuth: true,
             detail: {
@@ -357,8 +362,8 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
           {
             body: PasskeyRegistrationFinishDto,
             response: {
-              200: PasskeyRegistrationResponseDto,
-              400: ErrorResponseDto,
+              200: PasskeyRegistrationSuccessResponseDto,
+              400: PasskeyRegistrationErrorResponseDto,
             },
             needAuth: true,
             detail: {

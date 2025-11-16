@@ -12,9 +12,6 @@ ARG NODE_ENV
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 ENV NODE_ENV=${NODE_ENV}
 
-# Install system dependencies
-RUN apk add --no-cache openssl
-
 # Copy package files
 COPY package.json bun.lockb ./
 

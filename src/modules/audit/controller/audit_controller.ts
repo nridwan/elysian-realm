@@ -64,7 +64,10 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
           },
           {
             query: dto.AuditPaginationQueryDto,
-            response: dto.AuditTrailsResponseDto,
+            response: {
+              200: dto.AuditTrailsSuccessResponseDto,
+              404: dto.AuditTrailsErrorResponseDto
+            },
             hasPermission: 'audit.read',
             detail: {
               tags: ['Audit'],
@@ -109,7 +112,10 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
                 examples: ['audit_123456']
               })
             }),
-            response: dto.AuditTrailResponseDto,
+            response: {
+              200: dto.AuditTrailSuccessResponseDto,
+              404: dto.AuditTrailErrorResponseDto
+            },
             hasPermission: 'audit.read',
             detail: {
               tags: ['Audit'],
@@ -159,7 +165,10 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
               })
             }),
             query: dto.AuditPaginationQueryDto,
-            response: dto.AuditTrailsResponseDto,
+            response: {
+              200: dto.AuditTrailsSuccessResponseDto,
+              404: dto.AuditTrailsErrorResponseDto
+            },
             hasPermission: 'audit.read',
             detail: {
               tags: ['Audit'],
@@ -209,7 +218,10 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
               })
             }),
             query: dto.AuditPaginationQueryDto,
-            response: dto.AuditTrailsResponseDto,
+            response: {
+              200: dto.AuditTrailsSuccessResponseDto,
+              404: dto.AuditTrailsErrorResponseDto
+            },
             hasPermission: 'audit.read',
             detail: {
               tags: ['Audit'],
