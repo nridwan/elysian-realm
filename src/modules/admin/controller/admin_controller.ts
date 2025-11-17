@@ -14,11 +14,10 @@ interface AdminControllerOptions {
 
 export const createAdminController = (options: AdminControllerOptions = {}) => {
   const service = options.service || adminService
-  const admin = options.adminMiddleware || adminMiddleware()
+  const admin = options.adminMiddleware || adminMiddleware({response: responsePlugin({ defaultServiceName: 'ADMIN' })})
   const audit = options.auditMiddleware || auditMiddleware()
 
   return new Elysia({ name: 'admin-controller' })
-    .use(responsePlugin({ defaultServiceName: 'ADMIN' }))
     .group('/api/admin', (app) =>
       app
         .use(admin)
@@ -49,7 +48,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                   description: user.role.description,
                 }
               }))
-            }, '200', 'Admins retrieved successfully')
+            }, '200', 'admin.admins_retrieved_successfully')
           },
           {
             query: dto.AdminPaginationQueryDto,
@@ -73,7 +72,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const user = await service.getUserById(id)
 
             if (!user) {
-              return responseTools.generateErrorResponse('Admin not found', '404', 'Admin not found')
+              return responseTools.generateErrorResponse('admin.admin_not_found', '404', 'admin.admin_not_found')
             }
 
             return responseTools.generateResponse({
@@ -88,7 +87,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                   description: user.role.description,
                 }
               }
-            }, '200', 'Admin retrieved successfully')
+            }, '200', 'admin.admin_retrieved_successfully')
           },
           {
             params: dto.IdParamDto,
@@ -115,7 +114,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const updatedUser = await service.updateUser(id, body)
 
             if (!updatedUser) {
-              return responseTools.generateErrorResponse('Failed to update admin', '400', 'Failed to update admin')
+              return responseTools.generateErrorResponse('admin.failed_to_update_admin', '400', 'admin.failed_to_update_admin')
             }
 
             // Log the update action in audit trail using new enhanced API
@@ -147,7 +146,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                   description: updatedUser.role.description,
                 }
               }
-            }, '200', 'Admin updated successfully')
+            }, '200', 'admin.admin_updated_successfully')
           },
           {
             params: dto.IdParamDto,
@@ -172,7 +171,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const createdUser = await service.createUser(body)
 
             if (!createdUser) {
-              return responseTools.generateErrorResponse('Failed to create admin', '400', 'Failed to create admin')
+              return responseTools.generateErrorResponse('admin.failed_to_create_admin', '400', 'admin.failed_to_create_admin')
             }
 
             // Log the create action in audit trail using new enhanced API
@@ -197,7 +196,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                   description: createdUser.role.description,
                 }
               }
-            }, '200', 'Admin created successfully')
+            }, '200', 'admin.admin_created_successfully')
           },
           {
             body: dto.CreateUserRequestDto,
@@ -224,7 +223,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const success = await service.deleteUser(id)
 
             if (!success) {
-              return responseTools.generateErrorResponse('Failed to delete admin', '400', 'Failed to delete admin')
+              return responseTools.generateErrorResponse('admin.failed_to_delete_admin', '400', 'admin.failed_to_delete_admin')
             }
 
             // Log the delete action in audit trail using new enhanced API
@@ -240,7 +239,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
               )
             }
 
-            return responseTools.generateResponse({}, '200', 'Admin deleted successfully')
+            return responseTools.generateResponse({}, '200', 'admin.admin_deleted_successfully')
           },
           {
             params: dto.IdParamDto,
@@ -271,7 +270,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                 description: role.description,
                 permissions: role.permissions
               }))
-            }, '200', 'Roles retrieved successfully')
+            }, '200', 'admin.roles_retrieved_successfully')
           },
           {
             response: {
@@ -293,7 +292,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const createdRole = await service.createRole(body)
 
             if (!createdRole) {
-              return responseTools.generateErrorResponse('Failed to create role', '400', 'Failed to create role')
+              return responseTools.generateErrorResponse('admin.failed_to_create_role', '400', 'admin.failed_to_create_role')
             }
 
             // Log the create action in audit trail using new enhanced API
@@ -313,7 +312,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                 description: createdRole.description,
                 permissions: createdRole.permissions
               }
-            }, '200', 'Role created successfully')
+            }, '200', 'admin.role_created_successfully')
           },
           {
             body: dto.CreateRoleRequestDto,
@@ -340,7 +339,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
             const updatedRole = await service.updateRole(id, body)
 
             if (!updatedRole) {
-              return responseTools.generateErrorResponse('Failed to update role', '400', 'Failed to update role')
+              return responseTools.generateErrorResponse('admin.failed_to_update_role', '400', 'admin.failed_to_update_role')
             }
 
             // Log the update action in audit trail using new enhanced API
@@ -367,7 +366,7 @@ export const createAdminController = (options: AdminControllerOptions = {}) => {
                 description: updatedRole.description,
                 permissions: updatedRole.permissions
               }
-            }, '200', 'Role updated successfully')
+            }, '200', 'admin.role_updated_successfully')
           },
           {
             params: dto.IdParamDto,

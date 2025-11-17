@@ -83,7 +83,7 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
               access_token: accessTokenValue,
               refresh_token: refreshTokenValue,
               has_passkeys: hasPasskeys
-            }, '200', 'Login successful')
+            }, '200', 'auth.login_successful')
           },
           {
             body: LoginDto,
@@ -107,7 +107,7 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
             const payload = await adminRefreshToken.verify(refreshTokenValue)
             if (!payload) {
               set.status = 401
-              return responseTools.generateErrorResponse('Invalid refresh token', '401', 'Invalid refresh token')
+              return responseTools.generateErrorResponse('auth.invalid_refresh_token', '401', 'auth.invalid_refresh_token')
             }
 
             // Requery user by ID to get fresh user data including role and permissions
@@ -140,7 +140,7 @@ export const createAuthController = (options: AuthControllerOptions = {}) => {
             return responseTools.generateResponse({
               access_token: newAccessToken,
               refresh_token: newRefreshToken
-            }, '200', 'Token refreshed successfully')
+            }, '200', 'auth.token_refreshed_successfully')
           },
           {
             body: RefreshTokenDto,

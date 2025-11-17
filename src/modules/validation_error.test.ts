@@ -6,6 +6,8 @@ import { createAdminController } from './admin/controller/admin_controller'
 import { AuthService } from './auth/services/auth_service'
 import { AdminService } from './admin/services/admin_service'
 import { errorHandlerPlugin } from '../plugins/error_handler_plugin'
+import { adminMiddleware } from './admin/middleware/admin_middleware'
+import { responsePlugin } from '../plugins/response_plugin'
 
 // Mock Prisma client with Bun.mock
 const mockPrisma = {
@@ -34,6 +36,10 @@ const mockPrisma = {
 const mockAuthService = new AuthService(mockPrisma)
 const mockAdminService = new AdminService(mockPrisma)
 
+const mockAuthMiddleware = (app: Elysia) => {
+  return app.derive(() => ({}))
+}
+
 // Create mock JWT implementations
 const mockAdminAccessToken = {
   sign: mock(() => Promise.resolve('mock-access-token')),
@@ -60,24 +66,6 @@ const createMockAdminAccessTokenPlugin = () => {
 
 const createMockAdminRefreshTokenPlugin = () => {
   return (app: Elysia) => app.derive(() => ({ adminRefreshToken: mockAdminRefreshToken }))
-}
-
-// Create mock admin middleware
-const createMockAdminMiddleware = () => {
-  return (app: Elysia) => app.derive(() => ({ 
-    user: { 
-      id: '1', 
-      email: 'admin@example.com', 
-      name: 'Admin', 
-      role_id: 'admin-role',
-      role: { 
-        id: 'admin-role', 
-        name: 'admin', 
-        description: null, 
-        permissions: ['admins.create', 'roles.create'] 
-      } 
-    } 
-  }))
 }
 
 describe('Validation Error Responses', () => {
@@ -183,7 +171,7 @@ describe('Validation Error Responses', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: createMockAdminMiddleware() as any
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'ADMIN' })})
       }))
 
     const response = await app.handle(
@@ -225,7 +213,7 @@ describe('Validation Error Responses', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: createMockAdminMiddleware() as any
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'ADMIN' })})
       }))
 
     const response = await app.handle(

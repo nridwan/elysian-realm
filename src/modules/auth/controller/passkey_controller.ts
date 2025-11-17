@@ -37,11 +37,10 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
   const service = options.service || passkeyService
   const adminAccessTokenJwt = options.adminAccessTokenPlugin || adminAccessTokenPlugin
   const adminRefreshTokenJwt = options.adminRefreshTokenPlugin || adminRefreshTokenPlugin
-  const admin = options.adminMiddleware || adminMiddleware()
+  const admin = options.adminMiddleware || adminMiddleware({response: responsePlugin({ defaultServiceName: 'PASSKEY' })})
   const audit = options.auditMiddleware || auditMiddleware()
 
   return new Elysia({ name: 'passkey-controller' })
-    .use(responsePlugin({ defaultServiceName: 'PASSKEY' }))
     .use(adminAccessTokenJwt)
     .use(adminRefreshTokenJwt)
     .use(admin)
@@ -62,7 +61,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             return responseTools.generateResponse(
               result.passkeys,
               '200',
-              'Passkeys retrieved successfully'
+              'auth.passkeys_retrieved_successfully'
             )
           },
           {
@@ -112,7 +111,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             return responseTools.generateResponse(
               { success: true },
               '200',
-              'Passkey deleted successfully'
+              'auth.passkey_deleted_successfully'
             )
           },
           {
@@ -149,7 +148,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             return responseTools.generateResponse(
               { options: authenticationOptions.options! },
               '200',
-              'Authentication options generated successfully'
+              'auth.authentication_options_generated_successfully'
             )
           },
           {
@@ -180,7 +179,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             return responseTools.generateResponse(
               { options: authenticationOptions.options! },
               '200',
-              'Passwordless authentication options generated successfully'
+              'auth.passwordless_authentication_options_generated_successfully'
             )
           },
           {
@@ -230,7 +229,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
                 null,
                 { uuid: uuid, user_id: verification.userId, success: false, reason: 'User not found' }
               )
-              return responseTools.generateErrorResponse('User not found', '401', 'User not found')
+              return responseTools.generateErrorResponse('auth.user_not_found_error', '401', 'auth.user_not_found_error')
             }
             
             // Generate access token with user profile and permissions
@@ -265,7 +264,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             return responseTools.generateResponse({
               access_token: accessTokenValue,
               refresh_token: refreshTokenValue
-            }, '200', 'Login successful')
+            }, '200', 'auth.login_successful')
           },
           {
             body: PasskeyAuthenticationFinishDto,
@@ -290,7 +289,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             // Verify the email matches the authenticated user
             if (user.email !== email) {
               set.status = 403
-              return responseTools.generateErrorResponse('Email does not match authenticated user', '403', 'Email does not match authenticated user')
+              return responseTools.generateErrorResponse('auth.email_does_not_match_authenticated_user', '403', 'auth.email_does_not_match_authenticated_user')
             }
             
             const registrationOptions = await service.generateRegistrationOptions({
@@ -309,7 +308,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             return responseTools.generateResponse(
               { options: registrationOptions.options! },
               '200',
-              'Registration options generated successfully'
+              'auth.registration_options_generated_successfully'
             )
           },
           {
@@ -356,7 +355,7 @@ export const createPasskeyController = (options: PasskeyControllerOptions = {}) 
             return responseTools.generateResponse(
               { success: true },
               '200',
-              'Passkey registered successfully'
+              'auth.passkey_registered_successfully'
             )
           },
           {

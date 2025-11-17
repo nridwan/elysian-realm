@@ -5,6 +5,7 @@ import { createPasskeyController } from './passkey_controller'
 import { PasskeyService } from '../services/passkey_service'
 import { adminMiddleware } from '../../admin/middleware/admin_middleware'
 import { AuditContext } from '../../audit/middleware/audit_middleware'
+import { responsePlugin } from '../../../plugins/response_plugin'
 
 // Mock functions using Bun's native mocking
 const mockFn = () => {
@@ -183,7 +184,7 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'PASSKEY' }) }),
         auditMiddleware: mockAuditMiddleware as any
       }))
 
@@ -225,7 +226,7 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'PASSKEY' }) }),
         auditMiddleware: mockAuditMiddleware as any
       }))
 
@@ -255,7 +256,7 @@ describe('PasskeyController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createPasskeyController({ 
         service: mockPasskeyService,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'PASSKEY' }) }),
         auditMiddleware: mockAuditMiddleware as any
       }))
 
@@ -288,7 +289,7 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'PASSKEY' }) }),
         auditMiddleware: mockAuditMiddleware as any
       }))
 
@@ -330,7 +331,7 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'PASSKEY' }) }),
         auditMiddleware: mockAuditMiddleware as any
       }))
 
@@ -376,7 +377,7 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any }),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'PASSKEY' }) }),
         auditMiddleware: mockAuditMiddleware as any
       }))
 
@@ -416,7 +417,7 @@ describe('PasskeyController - Mocked Service Tests', () => {
         service: mockPasskeyService,
         adminAccessTokenPlugin: createMockAdminAccessTokenPlugin() as any,
         adminRefreshTokenPlugin: createMockAdminRefreshTokenPlugin() as any,
-        adminMiddleware: adminMiddleware({ auth: mockAuthMiddlewareNoUser as any }),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddlewareNoUser as any, response: responsePlugin({ defaultServiceName: 'PASSKEY' }) }),
         auditMiddleware: mockAuditMiddleware as any
       }))
 
@@ -430,7 +431,7 @@ describe('PasskeyController - Mocked Service Tests', () => {
     expect(response.status).toBe(401)
     const body = await response.json()
     // The actual error code might be different than expected
-    expect(body.meta.code).toBe('AUTH-401')  // or allow either code
+    expect(body.meta.code).toBe('PASSKEY-401')  // or allow either code
     expect(body.meta.message).toBe('Unauthorized')
     
     // Restore original method

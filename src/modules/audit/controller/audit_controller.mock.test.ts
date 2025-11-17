@@ -4,6 +4,8 @@ import { PrismaClient } from '@prisma/client'
 import { createAuditController } from './audit_controller'
 import { AuditService } from '../services/audit_service'
 import { auditMiddleware } from '../middleware/audit_middleware'
+import { adminMiddleware } from '../../admin/middleware/admin_middleware'
+import { responsePlugin } from '../../../plugins/response_plugin'
 
 // Mock Prisma client with Bun.mock
 const mockPrisma = {
@@ -87,7 +89,8 @@ describe('AuditController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAuditController({ 
         service: mockAuditService,
-        auditMiddleware: auditMiddleware({auth: mockAuthMiddleware as any})
+        auditMiddleware: auditMiddleware({auth: mockAuthMiddleware as any}),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'AUDIT' }) }),
       }))
 
     const response = await app.handle(
@@ -125,7 +128,8 @@ describe('AuditController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAuditController({ 
         service: mockAuditService,
-        auditMiddleware: auditMiddleware({auth: mockAuthMiddleware as any})
+        auditMiddleware: auditMiddleware({auth: mockAuthMiddleware as any}),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'AUDIT' }) }),
       }))
 
     const response = await app.handle(
@@ -153,7 +157,8 @@ describe('AuditController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAuditController({ 
         service: mockAuditService,
-        auditMiddleware: auditMiddleware({auth: mockAuthMiddleware as any})
+        auditMiddleware: auditMiddleware({auth: mockAuthMiddleware as any}),
+        adminMiddleware: adminMiddleware({ auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'AUDIT' }) }),
       }))
 
     const response = await app.handle(
@@ -162,7 +167,7 @@ describe('AuditController - Mocked Service Tests', () => {
       })
     )
 
-    expect(response.status).toBe(200) // Returns success but with error message
+    expect(response.status).toBe(404) // Returns error status for not found
     const body = await response.json()
     expect(body.meta.code).toBe('AUDIT-404')
     expect(body.meta.message).toBe('Audit trail not found')

@@ -47,12 +47,11 @@ function replacePlaceholders(template: string, params: Record<string, any> = {})
   return result;
 }
 
-export const localizationPlugin = () => (app: Elysia) =>
-  app.derive(({ headers }) => {
-    // Get language from X-Language header or fallback to default
-    const language = headers['x-language'] || config.localization.defaultLanguage || 'en';
+export function createLocalizationTools(headers?: Record<string, string | undefined>) {
+  // Get language from X-Language header or fallback to default
+    const language = headers?.['x-language'] || config.localization.defaultLanguage || 'en';
     
-    const localizationTools: LocalizationTools = {
+    return {
       language,
       
       getTranslation(key: string, params?: Record<string, any>, languageOverride: string | null = null): string {
@@ -73,7 +72,10 @@ export const localizationPlugin = () => (app: Elysia) =>
         // Replace placeholders if params are provided
         return replacePlaceholders(translation, params);
       }
-    };
-    
-    return { localizationTools };
+    }
+}
+
+export const localizationPlugin = () => (app: Elysia) =>
+  app.derive(({ headers }) => {
+    return { localizationTools: createLocalizationTools(headers) };
   });

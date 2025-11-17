@@ -80,7 +80,41 @@ describe('AuthService - Logic Tests', () => {
       const result = await service.refreshAccessToken('non-existent-user-id')
       
       expect(result).toEqual({
-        error: 'User not found'
+        error: 'auth.user_not_found'
+      })
+    })
+  })
+
+  describe('login', () => {
+    it('should return error when user does not exist', async () => {
+      // Mock the Prisma client to return null (user not found)
+      mockPrisma.admin.findUnique = mock(() => Promise.resolve(null)) as any;
+
+      const service = new AuthService(mockPrisma)
+      const result = await service.login({ email: 'nonexistent@example.com', password: 'password' })
+
+      expect(result).toEqual({
+        error: 'auth.invalid_credentials'
+      })
+    })
+
+    it('should return error when password is invalid', async () => {
+      const mockUser = {
+        id: 'test-user-id',
+        email: 'test@example.com',
+        password: await Bun.password.hash('correct_password'),
+        role_id: 'role-id',
+        created_at: new Date(),
+        updated_at: new Date(),
+      }
+
+      mockPrisma.admin.findUnique = mock(() => Promise.resolve(mockUser)) as any;
+
+      const service = new AuthService(mockPrisma)
+      const result = await service.login({ email: 'test@example.com', password: 'wrong_password' })
+
+      expect(result).toEqual({
+        error: 'auth.invalid_credentials'
       })
     })
   })

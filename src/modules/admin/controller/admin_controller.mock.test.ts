@@ -5,6 +5,7 @@ import { createAdminController } from './admin_controller'
 import { AdminService } from '../services/admin_service'
 import { adminMiddleware } from '../middleware/admin_middleware'
 import { AuditContext } from '../../audit/middleware/audit_middleware'
+import { responsePlugin } from '../../../plugins/response_plugin'
 
 // Mock Prisma client with Bun.mock
 const mockPrisma = {
@@ -152,7 +153,7 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any}),
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'ADMIN' })}),
         auditMiddleware: mockAuditMiddleware as any,
       }))
 
@@ -198,7 +199,7 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any}),
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'ADMIN' })}),
         auditMiddleware: mockAuditMiddleware as any,
       }))
 
@@ -227,7 +228,7 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any}),
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'ADMIN' })}),
         auditMiddleware: mockAuditMiddleware as any,
       }))
 
@@ -237,7 +238,7 @@ describe('AdminController - Mocked Service Tests', () => {
       })
     )
 
-    expect(response.status).toBe(200) // The endpoint returns 200 with error object
+    expect(response.status).toBe(404) // The endpoint returns 200 with error object
     const body = await response.json()
     expect(body.meta.code).toBe('ADMIN-404')
     expect(body.meta.message).toBe('Admin not found')
@@ -271,7 +272,7 @@ describe('AdminController - Mocked Service Tests', () => {
     const app = new Elysia()
       .use(createAdminController({ 
         service: mockAdminService,
-        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any}),
+        adminMiddleware: adminMiddleware({auth: mockAuthMiddleware as any, response: responsePlugin({ defaultServiceName: 'ADMIN' })}),
         auditMiddleware: mockAuditMiddleware as any,
       }))
 

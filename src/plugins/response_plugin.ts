@@ -1,9 +1,9 @@
-import Elysia, { type ValidationError } from "elysia";
+import Elysia, { StatusMap, type ValidationError } from "elysia";
 import { ErrorKeys } from "./error_handler_plugin";
-import { localizationPlugin, LocalizationTools } from "./localization_plugin";
+import { createLocalizationTools, localizationPlugin, LocalizationTools } from "./localization_plugin";
 
 // Define the service name type
-export type ServiceName = "AUTH" | "ADMIN" | "USER" | "AUDIT" | "PASSKEY";
+export type ServiceName = "AUTH" | "ADMIN" | "USER" | "AUDIT" | "PASSKEY" | "PERMISSION";
 
 // Define TypeScript types for our response structure
 export interface ErrorDetail {
@@ -52,16 +52,21 @@ export const responsePlugin =
   (config?: { defaultServiceName?: ServiceName }) => (app: Elysia) =>
     app
       .use(localizationPlugin())
-      .derive(({ localizationTools }) => {
+      .derive(({ set, localizationTools }) => {
         const responseTools: ResponseTools = createResponseTools(
+          set,
           config,
           localizationTools
         );
 
         return { responseTools };
       })
-      .onError(({ code, error, set, responseTools, localizationTools }) => {
-        responseTools = responseTools!;
+      .onError(({ code, headers, error, set, responseTools, localizationTools }) => {
+        responseTools = responseTools ?? createResponseTools(
+          set,
+          config,
+          createLocalizationTools(headers)
+        );
         // Handle validation errors
         switch (code) {
           case "VALIDATION":
@@ -106,6 +111,7 @@ export const responsePlugin =
       });
 
 function createResponseTools(
+  set: {status?: number | keyof StatusMap},
   config: { defaultServiceName?: ServiceName } | undefined,
   localizationTools: LocalizationTools
 ): ResponseTools {
@@ -121,17 +127,14 @@ function createResponseTools(
     ): BaseResponse<T> {
       const serviceName = this.serviceName || "APP";
       const statusCode = code || "200";
-      // Use localization if available, otherwise fallback to default messages
-      const statusMessage =
-        message ||
-        (localizationTools?.getTranslation
-          ? localizationTools.getTranslation("success")
-          : "Success");
+      set.status = Number(statusCode);
+      // Use localization if available and the message is a translation key, otherwise use as is
+      message = localizationTools.getTranslation(message || "success");
 
       return {
         meta: {
           code: `${serviceName}-${statusCode}`,
-          message: statusMessage,
+          message,
         },
         data,
       };
@@ -143,12 +146,9 @@ function createResponseTools(
     ): BaseResponse<null> {
       const serviceName = this.serviceName || "APP";
       const statusCode = code || "500";
-      // Use localization if available, otherwise fallback to provided message or error
-      const statusMessage =
-        message ||
-        (localizationTools?.getTranslation
-          ? localizationTools.getTranslation("error")
-          : error);
+      set.status = Number(statusCode);
+      // Use localization if available and the message is a translation key, otherwise use as is
+      let statusMessage = localizationTools.getTranslation(message || error);
 
       return {
         meta: {

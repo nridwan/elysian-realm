@@ -199,7 +199,7 @@ export const AdminUserErrorResponseDto = t.Object({
       { field: 'id', messages: ['Admin ID not found'] }
     ]
   }),
-  data: t.Null(),
+  data: t.Optional(t.Null()),
 })
 
 export const AdminRolesErrorResponseDto = t.Object({

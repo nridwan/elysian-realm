@@ -31,13 +31,13 @@ export class AuthService {
     })
 
     if (!user) {
-      return { error: 'Invalid credentials' }
+      return { error: 'auth.invalid_credentials' }
     }
 
     // Check password using Bun's password verification
     const isValid = await Bun.password.verify(password, user.password)
     if (!isValid) {
-      return { error: 'Invalid credentials' }
+      return { error: 'auth.invalid_credentials' }
     }
 
     return { user: user as AdminWithRole }
@@ -52,13 +52,13 @@ export class AuthService {
       })
 
       if (!user) {
-        return { error: 'User not found' }
+        return { error: 'auth.user_not_found' }
       }
 
       return { user: user as AdminWithRole }
     } catch (error) {
       console.error('Error refreshing access token:', error)
-      return { error: 'Failed to refresh token' }
+      return { error: 'auth.failed_to_refresh_token' }
     }
   }
 }

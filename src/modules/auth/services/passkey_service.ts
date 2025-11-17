@@ -75,7 +75,7 @@ export class PasskeyService {
       return { success: true, options };
     } catch (error) {
       console.error('Error generating registration options:', error);
-      return { success: false, error: 'Failed to generate registration options' };
+      return { success: false, error: 'auth.failed_to_generate_registration_options' };
     }
   }
 
@@ -88,7 +88,7 @@ export class PasskeyService {
       const { challenge, passKeyName } = await this.getExpectedRegistrationChallengeWithPasskeyName(userId, uuid);
       
       if (!challenge) {
-        return { success: false, error: 'No registration challenge found' };
+        return { success: false, error: 'auth.no_registration_challenge_found' };
       }
 
       const verification = await verifyRegistrationResponse({
@@ -121,10 +121,10 @@ export class PasskeyService {
         return { success: true, passkey };
       }
 
-      return { success: false, error: 'Passkey verification failed' };
+      return { success: false, error: 'auth.passkey_verification_failed' };
     } catch (error) {
       console.error('Error verifying registration response:', error);
-      return { success: false, error: 'Failed to verify registration response' };
+      return { success: false, error: 'auth.failed_to_verify_registration_response' };
     }
   }
 
@@ -134,7 +134,7 @@ export class PasskeyService {
   async generateAuthenticationOptions({ email, uuid }: PasskeyAuthenticationOptions) {
     try {
       if (!email) {
-        return { success: false, error: 'Email is required for email-based authentication' };
+        return { success: false, error: 'auth.email_required_for_email_based_authentication' };
       }
       
       // Find the user
@@ -143,7 +143,7 @@ export class PasskeyService {
       });
 
       if (!user) {
-        return { success: false, error: 'User not found' };
+        return { success: false, error: 'auth.user_not_found_error' };
       }
 
       // Get existing passkeys for this user
@@ -152,7 +152,7 @@ export class PasskeyService {
       });
 
       if (passkeys.length === 0) {
-        return { success: false, error: 'No passkeys found for this user' };
+        return { success: false, error: 'auth.no_passkeys_found_for_this_user' };
       }
 
       const authOptions = await generateAuthenticationOptions({
@@ -171,7 +171,7 @@ export class PasskeyService {
       return { success: true, options: authOptions, userId: user.id };
     } catch (error) {
       console.error('Error generating authentication options:', error);
-      return { success: false, error: 'Failed to generate authentication options' };
+      return { success: false, error: 'auth.failed_to_generate_authentication_options' };
     }
   }
   
@@ -192,7 +192,7 @@ export class PasskeyService {
       return { success: true, options: authOptions };
     } catch (error) {
       console.error('Error generating passwordless authentication options:', error);
-      return { success: false, error: 'Failed to generate passwordless authentication options' };
+      return { success: false, error: 'auth.failed_to_generate_passwordless_authentication_options' };
     }
   }
 
@@ -209,7 +209,7 @@ export class PasskeyService {
       });
 
       if (!passkey) {
-        return { success: false, error: 'Passkey not found' };
+        return { success: false, error: 'auth.passkey_not_found' };
       }
 
       let expectedChallenge: string | null = null;
@@ -223,7 +223,7 @@ export class PasskeyService {
       }
       
       if (!expectedChallenge) {
-        return { success: false, error: 'No authentication challenge found' };
+        return { success: false, error: 'auth.no_authentication_challenge_found' };
       }
 
       const verification = await verifyAuthenticationResponse({
@@ -256,10 +256,10 @@ export class PasskeyService {
         return { success: true, userId: passkey.userId };
       }
 
-      return { success: false, error: 'Authentication failed' };
+      return { success: false, error: 'auth.authentication_failed' };
     } catch (error) {
       console.error('Error verifying authentication response:', error);
-      return { success: false, error: 'Failed to verify authentication response' };
+      return { success: false, error: 'auth.failed_to_verify_authentication_response' };
     }
   }
 
@@ -284,7 +284,7 @@ export class PasskeyService {
       return { success: true, passkeys };
     } catch (error) {
       console.error('Error getting user passkeys:', error);
-      return { success: false, error: 'Failed to retrieve passkeys' };
+      return { success: false, error: 'auth.failed_to_retrieve_passkeys' };
     }
   }
 
@@ -298,11 +298,11 @@ export class PasskeyService {
       });
 
       if (!passkey) {
-        return { success: false, error: 'Passkey not found' };
+        return { success: false, error: 'auth.passkey_not_found' };
       }
 
       if (passkey.userId !== userId) {
-        return { success: false, error: 'Unauthorized' };
+        return { success: false, error: 'auth.unauthorized' };
       }
 
       await this.prisma.passkey.delete({
@@ -312,7 +312,7 @@ export class PasskeyService {
       return { success: true };
     } catch (error) {
       console.error('Error deleting passkey:', error);
-      return { success: false, error: 'Failed to delete passkey' };
+      return { success: false, error: 'auth.failed_to_delete_passkey' };
     }
   }
 

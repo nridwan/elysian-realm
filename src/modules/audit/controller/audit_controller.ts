@@ -15,10 +15,9 @@ interface AuditControllerOptions {
 export const createAuditController = (options: AuditControllerOptions = {}) => {
   const service = options.service || auditService
   const audit = options.auditMiddleware || auditMiddleware()
-  const admin = options.adminMiddleware || adminMiddleware()
+  const admin = options.adminMiddleware || adminMiddleware({response: responsePlugin({ defaultServiceName: 'AUDIT' })})
 
   return new Elysia({ name: 'audit-controller' })
-    .use(responsePlugin({ defaultServiceName: 'AUDIT' }))
     .group('/api/audit', (app) =>
       app
         .use(admin)
@@ -60,7 +59,7 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
                 created_at: auditTrail.created_at,
                 is_rolled_back: auditTrail.is_rolled_back,
               }))
-            }, '200', 'Audit trails retrieved successfully')
+            }, '200', 'audit.audit_trails_retrieved_successfully')
           },
           {
             query: dto.AuditPaginationQueryDto,
@@ -84,7 +83,7 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
             const auditTrail = await service.getAuditTrailById(id)
 
             if (!auditTrail) {
-              return responseTools.generateErrorResponse('Audit trail not found', '404', 'Audit trail not found')
+              return responseTools.generateErrorResponse('audit.audit_trail_not_found', '404', 'audit.audit_trail_not_found')
             }
 
             return responseTools.generateResponse({
@@ -103,7 +102,7 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
                 created_at: auditTrail.created_at,
                 is_rolled_back: auditTrail.is_rolled_back,
               }
-            }, '200', 'Audit trail retrieved successfully')
+            }, '200', 'audit.audit_trail_retrieved_successfully')
           },
           {
             params: t.Object({
@@ -155,7 +154,7 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
                 created_at: auditTrail.created_at,
                 is_rolled_back: auditTrail.is_rolled_back,
               }))
-            }, '200', 'User audit trails retrieved successfully')
+            }, '200', 'audit.user_audit_trails_retrieved_successfully')
           },
           {
             params: t.Object({
@@ -208,7 +207,7 @@ export const createAuditController = (options: AuditControllerOptions = {}) => {
                 created_at: auditTrail.created_at,
                 is_rolled_back: auditTrail.is_rolled_back,
               }))
-            }, '200', 'Entity audit trails retrieved successfully')
+            }, '200', 'audit.entity_audit_trails_retrieved_successfully')
           },
           {
             params: t.Object({

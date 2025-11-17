@@ -9,7 +9,7 @@
     "dev:frontend": "cd client && bun run dev",
     "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server ./src/index.ts",
     "start": "./server",
-    "test": "bun test",
+    "test": "bun test src/*",
     "test:watch": "bun test --watch",
     "reseed": "bun run prisma/reseed.ts"
   },
