@@ -328,6 +328,7 @@ export const CreateUserRequestDto = t.Object({
     description: 'Role identifier to assign to the user',
     examples: ['role_admin'],
     minLength: 1,
+    format: 'uuid',
   }),
 })
 
@@ -348,6 +349,7 @@ export const UpdateUserRequestDto = t.Partial(
       description: 'Role identifier to assign to the user',
       examples: ['role_admin'],
       minLength: 1,
+      format: 'uuid',
     }),
   })
 )
