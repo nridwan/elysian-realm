@@ -1,4 +1,4 @@
-import { prisma } from './auth_service_factory'
+import { prisma } from '../../../prisma/client'
 import { PasskeyService } from './passkey_service'
 
 // Create and export the PasskeyService instance
